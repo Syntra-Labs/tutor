@@ -1,0 +1,8 @@
+{
+  "id": "002-hypervector-hamming",
+  "title": "8192-bit Hypervector Hamming Distance",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Easy",
+  "languages": ["cpp"],
+  "tags": ["bit-manipulation", "popcount", "hypervector", "simd"]
+}

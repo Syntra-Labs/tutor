@@ -1,0 +1,8 @@
+{
+  "id": "004-ca184-demarcation",
+  "title": "Rule 184 Stream Boundary Demarcation",
+  "category": "Information Theory & Automata",
+  "difficulty": "Hard",
+  "languages": ["cpp"],
+  "tags": ["cellular-automata", "rule-184", "swar", "stream-chunking"]
+}

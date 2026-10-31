@@ -1,0 +1,8 @@
+{
+  "id": "003-lru-cache-o1",
+  "title": "O(1) Intrusive LRU Cache",
+  "category": "Data Structures & Memory",
+  "difficulty": "Medium",
+  "languages": ["cpp"],
+  "tags": ["lru", "cache", "hash-map", "linked-list"]
+}

@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "syntra-tutor"
+version = "0.1.0"
+description = "Sovereign systems programming problem runner & Socratic tutor (leetvim style)"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+tutor = "tutor.cli:main"

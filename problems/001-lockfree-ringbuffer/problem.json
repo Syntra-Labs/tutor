@@ -1,0 +1,8 @@
+{
+  "id": "001-lockfree-ringbuffer",
+  "title": "SPSC Lock-Free Ring Buffer",
+  "category": "Concurrency & Systems",
+  "difficulty": "Medium",
+  "languages": ["cpp"],
+  "tags": ["atomics", "memory-ordering", "spsc", "lock-free", "ring-buffer"]
+}
