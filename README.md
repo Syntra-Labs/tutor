@@ -1,4 +1,4 @@
-# code-tutor
+# tutor
 
 > **"A Coding Tutor Rather Than a Coding Agent."**  
 > Sovereign systems programming problem sets, leetvim-style runner & clean-room contract compiler (`lgcc`).
@@ -7,9 +7,9 @@
 
 ## 1. Overview
 
-`code-tutor` is a minimalist, local-first development harness designed for deliberate systems programming practice, contract verification, and algorithmic derivation.
+`tutor` is a minimalist, local-first development harness designed for deliberate systems programming practice, contract verification, and algorithmic derivation.
 
-Modeled with the instant ergonomics of tools like **leetvim**, `code-tutor` provides:
+Modeled with the instant ergonomics of tools like **leetvim**, `tutor` provides:
 - **Zero-Friction CLI & Neovim Integration**: Pick, code, and test problems entirely inside your sovereign editor without external browsers or accounts.
 - **Syntra Labs Problem Sets**: Real-world low-level systems engineering (lock-free concurrency, memory models, geometric hypervectors, O(1) intrusive caches, cellular automata chunking).
 - **Clean-Room Contract Slicer (`tutor slice` / `lgcc`)**: Integrated native Rust logical compiler that extracts function signatures, docstring invariants, and contract stubs from real codebases.
@@ -24,8 +24,8 @@ Modeled with the instant ergonomics of tools like **leetvim**, `code-tutor` prov
 
 ### Installation
 ```bash
-git clone https://github.com/Syntra-Labs/code-tutor.git
-cd code-tutor
+git clone https://github.com/Syntra-Labs/tutor.git
+cd tutor
 
 # Build the native logical compiler (lgcc) and symlink CLI tools
 make install
@@ -100,7 +100,7 @@ The native Rust logical compiler located in `crates/lgcc` provides systems-level
 ## 6. Directory Layout
 
 ```
-code-tutor/
+tutor/
 ├── bin/
 │   ├── tutor                  # Standalone CLI launcher
 │   ├── tutorvim               # Neovim launcher (like leetvim)
