@@ -32,7 +32,7 @@ def cmd_list(args):
         print(f"{YELLOW}No problem sets found. Run 'tutor pull' to fetch problem sets.{RESET}")
         return 0
 
-    print(f"\n{BOLD}{CYAN}=== SYNTRA CODE-TUTOR — PROBLEM CATALOG ==={RESET}\n")
+    print(f"\n{BOLD}{CYAN}=== SYNTRA TUTOR — PROBLEM CATALOG ==={RESET}\n")
     header = f"{'STATUS':<8} {'ID':<28} {'DIFFICULTY':<12} {'CATEGORY':<24} {'TITLE'}"
     print(f"{BOLD}{header}{RESET}")
     print("-" * 90)
@@ -148,7 +148,7 @@ def cmd_status(args):
     total = len(problems)
     solved_count = sum(1 for p in problems if p.get("solved", False))
 
-    print(f"\n{BOLD}{CYAN}=== SYNTRA CODE-TUTOR STATUS ==={RESET}\n")
+    print(f"\n{BOLD}{CYAN}=== SYNTRA TUTOR STATUS ==={RESET}\n")
     print(f"  • Workspace : {config.get('workspace_dir')}")
     print(f"  • Upstream  : {config.get('remote_url')}")
     print(f"  • Node      : {config.get('distributed_node') or '(Local standalone mode)'}")
