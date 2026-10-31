@@ -89,11 +89,12 @@ tutorvim
 
 ## 5. Logical Compiler & Contract Slicer (`lgcc`)
 
-The native Rust logical compiler located in `crates/lgcc` provides systems-level utilities:
-- **`lgcc --skeletonize <file>`**: Strips function bodies into stubs while preserving full type signatures and docstrings.
-- **`lgcc --lint-tasks [root]`**: Scans and lints task contract DAGs and formal proof obligations.
-- **`lgcc --extract <file>`**: Extracts symbol AST metadata as JSON.
-- **`lgcc --route <file|dir> --budget <N>`**: Model-aware context budgeting and topological subgraph extraction.
+The native Rust logical compiler located in `crates/lgcc` is designed to analyze code for **logical errors, invariant breaches, and semantic contract bugs** (analogous to how `gcc` checks syntax and types, `lgcc` checks logic):
+- **Logical Error & Bug Detection**: Analyzes implementations against declared preconditions, postconditions, and invariant contracts.
+- **`lgcc --skeletonize <file>`**: Slices functions into clean-room problem stubs with intact signatures and docstring specifications (`tutor slice <file>`).
+- **`lgcc --extract <file>`**: Extracts AST symbols, call graphs, and structural types.
+
+*(Note: Task DAG linting and task routing belong strictly to [`Syntra-Labs/taskflow`](https://github.com/Syntra-Labs/taskflow).)*
 
 ---
 
