@@ -110,20 +110,15 @@ theorem lgcc_dep_bundle_verified : lgcc_dep_bundle = true := by rfl
 */
 fn print_usage() {
     eprintln!(
-        r#"lgcc: Logical Compiler, AST Extractor & Formal Task Engine
+        r#"lgcc: Logical Compiler & Semantic Contract Verifier
 
 Usage:
-  lgcc --lint-tasks [--json] [root]     Scan and lint in-tree Task Graph DAG
-  lgcc --graph [--json] [--all] [--reverse] [root]  Render interactive/ASCII Code & Spec DAG
-  lgcc --fix-tasks [--apply] [root]     Synthesize structured task contracts from loose TODOs
-  lgcc --verify-specs [root]            Verify in-tree LexLean specs via prod_codegen
-  lgcc --route <file|dir> --budget <N>  Route and allocate context subgraphs
-  lgcc --skeletonize <file>             Emit interface skeleton without function bodies
-  lgcc --extract <file>                 Extract symbol AST metadata as JSON
-  lgcc --metrics <file>                 Compute compression metrics
-  lgcc --help                           Show this help message
+  lgcc check <file>             Verify semantic invariants and logical contracts
+  lgcc skeletonize <file>       Generate problem stub (strip function bodies)
+  lgcc extract <file>           Extract symbol AST metadata as JSON
+  lgcc help                     Show this help message
 
-Subcommand aliases without '--' (e.g., 'lgcc tasks', 'lgcc graph', 'lgcc fix', 'lgcc verify') are also supported."#
+Note: Repository task DAGs, task linting, and context routing belong to 'taskflow'."#
     );
 }
 
