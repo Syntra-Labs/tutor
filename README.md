@@ -1,7 +1,7 @@
 # tutor
 
 > **"A Coding Tutor Rather Than a Coding Agent."**  
-> Sovereign systems programming problem sets, leetvim-style runner & clean-room contract compiler (`lgcc`).
+> Sovereign systems programming problem sets, leetvim-style runner & logical bug compiler (`lgcc`).
 
 ---
 
@@ -12,7 +12,7 @@
 Modeled with the instant ergonomics of tools like **leetvim**, `tutor` provides:
 - **Zero-Friction CLI & Neovim Integration**: Pick, code, and test problems entirely inside your sovereign editor without external browsers or accounts.
 - **Syntra Labs Problem Sets**: Real-world low-level systems engineering (lock-free concurrency, memory models, geometric hypervectors, O(1) intrusive caches, cellular automata chunking).
-- **Clean-Room Contract Slicer (`tutor slice` / `lgcc`)**: Integrated native Rust logical compiler that extracts function signatures, docstring invariants, and contract stubs from real codebases.
+- **Problem Stub Generator (`tutor slice` / `lgcc --skeletonize`)**: Tool to strip function bodies into empty problem stubs while keeping signatures and comments intact.
 - **Local-First Verification**: Compiles and runs test harnesses locally on your machine with millisecond feedback.
 - **Optional Distributed Network Sync**:
   - Pull updated problem sets and regression tests from the upstream git repo or URL (`tutor pull`).
@@ -42,7 +42,7 @@ tutor pick 001-lockfree-ringbuffer
 # 3. Run test harness against your solution
 tutor test 001-lockfree-ringbuffer
 
-# 4. Slice an existing source file into a clean-room problem stub
+# 4. Strip an existing source file into an empty problem stub
 tutor slice src/engine.cpp -o stub.hpp
 
 # 5. Pull new or updated problem sets and tests from remote
@@ -87,11 +87,11 @@ tutorvim
 
 ---
 
-## 5. Logical Compiler & Contract Slicer (`lgcc`)
+## 5. Logical Compiler & Problem Stub Generator (`lgcc`)
 
 The native Rust logical compiler located in `crates/lgcc` is designed to analyze code for **logical errors, invariant breaches, and semantic contract bugs** (analogous to how `gcc` checks syntax and types, `lgcc` checks logic):
 - **Logical Error & Bug Detection**: Analyzes implementations against declared preconditions, postconditions, and invariant contracts.
-- **`lgcc --skeletonize <file>`**: Slices functions into clean-room problem stubs with intact signatures and docstring specifications (`tutor slice <file>`).
+- **`lgcc --skeletonize <file>`**: Strips function bodies into empty problem stubs while keeping signatures and docstring specifications (`tutor slice <file>`).
 - **`lgcc --extract <file>`**: Extracts AST symbols, call graphs, and structural types.
 
 *(Note: Task DAG linting and task routing belong strictly to [`Syntra-Labs/taskflow`](https://github.com/Syntra-Labs/taskflow).)*
@@ -107,9 +107,9 @@ tutor/
 │   ├── tutorvim               # Neovim launcher (like leetvim)
 │   └── lgcc                   # Compiled native Rust logical compiler
 ├── crates/
-│   └── lgcc/                  # Logical compiler, AST extractor & contract slicer
+│   └── lgcc/                  # Logical compiler & problem stub generator
 │       ├── src/
-│       │   ├── ast/           # Extractor & clean-room skeletonizer
+│       │   ├── ast/           # Extractor & function skeletonizer
 │       │   ├── graph/         # Dependency graph & symbol table
 │       │   ├── router/        # Context budgeting & prime router
 │       │   └── spec/          # LexLean parser & task linter

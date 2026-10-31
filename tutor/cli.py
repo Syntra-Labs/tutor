@@ -177,7 +177,7 @@ def cmd_slice(args):
     if args.output:
         with open(args.output, "w") as f:
             f.write(output)
-        print(f"{GREEN}✓ Wrote clean-room contract stub to {args.output}{RESET}")
+        print(f"{GREEN}✓ Wrote problem stub to {args.output}{RESET}")
     else:
         print(output)
     return 0
