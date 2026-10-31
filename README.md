@@ -1,22 +1,20 @@
 # tutor
 
 > **"A Coding Tutor Rather Than a Coding Agent."**  
-> Sovereign systems programming problem sets, leetvim-style runner & logical bug compiler (`lgcc`).
+> Hands-on systems programming problem sets with an in-editor test runner and contract linter (`lgcc`).
 
 ---
 
 ## 1. Overview
 
-`tutor` is a minimalist, local-first development harness designed for deliberate systems programming practice, contract verification, and algorithmic derivation.
+`tutor` is a lightweight, local-first practice harness for systems programming.
 
-Modeled with the instant ergonomics of tools like **leetvim**, `tutor` provides:
-- **Zero-Friction CLI & Neovim Integration**: Pick, code, and test problems entirely inside your sovereign editor without external browsers or accounts.
-- **Syntra Labs Problem Sets**: Real-world low-level systems engineering (lock-free concurrency, memory models, geometric hypervectors, O(1) intrusive caches, cellular automata chunking).
-- **Problem Stub Generator (`tutor slice` / `lgcc --skeletonize`)**: Tool to strip function bodies into empty problem stubs while keeping signatures and comments intact.
-- **Local-First Verification**: Compiles and runs test harnesses locally on your machine with millisecond feedback.
-- **Optional Distributed Network Sync**:
-  - Pull updated problem sets and regression tests from the upstream git repo or URL (`tutor pull`).
-  - Optionally register with a distributed cluster node for automated remote benchmarking and telemetry (`tutor connect <node>`).
+Inspired by the quick workflow of tools like **leetvim**, `tutor` provides:
+- **Fast CLI & Neovim Integration**: Pick, code, and test problems directly in your editor without browser tabs or signups.
+- **Real-World Systems Problems**: Exercises on low-level topics like lock-free concurrency, memory models, cache optimization, and buffer management.
+- **Exercise Generator (`tutor slice` / `lgcc --skeletonize`)**: Tool to strip function bodies into empty practice exercises while keeping signatures and comments intact.
+- **Instant Local Tests**: Compiles and runs test suites locally on your machine in milliseconds.
+- **Optional Problem Updates**: Pull updated problem sets and regression tests from upstream repositories (`tutor pull`).
 
 ---
 
