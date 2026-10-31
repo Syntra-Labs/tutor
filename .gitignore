@@ -1,12 +1,17 @@
 # Build and binary artifacts
 build/
-bin/
 dist/
 target/
 out/
 *.o
 *.a
 *.so
+bin/lgcc
+
+# Track shell launcher scripts
+bin/*
+!bin/tutor
+!bin/tutorvim
 
 # Environments and dependencies
 node_modules/

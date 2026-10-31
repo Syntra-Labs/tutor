@@ -1,17 +1,18 @@
-# tutor
+# code-tutor
 
 > **"A Coding Tutor Rather Than a Coding Agent."**  
-> Sovereign systems programming problem sets & local test runner (leetvim-style for Syntra Labs).
+> Sovereign systems programming problem sets, leetvim-style runner & clean-room contract compiler (`lgcc`).
 
 ---
 
 ## 1. Overview
 
-`tutor` is a minimalist, local-first development harness designed for deliberate systems programming practice, contract verification, and algorithmic derivation.
+`code-tutor` is a minimalist, local-first development harness designed for deliberate systems programming practice, contract verification, and algorithmic derivation.
 
-Modeled with the instant ergonomics of tools like **leetvim**, `tutor` provides:
+Modeled with the instant ergonomics of tools like **leetvim**, `code-tutor` provides:
 - **Zero-Friction CLI & Neovim Integration**: Pick, code, and test problems entirely inside your sovereign editor without external browsers or accounts.
 - **Syntra Labs Problem Sets**: Real-world low-level systems engineering (lock-free concurrency, memory models, geometric hypervectors, O(1) intrusive caches, cellular automata chunking).
+- **Clean-Room Contract Slicer (`tutor slice` / `lgcc`)**: Integrated native Rust logical compiler that extracts function signatures, docstring invariants, and contract stubs from real codebases.
 - **Local-First Verification**: Compiles and runs test harnesses locally on your machine with millisecond feedback.
 - **Optional Distributed Network Sync**:
   - Pull updated problem sets and regression tests from the upstream git repo or URL (`tutor pull`).
@@ -23,12 +24,11 @@ Modeled with the instant ergonomics of tools like **leetvim**, `tutor` provides:
 
 ### Installation
 ```bash
-git clone https://github.com/Syntra-Labs/tutor.git
-cd tutor
+git clone https://github.com/Syntra-Labs/code-tutor.git
+cd code-tutor
 
-# Symlink CLI and Neovim launcher to your PATH
-ln -sf $(pwd)/bin/tutor ~/.local/bin/tutor
-ln -sf $(pwd)/bin/tutorvim ~/.local/bin/tutorvim
+# Build the native logical compiler (lgcc) and symlink CLI tools
+make install
 ```
 
 ### CLI Workflow
@@ -42,10 +42,13 @@ tutor pick 001-lockfree-ringbuffer
 # 3. Run test harness against your solution
 tutor test 001-lockfree-ringbuffer
 
-# 4. Pull new or updated problem sets and tests from remote
+# 4. Slice an existing source file into a clean-room problem stub
+tutor slice src/engine.cpp -o stub.hpp
+
+# 5. Pull new or updated problem sets and tests from remote
 tutor pull
 
-# 5. Connect to an optional distributed evaluation node
+# 6. Connect to an optional distributed evaluation node
 tutor connect cluster.syntralabs.org:9000
 ```
 
@@ -77,20 +80,39 @@ tutorvim
 
 | ID | Title | Category | Difficulty | Focus |
 | :--- | :--- | :--- | :--- | :--- |
-| `001-lockfree-ringbuffer` | **SPSC Lock-Free Ring Buffer** | Concurrency & Systems | Medium | Atomic indices, `acquire`/`release` memory barriers |
+| `001-lockfree-ringbuffer` | **SPSC Lock-Free Ring Buffer** | Concurrency & Systems | Medium | Atomic head/tail, `acquire`/`release` memory barriers |
 | `002-hypervector-hamming` | **8192-bit Hypervector Hamming Distance** | Geometric Systems & Compute | Easy | SWAR / `std::popcount`, normalized cosine metric |
 | `003-lru-cache-o1` | **O(1) Intrusive LRU Cache** | Data Structures & Memory | Medium | Hash index + linked list promotion & eviction |
 | `004-ca184-demarcation` | **Rule 184 Boundary Demarcation** | Information Theory & Automata | Hard | 64-bit SWAR Rule 184 traffic particle conservation |
 
 ---
 
-## 5. Directory Layout
+## 5. Logical Compiler & Contract Slicer (`lgcc`)
+
+The native Rust logical compiler located in `crates/lgcc` provides systems-level utilities:
+- **`lgcc --skeletonize <file>`**: Strips function bodies into stubs while preserving full type signatures and docstrings.
+- **`lgcc --lint-tasks [root]`**: Scans and lints task contract DAGs and formal proof obligations.
+- **`lgcc --extract <file>`**: Extracts symbol AST metadata as JSON.
+- **`lgcc --route <file|dir> --budget <N>`**: Model-aware context budgeting and topological subgraph extraction.
+
+---
+
+## 6. Directory Layout
 
 ```
-tutor/
+code-tutor/
 ├── bin/
 │   ├── tutor                  # Standalone CLI launcher
-│   └── tutorvim               # Neovim launcher (like leetvim)
+│   ├── tutorvim               # Neovim launcher (like leetvim)
+│   └── lgcc                   # Compiled native Rust logical compiler
+├── crates/
+│   └── lgcc/                  # Logical compiler, AST extractor & contract slicer
+│       ├── src/
+│       │   ├── ast/           # Extractor & clean-room skeletonizer
+│       │   ├── graph/         # Dependency graph & symbol table
+│       │   ├── router/        # Context budgeting & prime router
+│       │   └── spec/          # LexLean parser & task linter
+│       └── Cargo.toml
 ├── lua/
 │   └── tutor/
 │       └── init.lua           # Neovim plugin (:Tutor, floating runner, dashboard)
@@ -106,22 +128,7 @@ tutor/
 │   ├── sync.py                # Remote pull & optional node connection
 │   ├── state.py               # Local progress ledger (~/.local/share/tutor/)
 │   └── cli.py                 # Colorized terminal interface
+├── Makefile
 ├── pyproject.toml
 └── README.md
-```
-
----
-
-## 6. Distributed Network Architecture (Optional)
-
-`tutor` runs 100% locally by default. When desired, developers can connect their client to the Syntra distributed verification cluster:
-
-```
-┌──────────────────┐               ┌─────────────────────────────────┐
-│ Local Workstation│               │ Syntra Distributed Cluster Node │
-│ • tutor CLI      │  tutor pull   │ • Updated Problem Repository    │
-│ • tutorvim       │ ◄──────────── │ • Verification Regression Gates │
-│ • Local C++20/Rs │ tutor connect │ • Micro-Benchmarking Runners    │
-│   Compilers      │ ────────────► │ • Multi-Container Fault Sandboxes│
-└──────────────────┘               └─────────────────────────────────┘
 ```

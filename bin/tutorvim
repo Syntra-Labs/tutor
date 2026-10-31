@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Launch Neovim directly into Tutor problem dashboard (analogous to leetvim)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+
+export TUTOR_REPO_DIR="$SCRIPT_DIR"
+
+if [ $# -eq 0 ]; then
+    exec nvim -u NONE \
+        --cmd "set rtp+=$SCRIPT_DIR" \
+        -c "set number relativenumber cursorline" \
+        -c "lua require('tutor').dashboard()"
+else
+    exec nvim -u NONE \
+        --cmd "set rtp+=$SCRIPT_DIR" \
+        "$@"
+fi

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+
+if [[ -n "${VIRTUAL_ENV:-}" && -x "$VIRTUAL_ENV/bin/python" ]]; then
+    PYTHON="$VIRTUAL_ENV/bin/python"
+elif [[ -x "$HOME/myenv/bin/python" ]]; then
+    PYTHON="$HOME/myenv/bin/python"
+else
+    PYTHON="$(command -v python3 || command -v python)"
+fi
+
+exec "$PYTHON" "$SCRIPT_DIR/tutor.py" "$@"

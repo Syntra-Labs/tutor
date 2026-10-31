@@ -1,6 +1,8 @@
 import os
 import sys
+import shutil
 import argparse
+import subprocess
 from pathlib import Path
 
 from tutor import __version__
@@ -19,6 +21,9 @@ BOLD = "\033[1m"
 DIM = "\033[2m"
 RESET = "\033[0m"
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+LGCC_BIN = REPO_ROOT / "bin" / "lgcc"
+
 def cmd_list(args):
     catalog = ProblemCatalog()
     problems = catalog.list_problems()
@@ -27,7 +32,7 @@ def cmd_list(args):
         print(f"{YELLOW}No problem sets found. Run 'tutor pull' to fetch problem sets.{RESET}")
         return 0
 
-    print(f"\n{BOLD}{CYAN}=== SYNTRA TUTOR — PROBLEM CATALOG ==={RESET}\n")
+    print(f"\n{BOLD}{CYAN}=== SYNTRA CODE-TUTOR — PROBLEM CATALOG ==={RESET}\n")
     header = f"{'STATUS':<8} {'ID':<28} {'DIFFICULTY':<12} {'CATEGORY':<24} {'TITLE'}"
     print(f"{BOLD}{header}{RESET}")
     print("-" * 90)
@@ -81,7 +86,6 @@ def cmd_test(args):
         if (cwd / "README.md").exists() and (cwd / "problem.json").exists():
             target_id = cwd.name
         else:
-            # Check workspace for most recently modified problem
             config = get_config()
             ws_root = Path(config["workspace_dir"])
             if ws_root.exists():
@@ -139,23 +143,60 @@ def cmd_connect(args):
 def cmd_status(args):
     catalog = ProblemCatalog()
     problems = catalog.list_problems()
-    progress = get_progress()
     config = get_config()
 
     total = len(problems)
     solved_count = sum(1 for p in problems if p.get("solved", False))
 
-    print(f"\n{BOLD}{CYAN}=== SYNTRA TUTOR STATUS ==={RESET}\n")
+    print(f"\n{BOLD}{CYAN}=== SYNTRA CODE-TUTOR STATUS ==={RESET}\n")
     print(f"  • Workspace : {config.get('workspace_dir')}")
     print(f"  • Upstream  : {config.get('remote_url')}")
     print(f"  • Node      : {config.get('distributed_node') or '(Local standalone mode)'}")
     print(f"  • Progress  : {GREEN}{solved_count} / {total} problems solved{RESET}\n")
     return 0
 
+def cmd_slice(args):
+    """Clean-room contract slicer powered by lgcc: strips function bodies to stubs while preserving signatures."""
+    target_path = Path(args.file)
+    if not target_path.exists():
+        print(f"{RED}Error: File '{args.file}' not found.{RESET}")
+        return 1
+
+    bin_path = LGCC_BIN if LGCC_BIN.exists() else Path(shutil.which("lgcc") or "")
+    if bin_path.exists():
+        proc = subprocess.run([str(bin_path), "--skeletonize", str(target_path)], capture_output=True, text=True)
+        if proc.returncode == 0:
+            output = proc.stdout
+        else:
+            print(f"{RED}lgcc error:\n{proc.stderr}{RESET}")
+            return 1
+    else:
+        print(f"{YELLOW}Warning: lgcc binary not found. Build via 'cargo build --release' in crates/lgcc.{RESET}")
+        return 1
+
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(output)
+        print(f"{GREEN}✓ Wrote clean-room contract stub to {args.output}{RESET}")
+    else:
+        print(output)
+    return 0
+
+def cmd_lint(args):
+    """Formal task linter & contract verifier powered by lgcc."""
+    root = args.root or "."
+    bin_path = LGCC_BIN if LGCC_BIN.exists() else Path(shutil.which("lgcc") or "")
+    if bin_path.exists():
+        proc = subprocess.run([str(bin_path), "--lint-tasks", root], capture_output=False)
+        return proc.returncode
+    else:
+        print(f"{YELLOW}Warning: lgcc binary not found. Build via 'cargo build --release' in crates/lgcc.{RESET}")
+        return 1
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="tutor",
-        description="Tutor — Socratic Systems Programming Challenges & Local Test Runner",
+        description="Code-Tutor — Sovereign Systems Programming Problem Runner & Logical Compiler",
     )
     parser.add_argument("-v", "--version", action="version", version=f"tutor {__version__}")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -187,13 +228,23 @@ def main(argv=None):
     p_conn.add_argument("endpoint", help="Distributed node endpoint (e.g. node.syntralabs.org:9000)")
     p_conn.set_defaults(func=cmd_connect)
 
+    # slice (contract slicer)
+    p_slice = subparsers.add_parser("slice", help="Clean-room contract slicer: extract problem stub from real code")
+    p_slice.add_argument("file", help="Source file to slice (C++, Rust, Python, Lua)")
+    p_slice.add_argument("-o", "--output", help="Output file path for stub")
+    p_slice.set_defaults(func=cmd_slice)
+
+    # lint (task contract linter)
+    p_lint = subparsers.add_parser("lint", help="Lint task contracts and verification obligations")
+    p_lint.add_argument("root", nargs="?", default=".", help="Root directory to scan")
+    p_lint.set_defaults(func=cmd_lint)
+
     # status
     p_stat = subparsers.add_parser("status", help="Show workspace status and solved metrics")
     p_stat.set_defaults(func=cmd_status)
 
     args = parser.parse_args(argv)
     if not args.command:
-        # Default to listing problems if no command is given
         return cmd_list(args)
 
     return args.func(args)
