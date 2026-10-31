@@ -1,0 +1,29 @@
+# Build and binary artifacts
+build/
+bin/
+dist/
+target/
+out/
+*.o
+*.a
+*.so
+
+# Environments and dependencies
+node_modules/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Ephemeral runtime and sandboxes
+.arena/
+.sandboxes/
+*.log
