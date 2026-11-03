@@ -971,6 +971,8 @@ function applyJudgeResult(prob, success, logText, cyclesPerOp, codeBytes, user) 
 
     // Update live in-memory Autolab scoreboard preview
     recordInBrowserScoreboardEntry(user, prob.id, [100.0, Number(Number(cyclesPerOp).toFixed(2)), codeBytes]);
+    renderDag();
+    renderScoreboard();
   } else {
     headerEl.className = "judge-header fail";
     statusEl.textContent = `✗ TESTS FAILED — Autolab Scoreboard entry suppressed until 100% pass`;
