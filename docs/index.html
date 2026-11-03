@@ -1762,7 +1762,6 @@ function primeNeovim() {
   sendRpc("nvim_command", ["set number background=light fillchars=eob:~"]);
   sendRpc("nvim_command", ["set tabstop=4 shiftwidth=4 softtabstop=4 expandtab autoindent smartindent"]);
 
-  sendRpc("nvim_command", ["syntax enable"]);
   sendRpc("nvim_command", ["highlight Normal guibg=#ffffff guifg=#000000"]);
   sendRpc("nvim_command", ["highlight LineNr guibg=#fafafa guifg=#888888"]);
   sendRpc("nvim_command", ["highlight CursorLineNr guibg=#fafafa guifg=#000000 gui=bold"]);
@@ -1862,11 +1861,6 @@ function setBufferCode(codeStr) {
     vim.bo[buf].shiftwidth = 4
     vim.bo[buf].softtabstop = 4
     vim.bo[buf].expandtab = true
-    pcall(vim.cmd, [[syntax match TutorComment "//.*$"]])
-    pcall(vim.cmd, [[syntax region TutorBlockComment start="/\*" end="\*/"]])
-    pcall(vim.cmd, [[highlight Comment guifg=#999999 gui=italic]])
-    pcall(vim.cmd, [[highlight link TutorComment Comment]])
-    pcall(vim.cmd, [[highlight link TutorBlockComment Comment]])
     vim.api.nvim_win_set_cursor(0, {1, 0})
   `;
   sendRpc("nvim_exec_lua", [lua, [lines]]);
