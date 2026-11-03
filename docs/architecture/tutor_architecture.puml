@@ -1,0 +1,76 @@
+@startuml tutor_architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Helvetica, Arial, sans-serif"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+skinparam rectangle {
+    BackgroundColor #F8FAFC
+    BorderColor #64748B
+    BorderThickness 1.5
+    FontSize 13
+    FontStyle bold
+}
+
+skinparam card {
+    BackgroundColor #FFFFFF
+    BorderColor #94A3B8
+    BorderThickness 1.2
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.2
+}
+
+skinparam arrow {
+    Color #2563EB
+    Thickness 1.2
+    FontColor #334155
+    FontSize 11
+}
+
+title **Syntra Tutor — Architecture & Execution Pipeline**
+
+package "Browser Studio (GitHub Pages — Static 50/50 Split)" as BrowserTier #EFF6FF {
+    component "**Left Split: Studio UI**\n//Description (Markdown + KaTeX)//\n//Problems (76) & Scoreboard//" as LeftPane #FFFFFF
+    component "**Right Split: Neovim WASM**\n//nvim-asyncify.wasm + nvim-runtime//\n//Msgpack-RPC Linegrid (:Run, :w)//" as NvimWasm #DBEAFE
+}
+
+package "76-Problem Atomic Curriculum & DAG" as CatalogTier #F8FAFC {
+    card "**Problem Catalog (`problems/000a`..`074`)**\n• Track 0: Warmup (`000a` Hello World, `000b` Arithmetic)\n• Tracks 1–2: Bit-Parallelism, CA & VSA Hypervectors\n• Tracks 3–4: Surprisal, Golden Ring Z[phi] & Dyadics\n• Tracks 5–6: S^2/S^3 Rotors, Octonions, Cl(0,6) & E8\n• Tracks 7–8: Geometric Routing & Symbolic Proving" as ProblemSet #FFFFFF
+    card "**Static Site Data (`docs/data/`)**\n• `catalog.json` (Specs, Stubs, Locked Harnesses)\n• `leaderboard.json` (Autolab Standings)" as StaticData #FFFFFF
+}
+
+package "Dual-Engine C++20 Judge (`-O3 -std=c++20`)" as JudgeTier {
+    component "**Cloud C++20 Judge**\n//Compiler Explorer (g++ 13.2) API//\n//Zero-Install Browser Execution//" as CloudJudge #F1F5F9
+    component "**Local CLI & Runner (`tutor`)**\n//`tutor test` / `tutor serve`//\n//Isolated Temp Sandbox + Local g++//" as LocalJudge #FFFFFF
+    card "**Locked Test Harness (`harness.cpp`)**\n• Correctness Assertions\n• Cycle/Op & Effective Byte Profiling\n• `SCOREBOARD_JSON` Emission" as Harness #FFFFFF
+}
+
+package "Autolab Multi-Metric Scoreboard (`colspec`)" as BoardTier #F8FAFC {
+    component "**Scoreboard Engine (`tutor/scoreboard.py`)**\n//1. Score (DESC)//\n//2. Cycles/Op (ASC)//\n//3. Effective Code Bytes (ASC)//" as Scoreboard #DBEAFE
+    component "**Two-Stage GitHub Actions CI**\n//`grade-pr.yml` (Unprivileged Sandbox)//\n//`update-scoreboard.yml` (Leaderboard Reducer)//" as CIWorkflow #FFFFFF
+}
+
+' Connections
+ProblemSet -down-> StaticData : "Exported via\n`tutor export-pages`"
+StaticData -up-> LeftPane : "Loads specs, DAG &\ninitial standings"
+StaticData -up-> NvimWasm : "Populates starter\n`solution.hpp` stub"
+
+NvimWasm -left-> LeftPane : "`:w` / `:Run` RPC\nnotification"
+LeftPane -down-> CloudJudge : "Bundles `solution.hpp`\n+ locked `harness.cpp`"
+LeftPane .down.> LocalJudge : "Optional `/api/judge`\nwhen running locally"
+
+CloudJudge -down-> Harness : "Compiles & executes"
+LocalJudge -down-> Harness : "Compiles & executes"
+
+Harness -down-> Scoreboard : "Emits `(Score, Cycles/Op, Bytes)`\non 100% test pass"
+CIWorkflow -left-> Scoreboard : "Verifies PR isolation &\nmerges global standings"
+Scoreboard -up-> LeftPane : "Updates live rankings"
+
+@enduml
