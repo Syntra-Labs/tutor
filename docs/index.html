@@ -303,13 +303,95 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.5;
-  padding: 12px;
-  white-space: pre-wrap;
-  max-height: 260px;
+  padding: 14px;
+  white-space: normal;
+  max-height: 360px;
   overflow-y: auto;
   background: #fafafa;
   color: #111111;
 }
+
+.lc-error-block {
+  background: #fef2f2;
+  border: 1px solid #f87171;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 2px;
+}
+.lc-error-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #991b1b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.lc-error-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #7f1d1d;
+  font-size: 11.5px;
+  margin: 0;
+}
+
+.lc-case-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.lc-case-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--fg-dim);
+  cursor: pointer;
+  border-radius: 2px;
+}
+.lc-case-tab:hover { border-color: #000000; color: #000000; }
+.lc-case-tab.active {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+.lc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.lc-dot.pass { background: #10b981; }
+.lc-dot.fail { background: #ef4444; }
+
+.lc-field {
+  margin-bottom: 10px;
+}
+.lc-field:last-child { margin-bottom: 0; }
+.lc-field-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.lc-field-box {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.lc-field-box.out-pass { color: #065f46; border-color: #a7f3d0; background: #f0fdf4; }
+.lc-field-box.out-fail { color: #991b1b; border-color: #fecaca; background: #fef2f2; }
 
 /* DAG Grid */
 .filter-bar {
@@ -1004,6 +1086,228 @@ function switchTab(tabName) {
 /* ========================================================================= */
 /* 2. DUAL-ENGINE C++20 JUDGE (LOCAL `/api/judge` + CLOUD GODBOLT FALLBACK)  */
 /* ========================================================================= */
+const TUTOR_CHECK_CPP_HEADER = `
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <cstdlib>
+
+namespace _tutor_check {
+template <typename T>
+std::string fmt(const T& v) {
+    using D = std::remove_cvref_t<T>;
+    if constexpr (std::is_same_v<D, bool>) {
+        return v ? "true" : "false";
+    } else if constexpr (std::is_convertible_v<D, std::string_view>) {
+        std::string s{std::string_view(v)};
+        std::string out = "\\"";
+        for (char c : s) {
+            if (c == '\\"') out += "\\\\\\"";
+            else if (c == '\\\\') out += "\\\\\\\\";
+            else if (c == '\\n') out += "\\\\n";
+            else out += c;
+        }
+        out += "\\"";
+        return out;
+    } else if constexpr (std::is_same_v<D, char> || std::is_same_v<D, signed char> || std::is_same_v<D, unsigned char>) {
+        return std::to_string(static_cast<int>(v));
+    } else if constexpr (requires(std::ostream& os, const D& x) { os << x; }) {
+        std::ostringstream oss;
+        oss << v;
+        return oss.str();
+    } else {
+        return "<object>";
+    }
+}
+
+inline std::string json_escape(std::string_view s) {
+    std::string out;
+    for (char c : s) {
+        if (c == '\\"') out += "\\\\\\"";
+        else if (c == '\\\\') out += "\\\\\\\\";
+        else if (c == '\\n') out += "\\\\n";
+        else if (c == '\\r') out += "\\\\r";
+        else if (c == '\\t') out += "\\\\t";
+        else out += c;
+    }
+    return out;
+}
+
+struct EvalResult {
+    bool ok;
+    std::string actual;
+    std::string expected;
+    template <typename R>
+    EvalResult operator&&(const R& rhs) const {
+        bool b = ok && static_cast<bool>(rhs);
+        return EvalResult{b, b ? "true" : "false", "true"};
+    }
+    template <typename R>
+    EvalResult operator||(const R& rhs) const {
+        bool b = ok || static_cast<bool>(rhs);
+        return EvalResult{b, b ? "true" : "false", "true"};
+    }
+};
+
+template <typename L>
+struct LhsWrap {
+    const L& lhs;
+    operator EvalResult() const {
+        bool b = static_cast<bool>(lhs);
+        return EvalResult{b, b ? "true" : "false", "true"};
+    }
+    template <typename R>
+    EvalResult operator==(const R& rhs) const {
+        bool b = (lhs == rhs);
+        return EvalResult{b, fmt(lhs), fmt(rhs)};
+    }
+    template <typename R>
+    EvalResult operator!=(const R& rhs) const {
+        bool b = (lhs != rhs);
+        return EvalResult{b, fmt(lhs), "!= " + fmt(rhs)};
+    }
+    template <typename R>
+    EvalResult operator<(const R& rhs) const {
+        bool b = (lhs < rhs);
+        return EvalResult{b, fmt(lhs), "< " + fmt(rhs)};
+    }
+    template <typename R>
+    EvalResult operator<=(const R& rhs) const {
+        bool b = (lhs <= rhs);
+        return EvalResult{b, fmt(lhs), "<= " + fmt(rhs)};
+    }
+    template <typename R>
+    EvalResult operator>(const R& rhs) const {
+        bool b = (lhs > rhs);
+        return EvalResult{b, fmt(lhs), "> " + fmt(rhs)};
+    }
+    template <typename R>
+    EvalResult operator>=(const R& rhs) const {
+        bool b = (lhs >= rhs);
+        return EvalResult{b, fmt(lhs), ">= " + fmt(rhs)};
+    }
+    template <typename R>
+    EvalResult operator&&(const R& rhs) const {
+        bool b = static_cast<bool>(lhs) && static_cast<bool>(rhs);
+        return EvalResult{b, b ? "true" : "false", "true"};
+    }
+    template <typename R>
+    EvalResult operator||(const R& rhs) const {
+        bool b = static_cast<bool>(lhs) || static_cast<bool>(rhs);
+        return EvalResult{b, b ? "true" : "false", "true"};
+    }
+};
+
+struct Decomposer {
+    template <typename T>
+    LhsWrap<T> operator<=(const T& lhs) const {
+        return LhsWrap<T>{lhs};
+    }
+};
+
+inline void run_assert(const char* expr_str, const EvalResult& res) {
+    static int emitted = 0;
+    static const char* last_expr = nullptr;
+    std::string expr(expr_str);
+    std::string input_label = expr;
+    auto eq_pos = expr.find("==");
+    if (eq_pos != std::string::npos) {
+        input_label = expr.substr(0, eq_pos);
+        while (!input_label.empty() && input_label.back() == ' ') input_label.pop_back();
+    }
+    if (!res.ok) {
+        std::cout << "\\nTESTCASE_JSON:{\\"passed\\":false,\\"input\\":\\"" << json_escape(input_label)
+                  << "\\",\\"output\\":\\"" << json_escape(res.actual)
+                  << "\\",\\"expected\\":\\"" << json_escape(res.expected) << "\\"}\\n";
+        std::exit(1);
+    } else if (emitted < 12 && last_expr != expr_str) {
+        last_expr = expr_str;
+        ++emitted;
+        std::cout << "\\nTESTCASE_JSON:{\\"passed\\":true,\\"input\\":\\"" << json_escape(input_label)
+                  << "\\",\\"output\\":\\"" << json_escape(res.actual)
+                  << "\\",\\"expected\\":\\"" << json_escape(res.expected) << "\\"}\\n";
+    }
+}
+} // namespace _tutor_check
+#undef assert
+#define assert(expr) ::_tutor_check::run_assert(#expr, (::_tutor_check::Decomposer{} <= expr))
+`;
+
+let lastTestCases = [];
+let activeCaseIdx = 0;
+let lastBuildErrors = "";
+let lastRuntimeErrors = "";
+
+window.selectTestCase = function(idx) {
+  activeCaseIdx = idx;
+  renderLeetCodeJudgeBody();
+};
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderLeetCodeJudgeBody() {
+  const logEl = document.getElementById("judge-log");
+  let html = "";
+
+  // 1. Show Compiler or Runtime Errors FIRST if any exist
+  if (lastBuildErrors) {
+    html += `
+      <div class="lc-error-block">
+        <div class="lc-error-title">Compile Error / Diagnostics</div>
+        <pre class="lc-error-pre">${escapeHtml(lastBuildErrors)}</pre>
+      </div>
+    `;
+  }
+  if (lastRuntimeErrors) {
+    html += `
+      <div class="lc-error-block">
+        <div class="lc-error-title">Runtime Error</div>
+        <pre class="lc-error-pre">${escapeHtml(lastRuntimeErrors)}</pre>
+      </div>
+    `;
+  }
+
+  // 2. Show LeetCode-style Testcase Tabs & Input / Output / Expected
+  if (lastTestCases.length > 0) {
+    const safeIdx = Math.max(0, Math.min(activeCaseIdx, lastTestCases.length - 1));
+    const tc = lastTestCases[safeIdx];
+    const tabsHtml = lastTestCases.map((c, idx) => `
+      <button class="lc-case-tab ${idx === safeIdx ? "active" : ""}" onclick="selectTestCase(${idx})">
+        <span class="lc-dot ${c.passed ? "pass" : "fail"}"></span>
+        Case ${idx + 1}
+      </button>
+    `).join("");
+
+    html += `
+      <div class="lc-case-tabs">${tabsHtml}</div>
+      <div class="lc-field">
+        <div class="lc-field-label">Input / Expression</div>
+        <div class="lc-field-box">${escapeHtml(tc.input)}</div>
+      </div>
+      <div class="lc-field">
+        <div class="lc-field-label">Output</div>
+        <div class="lc-field-box ${tc.passed ? "out-pass" : "out-fail"}">${escapeHtml(tc.output)}</div>
+      </div>
+      <div class="lc-field">
+        <div class="lc-field-label">Expected</div>
+        <div class="lc-field-box">${escapeHtml(tc.expected)}</div>
+      </div>
+    `;
+  } else if (!lastBuildErrors && !lastRuntimeErrors) {
+    html = `<div style="color:var(--fg-dim);">All assertions verified.</div>`;
+  }
+
+  logEl.innerHTML = html;
+}
+
 async function executeJudge(codeStr) {
   if (isJudging || !catalog.length) return;
   const prob = catalog[currentIdx];
@@ -1019,37 +1323,25 @@ async function executeJudge(codeStr) {
   const logEl = document.getElementById("judge-log");
 
   headerEl.className = "judge-header";
-  statusEl.textContent = `Compiling & running ${prob.id} with g++ -O3 -std=c++20...`;
-  logEl.textContent = "Running locked test harness...";
+  statusEl.textContent = `Running testcases for ${prob.id}...`;
+  logEl.textContent = "Compiling and executing test suite...";
   switchTab("spec");
 
   const user = (document.getElementById("gh-username").value || "browser-user").trim();
 
-  // 1. Try local `python3 tutor.py serve` endpoint first
-  try {
-    const localRes = await fetch("/api/judge", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problem_id: prob.id, code: codeStr, user, update_board: true })
-    });
-    if (localRes.ok) {
-      const data = await localRes.json();
-      isJudging = false;
-      engineEl.textContent = "Local g++ -O3 -std=c++20";
-      applyJudgeResult(prob, data.ok, data.log, data.metrics?.cycles_per_op || (data.runtime_ms * 100), codeBytes, user);
-      return;
-    }
-  } catch (_) {
-    // Static GitHub Pages mode — proceed to Cloud C++20 Judge
-  }
+  // Strip #pragma once from inlined solution.hpp while keeping line numbers identical via #line 1 "solution.hpp"
+  const sanitizedUserCode = String(codeStr || "").replace(/^(\s*)#\s*pragma\s+once\b/gm, "$1// #pragma once");
 
-  // 2. Cloud C++20 Judge via Compiler Explorer (Godbolt) Public API
   try {
     engineEl.textContent = "GitHub Pages Cloud g++ 13.2 (-O3 -std=c++20)";
     const harnessSrc = prob.harness || "";
-    const combinedSource = harnessSrc.replace(
+    let combinedSource = harnessSrc.replace(
       /#include\s+["<]solution\.hpp[">]/,
-      `// --- BEGIN USER solution.hpp ---\n${codeStr}\n// --- END USER solution.hpp ---`
+      `#line 1 "solution.hpp"\n${sanitizedUserCode}\n#line 1000 "harness.cpp"`
+    );
+    combinedSource = combinedSource.replace(
+      /#include\s+<cassert>/,
+      `#include <cassert>\n${TUTOR_CHECK_CPP_HEADER}`
     );
 
     const t0 = performance.now();
@@ -1077,19 +1369,15 @@ async function executeJudge(codeStr) {
     const gbData = await gbRes.json();
     const elapsedMs = performance.now() - t0;
     const stripAnsi = (s) => String(s || "").replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "");
-    const buildStderr = stripAnsi((gbData.buildResult?.stderr || []).map(x => x.text).join("\n"));
+    const buildStderr = stripAnsi((gbData.buildResult?.stderr || []).map(x => x.text).join("\n")).trim();
     const execStdout = stripAnsi((gbData.stdout || []).map(x => x.text).join("\n"));
-    const execStderr = stripAnsi((gbData.stderr || []).map(x => x.text).join("\n"));
+    const execStderr = stripAnsi((gbData.stderr || []).map(x => x.text).join("\n")).trim();
+    const buildOk = (gbData.buildResult?.code === 0);
     const exitCode = gbData.code;
 
-    let rawLog = "";
-    if (buildStderr) rawLog += buildStderr + "\n";
-    if (execStdout) rawLog += execStdout + "\n";
-    if (execStderr) rawLog += execStderr + "\n";
-
     let cyclesPerOp = Number((gbData.execTime || elapsedMs) * 10.0).toFixed(2);
-    const cleanLines = [];
-    for (const line of rawLog.split(/\r?\n/)) {
+    const testCases = [];
+    for (const line of execStdout.split(/\r?\n/)) {
       if (line.startsWith("SCOREBOARD_JSON:")) {
         try {
           const parsed = JSON.parse(line.slice("SCOREBOARD_JSON:".length).trim());
@@ -1097,32 +1385,41 @@ async function executeJudge(codeStr) {
             cyclesPerOp = Number(parsed.cycles_per_op).toFixed(2);
           }
         } catch (_) {}
-      } else {
-        cleanLines.push(line);
+      } else if (line.startsWith("TESTCASE_JSON:")) {
+        try {
+          testCases.push(JSON.parse(line.slice("TESTCASE_JSON:".length).trim()));
+        } catch (_) {}
       }
     }
 
-    const success = (gbData.buildResult?.code === 0) && (exitCode === 0) && Boolean(gbData.didExecute);
+    const success = buildOk && (exitCode === 0) && Boolean(gbData.didExecute) && testCases.every(c => c.passed);
     isJudging = false;
-    applyJudgeResult(prob, success, cleanLines.join("\n").trim() || "(No output)", Number(cyclesPerOp), codeBytes, user);
+    applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, Number(cyclesPerOp), codeBytes, user);
   } catch (err) {
     isJudging = false;
     headerEl.className = "judge-header fail";
     statusEl.textContent = "COMPILER SERVICE ERROR";
-    logEl.textContent = `Could not reach C++20 execution service: ${err.message}\nTip: You can also run 'python3 tutor.py serve' or 'python3 tutor.py test ${prob.id}' locally.`;
+    logEl.textContent = `Could not reach C++20 execution service: ${err.message}`;
   }
 }
 
-function applyJudgeResult(prob, success, logText, cyclesPerOp, codeBytes, user) {
+function applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, cyclesPerOp, codeBytes, user) {
   const headerEl = document.getElementById("judge-header");
   const statusEl = document.getElementById("judge-status-text");
-  const logEl = document.getElementById("judge-log");
 
-  logEl.textContent = logText || "(No output)";
+  lastTestCases = testCases || [];
+  lastBuildErrors = (!buildOk || buildStderr) ? buildStderr : "";
+  lastRuntimeErrors = execStderr || "";
+
+  const failedIdx = lastTestCases.findIndex(c => !c.passed);
+  activeCaseIdx = failedIdx >= 0 ? failedIdx : 0;
+  const passedCount = lastTestCases.filter(c => c.passed).length;
 
   if (success) {
     headerEl.className = "judge-header pass";
-    statusEl.textContent = `ALL TESTS PASSED — ${prob.id} SOLVED`;
+    statusEl.textContent = lastTestCases.length > 0
+      ? `Accepted — ${passedCount} / ${lastTestCases.length} testcases passed`
+      : `Accepted — ${prob.id} SOLVED`;
     document.getElementById("metric-score").textContent = "100.0";
     document.getElementById("metric-cycles").textContent = `${Number(cyclesPerOp).toFixed(2)}`;
     document.getElementById("metric-bytes").textContent = `${codeBytes} B`;
@@ -1131,16 +1428,23 @@ function applyJudgeResult(prob, success, logText, cyclesPerOp, codeBytes, user) 
     localStorage.setItem("tutor_solved_v1", JSON.stringify([...solvedSet]));
     populateSelectors();
 
-    // Update live in-memory Autolab scoreboard preview
     recordInBrowserScoreboardEntry(user, prob.id, [100.0, Number(Number(cyclesPerOp).toFixed(2)), codeBytes]);
     renderDag();
     renderScoreboard();
   } else {
     headerEl.className = "judge-header fail";
-    statusEl.textContent = `TESTS FAILED — ${prob.id}`;
+    if (!buildOk) {
+      statusEl.textContent = `Compile Error — ${prob.id}`;
+    } else if (failedIdx >= 0) {
+      statusEl.textContent = `Wrong Answer — ${passedCount} passed, failed on Case ${failedIdx + 1}`;
+    } else {
+      statusEl.textContent = `Runtime Error — ${prob.id}`;
+    }
     document.getElementById("metric-score").textContent = "0.0";
     document.getElementById("metric-cycles").textContent = "—";
   }
+
+  renderLeetCodeJudgeBody();
 }
 
 function recordInBrowserScoreboardEntry(user, probId, vec) {
