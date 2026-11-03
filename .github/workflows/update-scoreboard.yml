@@ -62,7 +62,7 @@ jobs:
 
       - name: Commit updated leaderboard.json & catalog.json
         run: |
-          git config user.name "Syntra Autolab Judge"
-          git config user.email "judge@users.noreply.github.com"
+          git config user.name "wwwportal"
+          git config user.email "yamraoui2001@gmail.com"
           git add docs/data/leaderboard.json docs/data/catalog.json
           git diff --staged --quiet || (git commit -m "chore(scoreboard): update Autolab standings [skip ci]" && git push)

@@ -1310,13 +1310,15 @@ function primeNeovim() {
   splashEl.classList.add("hidden");
 }
 
-function setBufferCode(codeStr, bufName = "solution.hpp") {
+function setBufferCode(codeStr) {
   currentBufferText = codeStr;
   const lines = String(codeStr || "").split(/\r?\n/);
   const lua = `
-    local lines, bname = ...
+    local lines = ...
     local buf = vim.api.nvim_get_current_buf()
-    pcall(vim.api.nvim_buf_set_name, buf, bname)
+    if vim.api.nvim_buf_get_name(buf) == "" then
+      pcall(vim.api.nvim_buf_set_name, buf, "solution.hpp")
+    end
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
     vim.bo[buf].filetype = "cpp"
     vim.bo[buf].readonly = false
@@ -1324,7 +1326,7 @@ function setBufferCode(codeStr, bufName = "solution.hpp") {
     vim.bo[buf].modified = false
     vim.api.nvim_win_set_cursor(0, {1, 0})
   `;
-  sendRpc("nvim_exec_lua", [lua, [lines, bufName]]);
+  sendRpc("nvim_exec_lua", [lua, [lines]]);
 }
 
 function handleWorkerMessage(event) {
@@ -1532,8 +1534,7 @@ document.getElementById("help-btn").addEventListener("click", openHelp);
 document.getElementById("help-close-btn").addEventListener("click", closeHelp);
 
 function triggerRun() {
-  if (workerReady) enqueueInput("<Esc>:Run<CR>");
-  else executeJudge(currentBufferText);
+  executeJudge(currentBufferText);
 }
 document.getElementById("run-trigger").addEventListener("click", triggerRun);
 
