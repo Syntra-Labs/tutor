@@ -1088,6 +1088,7 @@ function switchTab(tabName) {
 /* 2. DUAL-ENGINE C++20 JUDGE (LOCAL `/api/judge` + CLOUD GODBOLT FALLBACK)  */
 /* ========================================================================= */
 const TUTOR_CHECK_CPP_HEADER = `
+#pragma GCC diagnostic ignored "-Wparentheses"
 #include <iostream>
 #include <sstream>
 #include <string>
