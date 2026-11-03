@@ -1823,7 +1823,7 @@ function primeNeovim() {
   sendRpc("nvim_ui_attach", [cols, rows, { rgb: true, ext_linegrid: true, ext_hlstate: true }]);
   sendRpc("nvim_ui_set_focus", [true]);
   sendRpc("nvim_command", ["set noswapfile nobackup nowritebackup noundofile noreadonly"]);
-  sendRpc("nvim_command", ["set number background=light fillchars=eob:~ mouse=a mousemodel=extend"]);
+  sendRpc("nvim_command", ["set number background=light fillchars=eob:~ mouse=a mousemodel=extend mousescroll=ver:1,hor:2"]);
   sendRpc("nvim_command", ["set tabstop=4 shiftwidth=4 softtabstop=4 expandtab autoindent smartindent"]);
   sendRpc("nvim_command", ["filetype plugin indent on"]);
   sendRpc("nvim_command", ["syntax enable"]);
@@ -1973,17 +1973,26 @@ function setBufferCode(codeStr) {
   sendRpc("nvim_exec_lua", [lua, [lines]]);
 }
 
+let pendingDrawData = null;
+let drawRafId = null;
+
+function scheduleGridRender(drawData) {
+  pendingDrawData = drawData;
+  if (drawRafId !== null) return;
+  drawRafId = requestAnimationFrame(() => {
+    drawRafId = null;
+    if (pendingDrawData) {
+      const d = pendingDrawData;
+      pendingDrawData = null;
+      renderGrid(d.cells, d.cursor, d.cursorHlId, d.cursorShape, d.mode, d.hls);
+    }
+  });
+}
+
 function handleWorkerMessage(event) {
   const { type } = event.data || {};
   if (type === "draw-text") {
-    renderGrid(
-      event.data.cells,
-      event.data.cursor,
-      event.data.cursorHlId,
-      event.data.cursorShape,
-      event.data.mode,
-      event.data.hls
-    );
+    scheduleGridRender(event.data);
   } else if (type === "response") {
     const resolver = pendingRpcResolvers.get(event.data.msgid);
     if (resolver) {
@@ -2041,6 +2050,23 @@ function handleWorkerMessage(event) {
 
 let activeGridId = 0;
 
+const hlStyleCache = new Map();
+let lastHlMap = null;
+
+function getCachedHlStyle(map, id) {
+  if (map !== lastHlMap) {
+    hlStyleCache.clear();
+    lastHlMap = map;
+  }
+  const key = id != null && map[id] !== undefined ? id : 0;
+  let cached = hlStyleCache.get(key);
+  if (cached !== undefined) return cached;
+  const attr = getHl(map, key, false);
+  cached = styleFromHl(attr);
+  hlStyleCache.set(key, cached);
+  return cached;
+}
+
 function renderGrid(cells = [], cursor = null, cursorHlId = 0, cursorShape = "block", mode = "normal", hls = {}) {
   const rowsArr = Array.isArray(cells) && cells.length ? cells : [];
   const cur = cursor || { grid: 1, row: 0, col: 0 };
@@ -2060,22 +2086,42 @@ function renderGrid(cells = [], cursor = null, cursorHlId = 0, cursorShape = "bl
     const rowCells = Array.isArray(rowsArr[r]) ? rowsArr[r] : [];
     const lineLen = rowCells.length;
 
+    let curText = "";
+    let curStyle = null;
+
     for (let c = 0; c < lineLen; c += 1) {
       const cell = rowCells[c] || {};
       const ch = escapeChar(cell.ch || " ");
       const isCursor = (r === row && c === col);
-      const useBlockCursor = isCursor && cursorClass === "cursor";
-      const attr = useBlockCursor ? getHl(hlMap, cursorHlId, true) : getHl(hlMap, cell.hl, false);
-      const style = styleFromHl(attr);
 
       if (isCursor) {
+        if (curText) {
+          html += curStyle ? `<span style="${curStyle}">${curText}</span>` : curText;
+          curText = "";
+          curStyle = null;
+        }
+        const useBlockCursor = (cursorClass === "cursor");
+        const attr = useBlockCursor ? getHl(hlMap, cursorHlId, true) : getHl(hlMap, cell.hl, false);
+        const style = styleFromHl(attr);
         html += `<span class="${cursorClass}" style="${style}">${ch}</span>`;
-      } else if (style) {
-        html += `<span style="${style}">${ch}</span>`;
       } else {
-        html += ch;
+        const style = getCachedHlStyle(hlMap, cell.hl);
+        if (curText && style === curStyle) {
+          curText += ch;
+        } else {
+          if (curText) {
+            html += curStyle ? `<span style="${curStyle}">${curText}</span>` : curText;
+          }
+          curText = ch;
+          curStyle = style;
+        }
       }
     }
+
+    if (curText) {
+      html += curStyle ? `<span style="${curStyle}">${curText}</span>` : curText;
+    }
+
     if (r === row && col >= lineLen) {
       html += " ".repeat(col - lineLen);
       html += `<span class="${cursorClass}"> </span>`;
@@ -2182,6 +2228,27 @@ function mouseButtonName(btn) {
 }
 
 let activeMouseBtn = null;
+let lastDragCell = { row: -1, col: -1 };
+let dragInFlight = false;
+let pendingDragTarget = null;
+
+function processPendingDrag() {
+  if (dragInFlight || !pendingDragTarget || !workerReady) return;
+  const target = pendingDragTarget;
+  pendingDragTarget = null;
+  dragInFlight = true;
+  sendRpc("nvim_input_mouse", [
+    activeMouseBtn || "left",
+    "drag",
+    target.mod,
+    0,
+    target.row,
+    target.col
+  ]).finally(() => {
+    dragInFlight = false;
+    if (pendingDragTarget) processPendingDrag();
+  });
+}
 
 gridEl.addEventListener("mousedown", (ev) => {
   gridEl.focus();
@@ -2189,31 +2256,112 @@ gridEl.addEventListener("mousedown", (ev) => {
   ev.preventDefault();
   activeMouseBtn = mouseButtonName(ev.button);
   const { row, col } = mouseCoordsToCell(ev);
+  lastDragCell = { row, col };
+  pendingDragTarget = null;
   sendRpc("nvim_input_mouse", [activeMouseBtn, "press", mouseModifierStr(ev), 0, row, col]);
 });
 
 window.addEventListener("mousemove", (ev) => {
   if (!activeMouseBtn || !workerReady) return;
   const { row, col } = mouseCoordsToCell(ev);
-  sendRpc("nvim_input_mouse", [activeMouseBtn, "drag", mouseModifierStr(ev), 0, row, col]);
+  if (row === lastDragCell.row && col === lastDragCell.col) return;
+  lastDragCell = { row, col };
+  pendingDragTarget = { row, col, mod: mouseModifierStr(ev) };
+  processPendingDrag();
 });
 
 window.addEventListener("mouseup", (ev) => {
   if (!activeMouseBtn || !workerReady) return;
   const btn = activeMouseBtn;
   activeMouseBtn = null;
+  pendingDragTarget = null;
   const { row, col } = mouseCoordsToCell(ev);
   sendRpc("nvim_input_mouse", [btn, "release", mouseModifierStr(ev), 0, row, col]);
 });
 
 gridEl.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
+let wheelDeltaY = 0;
+let wheelDeltaX = 0;
+let wheelLastTarget = { row: 0, col: 0, mod: "" };
+let wheelInFlight = false;
+let wheelResetTimer = null;
+
+function processWheelQueue() {
+  if (wheelInFlight || !workerReady) return;
+  const thresholdY = (lastCharH || 18) * 1.5;
+  const thresholdX = (lastCharW || 9) * 2;
+
+  if (Math.abs(wheelDeltaY) < thresholdY && Math.abs(wheelDeltaX) < thresholdX) return;
+
+  let dir = "";
+  if (Math.abs(wheelDeltaY) >= thresholdY) {
+    dir = wheelDeltaY < 0 ? "up" : "down";
+    wheelDeltaY -= Math.sign(wheelDeltaY) * thresholdY;
+  } else if (Math.abs(wheelDeltaX) >= thresholdX) {
+    dir = wheelDeltaX < 0 ? "left" : "right";
+    wheelDeltaX -= Math.sign(wheelDeltaX) * thresholdX;
+  }
+
+  if (!dir) return;
+
+  wheelInFlight = true;
+  sendRpc("nvim_input_mouse", [
+    "wheel",
+    dir,
+    wheelLastTarget.mod || "",
+    0,
+    wheelLastTarget.row || 0,
+    wheelLastTarget.col || 0
+  ]).finally(() => {
+    wheelInFlight = false;
+    const thY = (lastCharH || 18) * 1.5;
+    const thX = (lastCharW || 9) * 2;
+    if (Math.abs(wheelDeltaY) >= thY || Math.abs(wheelDeltaX) >= thX) {
+      processWheelQueue();
+    }
+  });
+}
+
 gridEl.addEventListener("wheel", (ev) => {
   if (!workerReady) return;
   ev.preventDefault();
+
+  let dy = ev.deltaY;
+  let dx = ev.deltaX;
+  if (ev.deltaMode === 1) { // DOM_DELTA_LINE
+    dy *= (lastCharH || 18);
+    dx *= (lastCharW || 9);
+  } else if (ev.deltaMode === 2) { // DOM_DELTA_PAGE
+    dy *= (lastCharH || 18) * (rows || 24);
+    dx *= (lastCharW || 9) * (cols || 80);
+  }
+
+  wheelDeltaY += dy;
+  wheelDeltaX += dx;
+
   const { row, col } = mouseCoordsToCell(ev);
-  const dir = ev.deltaY < 0 ? "up" : "down";
-  sendRpc("nvim_input_mouse", ["wheel", dir, mouseModifierStr(ev), 0, row, col]);
+  wheelLastTarget = { row, col, mod: mouseModifierStr(ev) };
+
+  const thresholdY = (lastCharH || 18) * 1.5;
+  const maxBacklogY = thresholdY * 3;
+  if (Math.abs(wheelDeltaY) > maxBacklogY) {
+    wheelDeltaY = Math.sign(wheelDeltaY) * maxBacklogY;
+  }
+
+  const thresholdX = (lastCharW || 9) * 2;
+  const maxBacklogX = thresholdX * 3;
+  if (Math.abs(wheelDeltaX) > maxBacklogX) {
+    wheelDeltaX = Math.sign(wheelDeltaX) * maxBacklogX;
+  }
+
+  clearTimeout(wheelResetTimer);
+  wheelResetTimer = setTimeout(() => {
+    wheelDeltaY = 0;
+    wheelDeltaX = 0;
+  }, 120);
+
+  processWheelQueue();
 }, { passive: false });
 
 gridEl.addEventListener("keydown", (ev) => {

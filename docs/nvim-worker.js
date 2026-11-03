@@ -812,6 +812,7 @@ class UiState {
 
   defineHl(id, rgbAttr = {}) {
     const hlId = Number(id);
+    this.#hlsObj = null;
     this.hls.set(hlId, {
       foreground: toHex(rgbAttr.foreground),
       background: toHex(rgbAttr.background),
@@ -825,31 +826,31 @@ class UiState {
     });
   }
 
+  #hlsObj = null;
+
   snapshot() {
     const grid = this.grids.get(this.activeGrid) || this.grids.get(this.defaultGrid) || this.grids.values().next().value;
     if (!grid) {
       return {
-        lines: [""],
         cells: [[{ ch: " ", hl: 0 }]],
         cursor: { grid: this.defaultGrid, row: 0, col: 0 },
         mode: this.mode,
         cursorHlId: this.cursorHlId,
         cursorShape: this.cursorShape,
-        hls: Object.fromEntries(this.hls),
+        hls: this.#hlsObj || (this.#hlsObj = Object.fromEntries(this.hls)),
       };
     }
 
     const row = clamp(Math.floor(this.cursor.row || 0), 0, grid.height - 1);
     const col = clamp(Math.floor(this.cursor.col || 0), 0, grid.width - 1);
-    const cells = grid.cells.map((r) => r.map((cell) => ({ ch: cell?.ch ?? " ", hl: cell?.hl ?? 0 })));
+    const cells = grid.cells.map((r) => r.slice());
     return {
-      lines: cells.map((r) => r.map((c) => c.ch || " ").join("")),
       cells,
       cursor: { grid: this.cursor.grid, row, col },
       mode: this.mode,
       cursorHlId: this.cursorHlId,
       cursorShape: this.cursorShape,
-      hls: Object.fromEntries(this.hls),
+      hls: this.#hlsObj || (this.#hlsObj = Object.fromEntries(this.hls)),
     };
   }
 
