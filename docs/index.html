@@ -6,6 +6,9 @@
 <title>Syntra Tutor — 74-Problem Math & Systems Studio (Neovim WASM + Autolab Judge)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" crossorigin="anonymous"></script>
 
 <style>
 :root {
@@ -161,15 +164,78 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
 .meta-badge.solved { background: #000000; color: #ffffff; }
 
 .spec-box {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.65;
+  white-space: normal;
   background: var(--bg-subtle);
   border: 1px solid var(--line);
-  padding: 14px 16px;
+  padding: 16px 20px;
   border-radius: 2px;
   margin-bottom: 16px;
+  color: var(--fg);
+  overflow-x: auto;
+}
+.spec-box h1, .spec-box h2, .spec-box h3, .spec-box h4 {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #000000;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+.spec-box h1 {
+  font-size: 15.5px;
+  margin-top: 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.spec-box h2 { font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+.spec-box h3 { font-size: 12.5px; }
+.spec-box p { margin-bottom: 10px; }
+.spec-box p:last-child { margin-bottom: 0; }
+.spec-box ul, .spec-box ol { margin: 6px 0 12px 22px; }
+.spec-box li { margin-bottom: 4px; }
+.spec-box code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: #eaeaea;
+  padding: 1px 5px;
+  border-radius: 2px;
+  border: 1px solid #d8d8d8;
+}
+.spec-box pre {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+.spec-box pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+.spec-box table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.spec-box th, .spec-box td {
+  border: 1px solid var(--line);
+  padding: 5px 8px;
+  text-align: left;
+}
+.spec-box th { background: var(--panel); font-weight: 700; }
+.spec-box .katex-display {
+  margin: 12px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .judge-panel {
@@ -783,6 +849,57 @@ function stepProblem(delta) {
   loadProblem(next);
 }
 
+function renderMarkdownWithLatex(md) {
+  let text = String(md || "");
+  if (!text) return "";
+
+  const codeBlocks = [];
+  const mathBlocks = [];
+
+  // 1. Protect fenced code blocks and inline code spans from LaTeX extraction
+  text = text.replace(/```[\s\S]*?```|`[^`\n]+`/g, (match) => {
+    const id = codeBlocks.length;
+    codeBlocks.push(match);
+    return `CODEPLACEHOLDER${id}END`;
+  });
+
+  const renderTex = (tex, displayMode) => {
+    const id = mathBlocks.length;
+    let rendered = tex;
+    if (window.katex) {
+      try {
+        rendered = window.katex.renderToString(tex.trim(), {
+          displayMode,
+          throwOnError: false,
+          strict: false
+        });
+      } catch (_) {
+        rendered = `<code>${tex}</code>`;
+      }
+    }
+    mathBlocks.push(rendered);
+    return `KATEXPLACEHOLDER${id}END`;
+  };
+
+  // 2. Extract display math ($$...$$ and \[...\])
+  text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => renderTex(tex, true));
+  text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => renderTex(tex, true));
+
+  // 3. Extract inline math ($...$ and \(...\))
+  text = text.replace(/\$(?!\$)([^\$\n]+?)\$/g, (_, tex) => renderTex(tex, false));
+  text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => renderTex(tex, false));
+
+  // 4. Restore code blocks so marked.parse formats them properly
+  text = text.replace(/CODEPLACEHOLDER(\d+)END/g, (_, idx) => codeBlocks[Number(idx)]);
+
+  // 5. Render Markdown via Marked
+  let html = window.marked ? window.marked.parse(text, { gfm: true, breaks: false }) : text;
+
+  // 6. Restore rendered KaTeX HTML
+  html = html.replace(/KATEXPLACEHOLDER(\d+)END/g, (_, idx) => mathBlocks[Number(idx)]);
+  return html;
+}
+
 function loadProblem(idx) {
   if (!catalog.length) return;
   currentIdx = Math.max(0, Math.min(idx, catalog.length - 1));
@@ -806,7 +923,7 @@ function loadProblem(idx) {
     <span><b>${prob.track}</b></span>
     <span>&bull; ${deps}</span>
   `;
-  document.getElementById("prob-readme").textContent = prob.readme || "";
+  document.getElementById("prob-readme").innerHTML = renderMarkdownWithLatex(prob.readme || "");
 
   const savedCode = localStorage.getItem(savedCodeKey(prob.id));
   const initialCode = savedCode !== null ? savedCode : (prob.stub || "");
