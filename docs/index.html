@@ -809,9 +809,8 @@ async function initStudio() {
   });
 
   populateSelectors();
-  // Default to 002-hypervector-hamming or first problem
-  const defaultIdx = catalog.findIndex(p => p.id.startsWith("002-"));
-  loadProblem(defaultIdx >= 0 ? defaultIdx : 0);
+  // Default to first problem (000a-hello-world)
+  loadProblem(0);
   renderDag();
   renderScoreboard();
   startNeovimWasm();
@@ -853,6 +852,7 @@ function populateSelectors() {
   }
 
   document.getElementById("top-progress").textContent = `${solvedSet.size} / ${catalog.length} SOLVED`;
+  document.getElementById("tab-btn-dag").textContent = `Problems (${catalog.length})`;
   if (catalog[currentIdx]) {
     sel.value = catalog[currentIdx].id;
   }

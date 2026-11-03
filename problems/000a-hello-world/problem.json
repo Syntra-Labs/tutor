@@ -1,0 +1,10 @@
+{
+  "id": "000a-hello-world",
+  "title": "Hello World & String Greeting",
+  "track": "Track 0: Warmup & Sanity Checks",
+  "category": "Track 0: Warmup & Sanity Checks",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "tags": ["warmup", "strings", "sanity-check"],
+  "languages": ["cpp"]
+}
