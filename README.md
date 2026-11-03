@@ -1,7 +1,11 @@
 # tutor
 
 > **"A Coding Tutor Rather Than a Coding Agent."**  
-> 74 Atomic Math, Geometry, Hyperdimensional Computing & Systems Programming Problem Sets (`001`–`074`) with Prerequisite Skill-Tree DAG, Local Test Harness, and $0 GitHub Pages Autolab Scoreboard.
+> 74 Atomic Math, Geometry, Hyperdimensional Computing & Systems Programming Problem Sets (`001`–`074`) with Prerequisite Skill-Tree DAG, Neovim WASM Studio, Live C++20 Judge, and $0 GitHub Pages Autolab Scoreboard.
+
+### 🌐 [**Launch Live Neovim WASM Studio & Judge → `https://syntra-labs.github.io/tutor/`**](https://syntra-labs.github.io/tutor/)
+
+- **In-Browser Neovim WASM (`nvim-asyncify.wasm`)**: Edit `solution.hpp` directly in the browser with full Vim motions, `:w` / `:Run` / `<Space>r` to compile and execute against the locked C++20 harness (`-O3 -std=c++20`), and automatic Autolab Scoreboard ranking (`Score DESC`, `Cycles/Op ASC`, `Bytes ASC`).
 
 ---
 

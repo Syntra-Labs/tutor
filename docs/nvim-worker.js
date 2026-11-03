@@ -181,7 +181,7 @@ async function startNvim({ cols, rows, assetVersion }) {
   const preopenDot = new RootedPreopenDirectory(".", fsRoot.contents);
   const preopenRoot = new RootedPreopenDirectory("/", fsRoot.contents);
 
-  const args = ["nvim", "--embed", "-u", "NORC", "--noplugin", "-i", "NONE", "-n", "path.cpp"];
+  const args = ["nvim", "--embed", "-u", "NORC", "--noplugin", "-i", "NONE", "-n", "solution.hpp"];
   const env = [
     "VIMRUNTIME=/nvim/runtime",
     "HOME=/nvim/home",

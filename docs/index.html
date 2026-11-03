@@ -539,10 +539,11 @@ body.is-resizing, body.is-resizing * {
           <div class="judge-log" id="judge-log">Locked harness ready. Implement solution.hpp in Neovim on the right and run :w or :Run.</div>
         </div>
 
-        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;">
-          <input type="text" id="gh-username" placeholder="GitHub username (for scoreboard)" style="font-family:var(--mono);font-size:11.5px;padding:5px 8px;border:1px solid var(--line);flex:1;min-width:170px;" />
-          <button class="small-btn" onclick="downloadOrCopySubmission()">📋 Copy / Download Submission</button>
-          <button class="small-btn primary" onclick="openGitHubPrSubmission()">🏆 Submit to Public Scoreboard (PR)</button>
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center; font-family:var(--mono); font-size:11.5px;">
+          <span style="color:var(--fg-dim);">Scoreboard Handle:</span>
+          <input type="text" id="gh-username" value="you" placeholder="handle" style="font-family:var(--mono);font-size:11.5px;padding:4px 8px;border:1px solid var(--line);width:150px;" />
+          <span style="color:var(--fg-muted); flex:1;">Passing <code>:w</code> or <code>:Run</code> automatically updates the Autolab Scoreboard (<code>:Board</code>).</span>
+          <button class="small-btn" onclick="switchTab('board')">🏆 View Scoreboard (:Board)</button>
         </div>
       </div>
 
@@ -700,6 +701,15 @@ async function initStudio() {
     }
     if (boardRes.ok) {
       leaderboard = await boardRes.json();
+    }
+    const cachedBoard = JSON.parse(localStorage.getItem("tutor_leaderboard_cache_v1") || "null");
+    if (cachedBoard && cachedBoard.problems) {
+      if (!leaderboard.problems) leaderboard.problems = {};
+      for (const [pid, rows] of Object.entries(cachedBoard.problems)) {
+        for (const r of rows || []) {
+          recordInBrowserScoreboardEntry(r.user || "you", pid, r.scoreboard || [100, 0, 0]);
+        }
+      }
     }
   } catch (err) {
     console.warn("Failed to load catalog/leaderboard:", err);
@@ -996,6 +1006,38 @@ function recordInBrowserScoreboardEntry(user, probId, vec) {
     dedup.push({ ...item, rank: dedup.length + 1 });
   }
   leaderboard.problems[probId] = dedup;
+  recomputeGlobalStandings();
+  try {
+    localStorage.setItem("tutor_leaderboard_cache_v1", JSON.stringify(leaderboard));
+  } catch (_) {}
+}
+
+function recomputeGlobalStandings() {
+  const users = {};
+  const probs = leaderboard.problems || {};
+  for (const [pid, rows] of Object.entries(probs)) {
+    for (const r of rows || []) {
+      const u = r.user || "you";
+      if (!users[u]) {
+        users[u] = { user: u, solved_count: 0, first_place_count: 0, total_score: 0, total_cycles: 0, total_bytes: 0 };
+      }
+      const vec = r.scoreboard || [100, 0, 0];
+      users[u].solved_count += 1;
+      if (r.rank === 1) users[u].first_place_count += 1;
+      users[u].total_score += Number(vec[0] || 100);
+      users[u].total_cycles += Number(vec[1] || 0);
+      users[u].total_bytes += Number(vec[2] || 0);
+    }
+  }
+  const ranked = Object.values(users).sort((a, b) => {
+    if (b.solved_count !== a.solved_count) return b.solved_count - a.solved_count;
+    if (b.first_place_count !== a.first_place_count) return b.first_place_count - a.first_place_count;
+    if (b.total_score !== a.total_score) return b.total_score - a.total_score;
+    if (a.total_cycles !== b.total_cycles) return a.total_cycles - b.total_cycles;
+    return a.total_bytes - b.total_bytes;
+  });
+  ranked.forEach((r, idx) => { r.rank = idx + 1; });
+  leaderboard.global_rankings = ranked;
 }
 
 /* ========================================================================= */
@@ -1251,7 +1293,7 @@ function primeNeovim() {
   sendRpc("nvim_command", ["highlight Number guifg=#000000 gui=bold"]);
 
   const lua = `
-    local ui_chan = (vim.api.nvim_get_api_info() or {})[1]
+    local ui_chan = 1
     if ui_chan then
       vim.g.mapleader = " "
       vim.g.maplocalleader = " "
