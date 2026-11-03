@@ -160,8 +160,22 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   padding: 1px 6px;
   font-weight: 700;
   font-size: 10.5px;
+  text-transform: uppercase;
 }
 .meta-badge.solved { background: #000000; color: #ffffff; }
+.meta-badge.locked { color: var(--fg-muted); border-color: var(--line); border-style: dashed; }
+
+.diff-badge {
+  padding: 1px 6px;
+  font-weight: 700;
+  font-size: 10.5px;
+  border: 1px solid currentColor;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.diff-easy { color: #065f46; background: #ecfdf5; border-color: #059669; }
+.diff-medium { color: #92400e; background: #fffbeb; border-color: #d97706; }
+.diff-hard { color: #991b1b; background: #fef2f2; border-color: #dc2626; }
 
 .spec-box {
   font-family: var(--sans);
@@ -439,6 +453,7 @@ body.is-resizing, body.is-resizing * {
 
 .nvim-statusline {
   height: 28px;
+  width: 100%;
   background: #f0f0f0;
   border-top: 1px solid #dcdcdc;
   display: flex;
@@ -448,8 +463,10 @@ body.is-resizing, body.is-resizing * {
   font-size: 11.5px;
   user-select: none;
   z-index: 5;
+  overflow: hidden;
 }
 .nvim-mode {
+  flex-shrink: 0;
   padding: 0 10px;
   height: 100%;
   display: flex;
@@ -464,6 +481,8 @@ body.is-resizing, body.is-resizing * {
 .mode-command { background: #222222; color: #ffffff; }
 
 .nvim-file {
+  flex: 1;
+  min-width: 0;
   color: #444444;
   padding: 0 10px;
   font-size: 11.5px;
@@ -474,11 +493,13 @@ body.is-resizing, body.is-resizing * {
 .nvim-file b { color: #000000; font-weight: 600; }
 
 .nvim-info {
+  flex-shrink: 0;
   display: flex;
   gap: 6px;
   align-items: center;
   color: #555555;
-  padding-right: 10px;
+  padding: 0 16px 0 8px;
+  white-space: nowrap;
 }
 .nvim-btn {
   background: #ffffff;
@@ -490,6 +511,7 @@ body.is-resizing, body.is-resizing * {
   border-radius: 2px;
   cursor: pointer;
   font-weight: 600;
+  flex-shrink: 0;
 }
 .nvim-btn:hover { background: #000000; color: #ffffff; }
 
@@ -565,17 +587,17 @@ body.is-resizing, body.is-resizing * {
       <div class="nav-tabs">
         <button class="tab-btn active" id="tab-btn-spec" onclick="switchTab('spec')">Spec &amp; Judge</button>
         <button class="tab-btn" id="tab-btn-dag" onclick="switchTab('dag')">Skill-Tree DAG (74)</button>
-        <button class="tab-btn" id="tab-btn-board" onclick="switchTab('board')">🏆 Scoreboard</button>
+        <button class="tab-btn" id="tab-btn-board" onclick="switchTab('board')">Scoreboard</button>
       </div>
     </div>
 
     <div class="left-scroll">
       <!-- Persistent Problem Switcher & Judge Trigger -->
       <div class="problem-bar">
-        <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">&#9664;</button>
+        <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">Prev</button>
         <select class="problem-select" id="problem-select" onchange="loadProblemById(this.value)"></select>
-        <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">&#9654;</button>
-        <button class="small-btn primary" onclick="triggerRun()">&#9654; :Run / Test (&lt;F5&gt;)</button>
+        <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next</button>
+        <button class="small-btn primary" onclick="triggerRun()">:Run / Test (&lt;F5&gt;)</button>
       </div>
 
       <!-- TAB 1: PROBLEM SPEC & LIVE C++20 JUDGE OUTPUT -->
@@ -606,10 +628,8 @@ body.is-resizing, body.is-resizing * {
         </div>
 
         <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center; font-family:var(--mono); font-size:11.5px;">
-          <span style="color:var(--fg-dim);">Scoreboard Handle:</span>
+          <span style="color:var(--fg-dim);">Handle:</span>
           <input type="text" id="gh-username" value="you" placeholder="handle" style="font-family:var(--mono);font-size:11.5px;padding:4px 8px;border:1px solid var(--line);width:150px;" />
-          <span style="color:var(--fg-muted); flex:1;">Passing <code>:w</code> or <code>:Run</code> automatically updates the Autolab Scoreboard (<code>:Board</code>).</span>
-          <button class="small-btn" onclick="switchTab('board')">🏆 View Scoreboard (:Board)</button>
         </div>
       </div>
 
@@ -622,8 +642,8 @@ body.is-resizing, body.is-resizing * {
           </select>
           <select id="dag-status-filter" onchange="renderDag()">
             <option value="">All Statuses</option>
-            <option value="ready">○ Ready / Unlocked</option>
-            <option value="solved">✓ Solved</option>
+            <option value="ready">Ready / Unlocked</option>
+            <option value="solved">Solved</option>
           </select>
         </div>
         <div id="dag-container"></div>
@@ -633,7 +653,7 @@ body.is-resizing, body.is-resizing * {
       <div id="tab-board" class="hidden">
         <div class="filter-bar">
           <select id="board-scope-select" onchange="renderScoreboard()" style="width:100%;">
-            <option value="__global__">🌍 Global Championship Standings (All 74 Problems)</option>
+            <option value="__global__">Global Standings (All 74 Problems)</option>
           </select>
         </div>
         <div id="board-colspec-note" style="font-family:var(--mono);font-size:11px;color:var(--fg-dim);margin-bottom:8px;"></div>
@@ -685,16 +705,16 @@ body.is-resizing, body.is-resizing * {
   :Manual, &lt;Space&gt;m, &lt;F1&gt;  Toggle this reference manual.
 
 ==============================================================================
-2. HOW THE DUAL-MODE C++20 JUDGE &amp; SCOREBOARD WORK                     *judge*
+2. HOW THE DUAL-MODE C++20 JUDGE WORKS                                 *judge*
 
-  • Every problem has a locked `harness.cpp` and a starter `solution_stub.hpp`.
-  • When you type `:w` or `:Run`:
+  - Every problem has a locked `harness.cpp` and a starter `solution_stub.hpp`.
+  - When you type `:w` or `:Run`:
     1. If running via `python3 tutor.py serve`, your local `g++ -O3 -std=c++20`
-       compiles and benchmarks your code in ~50ms and updates `leaderboard.json`.
+       compiles and benchmarks your code in ~50ms.
     2. If running on static GitHub Pages, the browser bundles your `solution.hpp`
        with the locked `harness.cpp` and executes it on `g++ 13.2 -O3 -std=c++20`
-       (via Compiler Explorer API), parsing `SCOREBOARD_JSON` cycles &amp; code bytes!
-  • Passing 100% of assertions marks the problem ✓ SOLVED and unlocks downstream
+       (via Compiler Explorer API), parsing `SCOREBOARD_JSON` cycles &amp; code bytes.
+  - Passing 100% of assertions marks the problem SOLVED and unlocks downstream
     problems in the Prerequisite DAG.
       </div>
     </div>
@@ -702,12 +722,12 @@ body.is-resizing, body.is-resizing * {
     <!-- Neovim Statusline -->
     <div class="nvim-statusline">
       <div class="nvim-mode mode-normal" id="nvim-mode">NORMAL</div>
-      <div class="nvim-file"><b id="nvim-filename">002-hypervector-hamming/solution.hpp</b> [C++20] · Neovim WASM</div>
+      <div class="nvim-file"><b id="nvim-filename">002-hypervector-hamming/solution.hpp</b> [C++20]</div>
       <div class="nvim-info">
         <span id="nvim-cursor">ln 1, col 1</span>
-        <button class="nvim-btn" onclick="resetCurrentStub()" title=":Reset">:Reset</button>
-        <button class="nvim-btn" id="help-btn">:Manual (&lt;Space&gt;m)</button>
-        <button class="nvim-btn" id="run-trigger">&#9654; :Run / :w (&lt;F5&gt;)</button>
+        <button class="nvim-btn" onclick="resetCurrentStub()" title="Reset to starter stub (:Reset)">:Reset</button>
+        <button class="nvim-btn" id="help-btn" title="Reference manual (:Manual / <Space>m)">:Manual</button>
+        <button class="nvim-btn" id="run-trigger" title="Compile &amp; test (:Run / :w / <F5>)">:Run</button>
       </div>
     </div>
   </div>
@@ -809,7 +829,7 @@ function populateSelectors() {
     tracks.add(p.track);
     const solved = solvedSet.has(p.id);
     const unlocked = isUnlocked(p);
-    const mark = solved ? "✓" : (unlocked ? "○" : "🔒");
+    const mark = solved ? "[SOLVED]" : (unlocked ? "[READY]" : "[LOCKED]");
     const opt = document.createElement("option");
     opt.value = p.id;
     opt.textContent = `${mark} ${p.id} — ${p.title} [${p.difficulty}]`;
@@ -818,7 +838,7 @@ function populateSelectors() {
     if (boardSel.querySelectorAll(`option[value="${p.id}"]`).length === 0) {
       const bOpt = document.createElement("option");
       bOpt.value = p.id;
-      bOpt.textContent = `📊 ${p.id} — ${p.title}`;
+      bOpt.textContent = `${p.id} — ${p.title}`;
       boardSel.appendChild(bOpt);
     }
   });
@@ -900,6 +920,12 @@ function renderMarkdownWithLatex(md) {
   return html;
 }
 
+function difficultyBadgeHtml(diff) {
+  const d = String(diff || "Medium").toLowerCase();
+  const cls = d === "easy" ? "diff-easy" : (d === "hard" ? "diff-hard" : "diff-medium");
+  return `<span class="diff-badge ${cls}">${diff || "Medium"}</span>`;
+}
+
 function loadProblem(idx) {
   if (!catalog.length) return;
   currentIdx = Math.max(0, Math.min(idx, catalog.length - 1));
@@ -911,17 +937,17 @@ function loadProblem(idx) {
   const solved = solvedSet.has(prob.id);
   const unlocked = isUnlocked(prob);
   const statusBadge = solved
-    ? `<span class="meta-badge solved">✓ SOLVED</span>`
-    : (unlocked ? `<span class="meta-badge">○ READY</span>` : `<span class="meta-badge">🔒 LOCKED</span>`);
+    ? `<span class="meta-badge solved">SOLVED</span>`
+    : (unlocked ? `<span class="meta-badge">READY</span>` : `<span class="meta-badge locked">LOCKED</span>`);
   const deps = (prob.depends_on || []).length
     ? `Prereqs: ${prob.depends_on.map(d => d.split("-")[0]).join(", ")}`
     : "Root Primitive (No Prereqs)";
 
   document.getElementById("prob-meta-row").innerHTML = `
     ${statusBadge}
-    <span class="meta-badge">${prob.difficulty}</span>
+    ${difficultyBadgeHtml(prob.difficulty)}
     <span><b>${prob.track}</b></span>
-    <span>&bull; ${deps}</span>
+    <span>| ${deps}</span>
   `;
   document.getElementById("prob-readme").innerHTML = renderMarkdownWithLatex(prob.readme || "");
 
@@ -974,7 +1000,7 @@ async function executeJudge(codeStr) {
   const logEl = document.getElementById("judge-log");
 
   headerEl.className = "judge-header";
-  statusEl.textContent = `⚡ Compiling & running ${prob.id} with g++ -O3 -std=c++20...`;
+  statusEl.textContent = `Compiling & running ${prob.id} with g++ -O3 -std=c++20...`;
   logEl.textContent = "Running locked test harness...";
   switchTab("spec");
 
@@ -1063,7 +1089,7 @@ async function executeJudge(codeStr) {
   } catch (err) {
     isJudging = false;
     headerEl.className = "judge-header fail";
-    statusEl.textContent = "✗ COMPILER SERVICE ERROR";
+    statusEl.textContent = "COMPILER SERVICE ERROR";
     logEl.textContent = `Could not reach C++20 execution service: ${err.message}\nTip: You can also run 'python3 tutor.py serve' or 'python3 tutor.py test ${prob.id}' locally.`;
   }
 }
@@ -1077,7 +1103,7 @@ function applyJudgeResult(prob, success, logText, cyclesPerOp, codeBytes, user) 
 
   if (success) {
     headerEl.className = "judge-header pass";
-    statusEl.textContent = `✓ ALL TESTS PASSED — ${prob.id} SOLVED!`;
+    statusEl.textContent = `ALL TESTS PASSED — ${prob.id} SOLVED`;
     document.getElementById("metric-score").textContent = "100.0";
     document.getElementById("metric-cycles").textContent = `${Number(cyclesPerOp).toFixed(2)}`;
     document.getElementById("metric-bytes").textContent = `${codeBytes} B`;
@@ -1092,7 +1118,7 @@ function applyJudgeResult(prob, success, logText, cyclesPerOp, codeBytes, user) 
     renderScoreboard();
   } else {
     headerEl.className = "judge-header fail";
-    statusEl.textContent = `✗ TESTS FAILED — Autolab Scoreboard entry suppressed until 100% pass`;
+    statusEl.textContent = `TESTS FAILED — ${prob.id}`;
     document.getElementById("metric-score").textContent = "0.0";
     document.getElementById("metric-cycles").textContent = "—";
   }
@@ -1200,7 +1226,7 @@ function renderDag() {
     probs.forEach(p => {
       const solved = solvedSet.has(p.id);
       const unlocked = isUnlocked(p);
-      const statusText = solved ? "✓ SOLVED" : (unlocked ? "○ READY" : "🔒 LOCKED");
+      const statusText = solved ? "SOLVED" : (unlocked ? "READY" : "LOCKED");
       const deps = (p.depends_on || []).map(d => d.split("-")[0]).join(", ");
 
       const card = document.createElement("div");
@@ -1211,8 +1237,8 @@ function renderDag() {
       };
       card.innerHTML = `
         <div class="dag-card-top">
-          <span>${p.id.split("-")[0]} &bull; ${statusText}</span>
-          <span>${p.difficulty}</span>
+          <span>${p.id.split("-")[0]} | ${statusText}</span>
+          ${difficultyBadgeHtml(p.difficulty)}
         </div>
         <div class="dag-card-title">${p.title}</div>
         <div class="dag-card-deps">${deps ? `Requires: [${deps}]` : "Root Primitive"}</div>
