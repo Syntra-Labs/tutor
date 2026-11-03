@@ -538,7 +538,8 @@ body.is-resizing, body.is-resizing * {
   background: #ffffff;
   color: #000000;
   cursor: text;
-  user-select: text;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .cursor {
@@ -1683,6 +1684,7 @@ let pendingKeys = "";
 let pendingKeysScheduled = false;
 let currentBufferText = "";
 let cols = 80, rows = 30;
+let lastCharW = 8.1, lastCharH = 19.575;
 
 function computeGridDimensions() {
   const container = document.getElementById("nvim-container");
@@ -1702,6 +1704,8 @@ function computeGridDimensions() {
   container.removeChild(probe);
   if (pRect.width > 0) charW = pRect.width / 20;
   if (pRect.height > 0) charH = pRect.height;
+  lastCharW = charW;
+  lastCharH = charH;
 
   const c = Math.max(30, Math.floor(rect.width / charW));
   const r = Math.max(12, Math.floor((rect.height - 8) / charH));
@@ -1759,10 +1763,11 @@ function primeNeovim() {
   sendRpc("nvim_ui_attach", [cols, rows, { rgb: true, ext_linegrid: true, ext_hlstate: true }]);
   sendRpc("nvim_ui_set_focus", [true]);
   sendRpc("nvim_command", ["set noswapfile nobackup nowritebackup noundofile noreadonly"]);
-  sendRpc("nvim_command", ["set number background=light fillchars=eob:~"]);
+  sendRpc("nvim_command", ["set number background=light fillchars=eob:~ mouse=a mousemodel=extend"]);
   sendRpc("nvim_command", ["set tabstop=4 shiftwidth=4 softtabstop=4 expandtab autoindent smartindent"]);
 
   sendRpc("nvim_command", ["highlight Normal guibg=#ffffff guifg=#000000"]);
+  sendRpc("nvim_command", ["highlight Visual guibg=#dcdcdc guifg=#000000"]);
   sendRpc("nvim_command", ["highlight LineNr guibg=#fafafa guifg=#888888"]);
   sendRpc("nvim_command", ["highlight CursorLineNr guibg=#fafafa guifg=#000000 gui=bold"]);
   sendRpc("nvim_command", ["highlight StatusLine guibg=#f0f0f0 guifg=#000000 gui=none"]);
@@ -2074,7 +2079,62 @@ function translateKey(ev) {
   return null;
 }
 
-gridEl.addEventListener("click", () => gridEl.focus());
+function mouseModifierStr(ev) {
+  let mod = "";
+  if (ev.shiftKey) mod += "S";
+  if (ev.ctrlKey) mod += "C";
+  if (ev.altKey) mod += "A";
+  return mod;
+}
+
+function mouseCoordsToCell(ev) {
+  const rect = gridEl.getBoundingClientRect();
+  const c = Math.max(0, Math.min(cols - 1, Math.floor((ev.clientX - rect.left) / lastCharW)));
+  const r = Math.max(0, Math.min(rows - 1, Math.floor((ev.clientY - rect.top - 4) / lastCharH)));
+  return { row: r, col: c };
+}
+
+function mouseButtonName(btn) {
+  if (btn === 1) return "middle";
+  if (btn === 2) return "right";
+  return "left";
+}
+
+let activeMouseBtn = null;
+
+gridEl.addEventListener("mousedown", (ev) => {
+  gridEl.focus();
+  if (!workerReady) return;
+  ev.preventDefault();
+  activeMouseBtn = mouseButtonName(ev.button);
+  const { row, col } = mouseCoordsToCell(ev);
+  sendRpc("nvim_input_mouse", [activeMouseBtn, "press", mouseModifierStr(ev), 0, row, col]);
+});
+
+window.addEventListener("mousemove", (ev) => {
+  if (!activeMouseBtn || !workerReady) return;
+  const { row, col } = mouseCoordsToCell(ev);
+  sendRpc("nvim_input_mouse", [activeMouseBtn, "drag", mouseModifierStr(ev), 0, row, col]);
+});
+
+window.addEventListener("mouseup", (ev) => {
+  if (!activeMouseBtn || !workerReady) return;
+  const btn = activeMouseBtn;
+  activeMouseBtn = null;
+  const { row, col } = mouseCoordsToCell(ev);
+  sendRpc("nvim_input_mouse", [btn, "release", mouseModifierStr(ev), 0, row, col]);
+});
+
+gridEl.addEventListener("contextmenu", (ev) => ev.preventDefault());
+
+gridEl.addEventListener("wheel", (ev) => {
+  if (!workerReady) return;
+  ev.preventDefault();
+  const { row, col } = mouseCoordsToCell(ev);
+  const dir = ev.deltaY < 0 ? "up" : "down";
+  sendRpc("nvim_input_mouse", ["wheel", dir, mouseModifierStr(ev), 0, row, col]);
+}, { passive: false });
+
 gridEl.addEventListener("keydown", (ev) => {
   if (!document.getElementById("help-drawer").classList.contains("hidden")) {
     if (ev.key === "Escape" || ev.key === "q" || (ev.ctrlKey && ev.key === "[")) {
