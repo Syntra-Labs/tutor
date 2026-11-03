@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
@@ -96,27 +97,36 @@ class TestRunner:
             code_bytes = count_effective_code_bytes(sol_file)
 
             # Determine build & test command
-            if (sandbox_dir / "Makefile").exists():
-                cmd = ["make", "test"]
-            elif (sandbox_dir / "Cargo.toml").exists():
-                cmd = ["cargo", "test", "--release"]
-            elif (sandbox_dir / "test_solution.py").exists():
-                cmd = [sys.executable, "-m", "unittest", "test_solution.py"]
-            elif (sandbox_dir / "harness.cpp").exists():
+            nonce = f"TUTOR_{secrets.token_hex(8)}"
+            if (sandbox_dir / "harness.cpp").exists():
                 # Inject tutor_check.hpp testcase decomposer so local runs have 100% parity with cloud judge
                 tutor_check_src = Path(__file__).parent / "include" / "tutor_check.hpp"
                 if tutor_check_src.exists():
                     shutil.copy2(tutor_check_src, sandbox_dir / "tutor_check.hpp")
-                    harness_file = sandbox_dir / "harness.cpp"
-                    h_code = harness_file.read_text(encoding="utf-8")
-                    if 'tutor_check.hpp' not in h_code:
-                        h_code = re.sub(
-                            r"#include\s+<cassert>",
-                            '#include <cassert>\n#include "tutor_check.hpp"',
-                            h_code,
-                            count=1
-                        )
-                        harness_file.write_text(h_code, encoding="utf-8")
+                harness_file = sandbox_dir / "harness.cpp"
+                h_code = harness_file.read_text(encoding="utf-8")
+                if 'tutor_check.hpp' not in h_code:
+                    h_code = re.sub(
+                        r"#include\s+<cassert>",
+                        '#include <cassert>\n#include "tutor_check.hpp"',
+                        h_code,
+                        count=1
+                    )
+                # Secure benchmark output against user stdout spoofing
+                h_code = re.sub(r"SCOREBOARD_JSON\s*:", f"{nonce}:SCOREBOARD_JSON:", h_code)
+                # Wrap int main() with real_main and emit completion sentinel
+                main_wrapper = (
+                    f'int _tutor_real_main();\n'
+                    f'int main() {{ int r = _tutor_real_main(); if (r == 0) std::cout << "\\n{nonce}:DONE\\n"; return r; }}\n'
+                    f'int _tutor_real_main() {{'
+                )
+                h_code = re.sub(
+                    r"int\s+main\s*\(\s*\)\s*\{",
+                    lambda _: main_wrapper,
+                    h_code,
+                    count=1
+                )
+                harness_file.write_text(h_code, encoding="utf-8")
 
                 bin_path = sandbox_dir / "harness_bin"
                 compile_cmd = [
@@ -141,6 +151,12 @@ class TestRunner:
                         {"score": 0.0, "scoreboard": None},
                     )
                 cmd = [str(bin_path)]
+            elif (sandbox_dir / "Makefile").exists():
+                cmd = ["make", "test"]
+            elif (sandbox_dir / "Cargo.toml").exists():
+                cmd = ["cargo", "test", "--release"]
+            elif (sandbox_dir / "test_solution.py").exists():
+                cmd = [sys.executable, "-m", "unittest", "test_solution.py"]
             else:
                 return (
                     False,
@@ -161,14 +177,22 @@ class TestRunner:
                 elapsed_ns = time.perf_counter_ns() - start_ns
                 runtime_ms = elapsed_ns / 1_000_000.0
                 log = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
-                success = proc.returncode == 0
 
-                # Parse optional SCOREBOARD_JSON line emitted by harness benchmark and TESTCASE_JSON lines
+                # Parse authenticated SCOREBOARD_JSON line emitted by harness benchmark and TESTCASE_JSON lines
                 cycles_per_op = round(runtime_ms * 100.0, 2)
                 clean_lines = []
                 testcases = []
+                done_received = (f"{nonce}:DONE" in log) if ((sandbox_dir / "harness.cpp").exists()) else True
+
                 for line in log.splitlines():
-                    if line.startswith("SCOREBOARD_JSON:"):
+                    if (sandbox_dir / "harness.cpp").exists() and f"{nonce}:SCOREBOARD_JSON:" in line:
+                        try:
+                            payload = json.loads(line.split(f"{nonce}:SCOREBOARD_JSON:", 1)[1].strip())
+                            if "cycles_per_op" in payload:
+                                cycles_per_op = round(float(payload["cycles_per_op"]), 3)
+                        except Exception:
+                            pass
+                    elif not (sandbox_dir / "harness.cpp").exists() and line.startswith("SCOREBOARD_JSON:"):
                         try:
                             payload = json.loads(line.split("SCOREBOARD_JSON:", 1)[1].strip())
                             if "cycles_per_op" in payload:
@@ -181,11 +205,17 @@ class TestRunner:
                             testcases.append(tc)
                         except Exception:
                             pass
+                    elif (sandbox_dir / "harness.cpp").exists() and f"{nonce}:DONE" in line:
+                        continue
                     else:
                         clean_lines.append(line)
                 clean_log = "\n".join(clean_lines).strip()
 
-                success = (proc.returncode == 0) and (all(c.get("passed", False) for c in testcases) if testcases else True)
+                if not done_received:
+                    success = False
+                    clean_log = (clean_log + "\n[Security Error]: Test harness did not reach normal completion (exit(0) bypass or premature termination detected).").strip()
+                else:
+                    success = (proc.returncode == 0) and len(testcases) > 0 and all(c.get("passed", False) for c in testcases)
 
                 if success:
                     score = 100.0

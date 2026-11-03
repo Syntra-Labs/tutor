@@ -106,7 +106,7 @@ def cmd_dag(args):
             if dep in children_map:
                 children_map[dep].append(p["id"])
 
-    print(f"\n{BOLD}{CYAN}=== PREREQUISITE SKILL-TREE DAG (74 PROBLEMS) ==={RESET}\n")
+    print(f"\n{BOLD}{CYAN}=== PREREQUISITE SKILL-TREE DAG ({len(problems)} PROBLEMS) ==={RESET}\n")
     current_track = None
     for p in problems:
         track = p.get("track", p.get("category", "Systems"))
@@ -530,11 +530,12 @@ def cmd_serve(args):
             self.end_headers()
             self.wfile.write(data)
 
+    host = getattr(args, "host", "127.0.0.1")
     print(f"\n{BOLD}{CYAN}=== SYNTRA TUTOR — NEOVIM WASM STUDIO & LOCAL JUDGE ==={RESET}")
-    print(f"  • Studio URL : {GREEN}{BOLD}http://localhost:{port}{RESET}")
+    print(f"  • Studio URL : {GREEN}{BOLD}http://{host}:{port}{RESET}")
     print(f"  • Editor     : Genuine Neovim WebAssembly (:w, :Run, <Space>r, <F5>)")
     print(f"  • Judge      : Local g++ -O3 -std=c++20 (/api/judge) + Cloud Godbolt Fallback\n")
-    with http.server.ThreadingHTTPServer(("0.0.0.0", port), TutorStudioHandler) as httpd:
+    with http.server.ThreadingHTTPServer((host, port), TutorStudioHandler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
@@ -635,7 +636,7 @@ def main(argv=None):
     p_list.set_defaults(func=cmd_list)
 
     # dag / tree
-    p_dag = subparsers.add_parser("dag", aliases=["tree"], help="Visualize the 74-problem Prerequisite Skill-Tree DAG")
+    p_dag = subparsers.add_parser("dag", aliases=["tree"], help="Visualize the Prerequisite Skill-Tree DAG")
     p_dag.set_defaults(func=cmd_dag)
 
     # pick
@@ -673,6 +674,7 @@ def main(argv=None):
     # serve
     p_srv = subparsers.add_parser("serve", aliases=["web", "studio"], help="Launch Neovim WASM Studio + Local C++20 Judge in browser")
     p_srv.add_argument("-p", "--port", type=int, default=8080, help="HTTP port (default: 8080)")
+    p_srv.add_argument("--host", default="127.0.0.1", help="Host interface to bind to (default: 127.0.0.1 for local security)")
     p_srv.set_defaults(func=cmd_serve)
 
     # ci-grade-pr

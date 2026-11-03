@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Syntra Tutor — 74-Problem Math & Systems Studio (Neovim WASM + Autolab Judge)</title>
+<title>Syntra Tutor — 76-Problem Math & Systems Studio (Neovim WASM + Autolab Judge)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -684,11 +684,11 @@ body.is-resizing, body.is-resizing * {
     <div class="studio-topbar">
       <div class="brand-group">
         <span class="brand-pill">SYNTRA // TUTOR</span>
-        <span id="top-progress">0 / 74 SOLVED</span>
+        <span id="top-progress">0 / 76 SOLVED</span>
       </div>
       <div class="nav-tabs">
         <button class="tab-btn active" id="tab-btn-spec" onclick="switchTab('spec')">Description</button>
-        <button class="tab-btn" id="tab-btn-dag" onclick="switchTab('dag')">Problems (74)</button>
+        <button class="tab-btn" id="tab-btn-dag" onclick="switchTab('dag')">Problems (76)</button>
         <button class="tab-btn" id="tab-btn-board" onclick="switchTab('board')">Scoreboard</button>
       </div>
     </div>
@@ -735,10 +735,10 @@ body.is-resizing, body.is-resizing * {
         </div>
       </div>
 
-      <!-- TAB 2: 74-PROBLEM PREREQUISITE SKILL-TREE DAG -->
+      <!-- TAB 2: 76-PROBLEM PREREQUISITE SKILL-TREE DAG -->
       <div id="tab-dag" class="hidden">
         <div class="filter-bar">
-          <input type="search" id="dag-search" placeholder="Filter 74 problems by ID, title, tag..." oninput="renderDag()" />
+          <input type="search" id="dag-search" placeholder="Filter 76 problems by ID, title, tag..." oninput="renderDag()" />
           <select id="dag-track-filter" onchange="renderDag()">
             <option value="">All 8 Tracks</option>
           </select>
@@ -755,7 +755,7 @@ body.is-resizing, body.is-resizing * {
       <div id="tab-board" class="hidden">
         <div class="filter-bar">
           <select id="board-scope-select" onchange="renderScoreboard()" style="width:100%;">
-            <option value="__global__">Global Standings (All 74 Problems)</option>
+            <option value="__global__">Global Standings (All 76 Problems)</option>
           </select>
         </div>
         <div id="board-colspec-note" style="font-family:var(--mono);font-size:11px;color:var(--fg-dim);margin-bottom:8px;"></div>
@@ -799,9 +799,9 @@ body.is-resizing, body.is-resizing * {
   :w                       Save buffer &amp; immediately run the locked C++20 Judge!
   :Run, :R                 Compile &amp; run solution.hpp against locked harness.cpp.
   &lt;Space&gt;r, &lt;F5&gt;, &lt;C-CR&gt;   Compile &amp; run from Normal or Insert mode.
-  :Next, &lt;Space&gt;n          Switch to the next problem in the 74-problem catalog.
+  :Next, &lt;Space&gt;n          Switch to the next problem in the 76-problem catalog.
   :Prev, &lt;Space&gt;p          Switch to the previous problem.
-  :DAG, &lt;Space&gt;d           Open the 74-Problem Prerequisite Skill-Tree DAG.
+  :DAG, &lt;Space&gt;d           Open the 76-Problem Prerequisite Skill-Tree DAG.
   :Board, &lt;Space&gt;b         Open the Autolab Scoreboard for the current problem.
   :Reset                   Reset buffer back to the clean starter solution_stub.hpp.
   :Manual, &lt;Space&gt;m, &lt;F1&gt;  Toggle this reference manual.
@@ -1232,9 +1232,17 @@ inline void run_assert(const char* expr_str, const EvalResult& res) {
                   << "\\",\\"expected\\":\\"" << json_escape(res.expected) << "\\"}\\n";
     }
 }
+
+inline void poison_exit(int code) {
+    std::cerr << "\\n[Security Error]: User solution called exit(" << code << "). Solution code must return to the test harness normally.\\n";
+    std::abort();
+}
 } // namespace _tutor_check
 #undef assert
 #define assert(expr) ::_tutor_check::run_assert(#expr, (::_tutor_check::Decomposer{} <= expr))
+#define exit(c) ::_tutor_check::poison_exit(c)
+#define quick_exit(c) ::_tutor_check::poison_exit(c)
+#define _Exit(c) ::_tutor_check::poison_exit(c)
 `;
 
 let lastTestCases = [];
@@ -1371,12 +1379,17 @@ async function executeJudge(codeStr) {
   try {
     engineEl.textContent = "GitHub Pages Cloud g++ 13.2 (-O3 -std=c++20)";
     const harnessSrc = prob.harness || "";
-    // Compile exactly like the local runner (g++ -I. harness.cpp): solution.hpp is shipped
-    // as a real header file, untouched. Only the testcase inspector header is included right
-    // after <cassert> so its assert() override takes precedence over the standard one.
-    const harnessWithChecks = harnessSrc.replace(
+    const nonce = "TUTOR_" + Math.random().toString(36).slice(2) + "_" + Date.now();
+    let harnessWithChecks = harnessSrc.replace(
       /#include\s+<cassert>/,
       `#include <cassert>\n#include "tutor_check.hpp"`
+    );
+    // Secure benchmark cycles against user stdout spoofing
+    harnessWithChecks = harnessWithChecks.replace(/SCOREBOARD_JSON\s*:/g, `${nonce}:SCOREBOARD_JSON:`);
+    // Wrap int main() with real_main and emit completion sentinel
+    harnessWithChecks = harnessWithChecks.replace(
+      /int\s+main\s*\(\s*\)\s*\{/,
+      `int _tutor_real_main();\nint main() { int r = _tutor_real_main(); if (r == 0) std::cout << "\\n${nonce}:DONE\\n"; return r; }\nint _tutor_real_main() {`
     );
 
     const t0 = performance.now();
@@ -1410,16 +1423,17 @@ async function executeJudge(codeStr) {
     const stripAnsi = (s) => String(s || "").replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "");
     const buildStderr = stripAnsi((gbData.buildResult?.stderr || []).map(x => x.text).join("\n")).trim();
     const execStdout = stripAnsi((gbData.stdout || []).map(x => x.text).join("\n"));
-    const execStderr = stripAnsi((gbData.stderr || []).map(x => x.text).join("\n")).trim();
+    let execStderr = stripAnsi((gbData.stderr || []).map(x => x.text).join("\n")).trim();
     const buildOk = (gbData.buildResult?.code === 0);
     const exitCode = gbData.code;
+    const doneReceived = execStdout.includes(`${nonce}:DONE`);
 
     let cyclesPerOp = Number((gbData.execTime || elapsedMs) * 10.0).toFixed(2);
     const testCases = [];
     for (const line of execStdout.split(/\r?\n/)) {
-      if (line.startsWith("SCOREBOARD_JSON:")) {
+      if (line.includes(`${nonce}:SCOREBOARD_JSON:`)) {
         try {
-          const parsed = JSON.parse(line.slice("SCOREBOARD_JSON:".length).trim());
+          const parsed = JSON.parse(line.split(`${nonce}:SCOREBOARD_JSON:`, 2)[1].trim());
           if (parsed.cycles_per_op !== undefined) {
             cyclesPerOp = Number(parsed.cycles_per_op).toFixed(2);
           }
@@ -1431,7 +1445,12 @@ async function executeJudge(codeStr) {
       }
     }
 
-    const success = buildOk && (exitCode === 0) && Boolean(gbData.didExecute) && testCases.every(c => c.passed);
+    if (!doneReceived && buildOk) {
+      execStderr = (execStderr ? execStderr + "\n" : "") +
+        "[Security Error]: Test harness did not reach normal completion (exit(0) bypass or premature termination detected).";
+    }
+
+    const success = buildOk && (exitCode === 0) && Boolean(gbData.didExecute) && doneReceived && (testCases.length > 0) && testCases.every(c => c.passed);
     isJudging = false;
     applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, Number(cyclesPerOp), codeBytes, user);
   } catch (err) {
@@ -1640,7 +1659,7 @@ function renderScoreboard() {
       <tr>
         <td><b>#${r.rank}</b></td>
         <td><b>@${r.user}</b></td>
-        <td>${r.solved_count} / ${catalog.length || 74}</td>
+        <td>${r.solved_count} / ${catalog.length || 76}</td>
         <td>${r.first_place_count}</td>
         <td>${Number(r.total_score).toFixed(1)}</td>
         <td>${Number(r.total_cycles).toFixed(2)}</td>

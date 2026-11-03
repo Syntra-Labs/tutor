@@ -95,7 +95,7 @@ def load_leaderboard(path: Path = LEADERBOARD_FILE) -> Dict[str, Any]:
 
 def recompute_global_rankings(problems_board: Dict[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
     """
-    Aggregates per-problem Autolab boards into a global ranking across all 74 problems:
+    Aggregates per-problem Autolab boards into a global ranking across all catalog problems:
     - Primary sort: Total Problems Solved (DESC)
     - Secondary sort: Gold Medals / Rank #1 finishes (DESC)
     - Tertiary sort: Total Score (DESC)
@@ -212,7 +212,7 @@ def verify_pr_isolation(changed_files: List[str], github_actor: str) -> Tuple[bo
 
 def export_static_site_data() -> Tuple[Path, Path]:
     """
-    Exports `docs/data/catalog.json` (74-problem curriculum + DAG + specs) and
+    Exports `docs/data/catalog.json` (full curriculum + DAG + specs) and
     initializes `docs/data/leaderboard.json` if not present.
     """
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)

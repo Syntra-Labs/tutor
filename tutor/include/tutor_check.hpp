@@ -143,6 +143,14 @@ inline void run_assert(const char* expr_str, const EvalResult& res) {
                   << "\",\"expected\":\"" << json_escape(res.expected) << "\"}\n";
     }
 }
+
+inline void poison_exit(int code) {
+    std::cerr << "\n[Security Error]: User solution called exit(" << code << "). Solution code must return to the test harness normally.\n";
+    std::abort();
+}
 } // namespace _tutor_check
 #undef assert
 #define assert(expr) ::_tutor_check::run_assert(#expr, (::_tutor_check::Decomposer{} <= expr))
+#define exit(c) ::_tutor_check::poison_exit(c)
+#define quick_exit(c) ::_tutor_check::poison_exit(c)
+#define _Exit(c) ::_tutor_check::poison_exit(c)
