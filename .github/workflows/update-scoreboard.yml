@@ -5,6 +5,10 @@ on:
     workflows: ["Grade Pull Request (Untrusted Sandbox)"]
     types:
       - completed
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'submissions/**'
   workflow_dispatch:
 
 permissions:
@@ -18,14 +22,15 @@ concurrency:
 
 jobs:
   merge-scoreboard:
-    # Only run if Workflow 1 succeeded (100% of tests passed & PR isolation verified)
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Only run if Workflow 1 succeeded (100% of tests passed & PR isolation verified) or direct push
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout trusted main branch (never checks out untrusted PR code)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 2
 
       - name: Download verified scoreboard_entries.json from Workflow 1
         if: ${{ github.event_name == 'workflow_run' }}
@@ -52,10 +57,22 @@ jobs:
             fs.writeFileSync('/tmp/artifact.zip', Buffer.from(download.data));
 
       - name: Merge into Autolab Leaderboard & Export GitHub Pages Data
+        env:
+          PYTHONPATH: .
         run: |
           if [ -f /tmp/artifact.zip ]; then
             unzip -o /tmp/artifact.zip -d /tmp/artifact_out
             python3 -m tutor.cli ci-merge-scoreboard --input /tmp/artifact_out/scoreboard_entries.json
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+            USERS=$(echo "$CHANGED" | grep '^submissions/' | cut -d/ -f2 | sort -u || true)
+            for U in $USERS; do
+              python3 -m tutor.cli ci-grade-pr --user "$U" --commit-sha "${{ github.sha }}" --output /tmp/direct_entries_${U}.json $CHANGED || true
+              if [ -f /tmp/direct_entries_${U}.json ]; then
+                python3 -m tutor.cli ci-merge-scoreboard --input /tmp/direct_entries_${U}.json
+              fi
+            done
+            python3 -m tutor.cli export-pages
           else
             python3 -m tutor.cli export-pages
           fi

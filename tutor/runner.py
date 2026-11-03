@@ -103,6 +103,21 @@ class TestRunner:
             elif (sandbox_dir / "test_solution.py").exists():
                 cmd = [sys.executable, "-m", "unittest", "test_solution.py"]
             elif (sandbox_dir / "harness.cpp").exists():
+                # Inject tutor_check.hpp testcase decomposer so local runs have 100% parity with cloud judge
+                tutor_check_src = Path(__file__).parent / "include" / "tutor_check.hpp"
+                if tutor_check_src.exists():
+                    shutil.copy2(tutor_check_src, sandbox_dir / "tutor_check.hpp")
+                    harness_file = sandbox_dir / "harness.cpp"
+                    h_code = harness_file.read_text(encoding="utf-8")
+                    if 'tutor_check.hpp' not in h_code:
+                        h_code = re.sub(
+                            r"#include\s+<cassert>",
+                            '#include <cassert>\n#include "tutor_check.hpp"',
+                            h_code,
+                            count=1
+                        )
+                        harness_file.write_text(h_code, encoding="utf-8")
+
                 bin_path = sandbox_dir / "harness_bin"
                 compile_cmd = [
                     "g++",
@@ -148,9 +163,10 @@ class TestRunner:
                 log = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
                 success = proc.returncode == 0
 
-                # Parse optional SCOREBOARD_JSON line emitted by harness benchmark
+                # Parse optional SCOREBOARD_JSON line emitted by harness benchmark and TESTCASE_JSON lines
                 cycles_per_op = round(runtime_ms * 100.0, 2)
                 clean_lines = []
+                testcases = []
                 for line in log.splitlines():
                     if line.startswith("SCOREBOARD_JSON:"):
                         try:
@@ -159,9 +175,17 @@ class TestRunner:
                                 cycles_per_op = round(float(payload["cycles_per_op"]), 3)
                         except Exception:
                             pass
+                    elif line.startswith("TESTCASE_JSON:"):
+                        try:
+                            tc = json.loads(line.split("TESTCASE_JSON:", 1)[1].strip())
+                            testcases.append(tc)
+                        except Exception:
+                            pass
                     else:
                         clean_lines.append(line)
                 clean_log = "\n".join(clean_lines).strip()
+
+                success = (proc.returncode == 0) and (all(c.get("passed", False) for c in testcases) if testcases else True)
 
                 if success:
                     score = 100.0
@@ -180,6 +204,7 @@ class TestRunner:
                         "code_bytes": code_bytes,
                         "runtime_ms": round(runtime_ms, 3),
                         "scoreboard": scoreboard_vec,
+                        "testcases": testcases,
                     }
                 else:
                     # Autolab zero_all_scoreboards rule: failing submissions never enter the scoreboard
@@ -189,6 +214,7 @@ class TestRunner:
                         "code_bytes": code_bytes,
                         "runtime_ms": round(runtime_ms, 3),
                         "scoreboard": None,
+                        "testcases": testcases,
                     }
 
                 return success, clean_log, runtime_ms, metrics

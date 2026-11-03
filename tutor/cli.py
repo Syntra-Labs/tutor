@@ -207,6 +207,20 @@ def cmd_test(args):
     print(log)
     print("=" * 68)
 
+    testcases = metrics.get("testcases") or []
+    if testcases:
+        print(f"\n{BOLD}Testcases ({len(testcases)} evaluated):{RESET}")
+        for idx, tc in enumerate(testcases, 1):
+            passed = tc.get("passed", False)
+            mark = f"{GREEN}✓ PASS{RESET}" if passed else f"{RED}✗ FAIL{RESET}"
+            inp = tc.get("input", "")
+            out = tc.get("output", "")
+            exp = tc.get("expected", "")
+            print(f"  Case {idx}: {mark}  {CYAN}{inp}{RESET}")
+            if not passed:
+                print(f"    • Actual Output:   {RED}{out}{RESET}")
+                print(f"    • Expected Output: {GREEN}{exp}{RESET}")
+
     if success:
         vec = metrics.get("scoreboard") or [100.0, 0.0, 0]
         print(f"\n{GREEN}{BOLD}✓ ALL TESTS PASSED!{RESET} ({runtime_ms:.2f}ms)")
