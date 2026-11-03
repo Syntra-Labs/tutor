@@ -463,6 +463,12 @@ body.is-resizing, body.is-resizing * {
   background: #000000 !important;
   color: #ffffff !important;
 }
+.cursor-bar {
+  box-shadow: inset 2px 0 0 0 #000000 !important;
+}
+.cursor-underline {
+  box-shadow: inset 0 -2px 0 0 #000000 !important;
+}
 
 .nvim-statusline {
   height: 28px;
@@ -1617,6 +1623,10 @@ function renderGrid(cells = [], cursor = null, cursorHlId = 0, mode = "normal", 
 
   cursorBadge.textContent = `ln ${row + 1}, col ${col + 1}`;
   updateModeBadge(mode);
+  const modeLower = String(mode || "normal").toLowerCase();
+  const isBarCursor = modeLower.includes("insert") || modeLower.includes("cmd");
+  const isUnderlineCursor = modeLower.includes("replace");
+  const cursorClass = isBarCursor ? "cursor-bar" : (isUnderlineCursor ? "cursor-underline" : "cursor");
 
   let html = "";
   let inBlockComment = false;
@@ -1653,14 +1663,15 @@ function renderGrid(cells = [], cursor = null, cursorHlId = 0, mode = "normal", 
       const isCommentCell = !isStatusOrCmdRow && (inLineComment || inBlockComment);
       const ch = escapeChar(rawCh);
       const isCursor = (r === row && c === col);
-      const attr = isCursor ? getHl(hlMap, cursorHlId, true) : getHl(hlMap, cell.hl, false);
+      const useBlockCursor = isCursor && cursorClass === "cursor";
+      const attr = useBlockCursor ? getHl(hlMap, cursorHlId, true) : getHl(hlMap, cell.hl, false);
       let style = styleFromHl(attr);
-      if (isCommentCell && !isCursor && (!style || style === "color:#000000")) {
+      if (isCommentCell && !useBlockCursor && (!style || style === "color:#000000")) {
         style = "color:#999999;font-style:italic";
       }
 
       if (isCursor) {
-        html += `<span class="cursor" style="${style}">${ch}</span>`;
+        html += `<span class="${cursorClass}" style="${style}">${ch}</span>`;
       } else if (style) {
         html += `<span style="${style}">${ch}</span>`;
       } else {
@@ -1673,7 +1684,7 @@ function renderGrid(cells = [], cursor = null, cursorHlId = 0, mode = "normal", 
     }
     if (r === row && col >= lineLen) {
       html += " ".repeat(col - lineLen);
-      html += `<span class="cursor"> </span>`;
+      html += `<span class="${cursorClass}"> </span>`;
     }
     if (r < rowsArr.length - 1) html += "\n";
   }
