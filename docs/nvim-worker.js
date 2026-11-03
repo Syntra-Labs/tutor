@@ -175,9 +175,9 @@ async function startNvim({ cols, rows, assetVersion }) {
   const stdoutFd = new SinkFd(handleStdout);
   const stderrFd = new SinkFd(handleStderr);
 
-  const preopen = new RootedPreopenDirectory("nvim", fsRoot.contents);
+  const preopen = new RootedPreopenDirectory("/nvim", fsRoot.contents);
   const tmp = fsRoot.contents.get("tmp")?.contents || new Map();
-  const preopenTmp = new RootedPreopenDirectory("tmp", tmp);
+  const preopenTmp = new RootedPreopenDirectory("/tmp", tmp);
   const preopenDot = new RootedPreopenDirectory(".", fsRoot.contents);
   const preopenRoot = new RootedPreopenDirectory("/", fsRoot.contents);
 
@@ -625,6 +625,7 @@ function handleRedraw(events) {
           const [id, rgbAttr] = entry;
           uiState.defineHl(id, rgbAttr || {});
         }
+        dirty = true;
         break;
       }
       case "mode_change": {
@@ -653,6 +654,8 @@ function sendDraw() {
     lines: snapshot.lines,
     cells: snapshot.cells,
     cursor: snapshot.cursor,
+    cursorHlId: snapshot.cursorHlId,
+    cursorShape: snapshot.cursorShape,
     mode: snapshot.mode,
     hls: snapshot.hls,
   });
@@ -672,6 +675,7 @@ class UiState {
     this.cursorStyleEnabled = false;
     this.modeInfo = [];
     this.cursorHlId = 0;
+    this.cursorShape = "block";
     this.hls = new Map();
     this.hls.set(0, { foreground: null, background: null, reverse: false, blend: 0 });
   }
@@ -811,7 +815,12 @@ class UiState {
     this.hls.set(hlId, {
       foreground: toHex(rgbAttr.foreground),
       background: toHex(rgbAttr.background),
+      special: toHex(rgbAttr.special),
       reverse: Boolean(rgbAttr.reverse),
+      italic: Boolean(rgbAttr.italic),
+      bold: Boolean(rgbAttr.bold),
+      underline: Boolean(rgbAttr.underline || rgbAttr.undercurl),
+      strikethrough: Boolean(rgbAttr.strikethrough),
       blend: Number(rgbAttr.blend) || 0,
     });
   }
@@ -825,6 +834,7 @@ class UiState {
         cursor: { grid: this.defaultGrid, row: 0, col: 0 },
         mode: this.mode,
         cursorHlId: this.cursorHlId,
+        cursorShape: this.cursorShape,
         hls: Object.fromEntries(this.hls),
       };
     }
@@ -838,6 +848,7 @@ class UiState {
       cursor: { grid: this.cursor.grid, row, col },
       mode: this.mode,
       cursorHlId: this.cursorHlId,
+      cursorShape: this.cursorShape,
       hls: Object.fromEntries(this.hls),
     };
   }
@@ -859,13 +870,17 @@ class UiState {
   #makeCell(ch, hl) { return { ch, hl: Number.isFinite(Number(hl)) ? Number(hl) : 0 }; }
 
   #updateCursorHl() {
-    if (!this.cursorStyleEnabled || !Array.isArray(this.modeInfo)) {
+    if (!Array.isArray(this.modeInfo)) {
       this.cursorHlId = 0;
+      this.cursorShape = "block";
       return;
     }
     const info = this.modeInfo[this.modeIdx] || null;
     const attrId = info && info.attr_id !== undefined ? info.attr_id : 0;
     this.cursorHlId = Number.isFinite(Number(attrId)) ? Number(attrId) : 0;
+    if (info && typeof info.cursor_shape === "string") {
+      this.cursorShape = info.cursor_shape;
+    }
   }
 }
 
@@ -967,16 +982,8 @@ function buildFs(entries) {
   ensureDir(root, "home/.config");
   ensureDir(root, "home/.local/share");
   ensureDir(root, "home/.local/state");
-  const starterCode = `#include <sphere.hpp>
-#include <cmath>
-
-void path() {
-    // Steer towards the target
-    // Math functions like pow(), sqrt(), sin() are available
-    forward(60.0);
-}
-`;
-  root.contents.set("path.cpp", new File(new TextEncoder().encode(starterCode)));
+  root.contents.set("nvim", root);
+  root.contents.set("solution.hpp", new File(new TextEncoder().encode("#pragma once\n")));
 
   return root;
 }
