@@ -1,0 +1,15 @@
+{
+  "id": "053-e8-16root-orbit-bfs",
+  "title": "16-Root E8 Orbit Generation & Transport BFS Table",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "E8 Lattice & Discrete Routing",
+  "difficulty": "Hard",
+  "depends_on": ["052-spinor-group-64-closure"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["e8-lattice", "orbit-graph", "bfs", "holonomy-transport"]
+}

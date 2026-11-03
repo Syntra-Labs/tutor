@@ -1,0 +1,15 @@
+{
+  "id": "067-symbolic-ast-evaluator",
+  "title": "Recursive Descent Symbolic Expression Parser & Evaluator",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["recursive-descent", "symbolic-ast", "expression-parser", "evaluator"]
+}

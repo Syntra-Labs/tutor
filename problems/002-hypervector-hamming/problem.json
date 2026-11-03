@@ -1,8 +1,15 @@
 {
   "id": "002-hypervector-hamming",
   "title": "8192-bit Hypervector Hamming Distance",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Geometric Systems & Compute",
   "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
   "languages": ["cpp"],
   "tags": ["bit-manipulation", "popcount", "hypervector", "simd"]
 }

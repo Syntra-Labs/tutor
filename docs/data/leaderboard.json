@@ -1,0 +1,61 @@
+{
+  "updated_at": "2026-11-03T19:52:51.811877+00:00",
+  "problems": {
+    "002-hypervector-hamming": [
+      {
+        "user": "syntra-baseline",
+        "problem_id": "002-hypervector-hamming",
+        "lang": "cpp",
+        "score": 100.0,
+        "scoreboard": [
+          100.0,
+          38676.13,
+          482
+        ],
+        "submitted_at": "2026-11-03T19:45:19.659182+00:00",
+        "commit_sha": "abc1234",
+        "rank": 1
+      },
+      {
+        "user": "nvim-wasm-user",
+        "problem_id": "002-hypervector-hamming",
+        "lang": "cpp",
+        "score": 100.0,
+        "scoreboard": [
+          100.0,
+          40022.58,
+          482
+        ],
+        "submitted_at": "2026-11-03T19:52:51.805179+00:00",
+        "commit_sha": "local",
+        "rank": 2
+      }
+    ]
+  },
+  "global_rankings": [
+    {
+      "user": "syntra-baseline",
+      "solved_count": 1,
+      "first_place_count": 1,
+      "total_score": 100.0,
+      "total_cycles": 38676.13,
+      "total_bytes": 482,
+      "solved_problems": [
+        "002-hypervector-hamming"
+      ],
+      "rank": 1
+    },
+    {
+      "user": "nvim-wasm-user",
+      "solved_count": 1,
+      "first_place_count": 0,
+      "total_score": 100.0,
+      "total_cycles": 40022.58,
+      "total_bytes": 482,
+      "solved_problems": [
+        "002-hypervector-hamming"
+      ],
+      "rank": 2
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "057-icosian-snap-cayley",
+  "title": "600-Cell Voronoi Snapper & 120x120 Cayley Table",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "600-Cell, Icosians & H4",
+  "difficulty": "Hard",
+  "depends_on": ["056-icosian-600cell-generator"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["600-cell", "icosians", "cayley-table", "voronoi-snap", "spin-weights"]
+}

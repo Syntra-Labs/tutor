@@ -1,0 +1,15 @@
+{
+  "id": "030-golden-integers-pow",
+  "title": "Z[phi] Binary Exponentiation & Fibonacci Identity",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Easy",
+  "depends_on": ["029-golden-integers-norm-inv"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["fibonacci", "binary-exponentiation", "golden-ratio", "units", "ring"]
+}

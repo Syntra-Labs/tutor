@@ -1,0 +1,15 @@
+{
+  "id": "016-bipolar-byte-lut",
+  "title": "Precomputed 256x8 Bipolar Byte Expansion LUT",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["lut", "bipolar", "constexpr", "simd", "hypervector"]
+}

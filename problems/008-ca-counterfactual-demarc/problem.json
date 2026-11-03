@@ -1,0 +1,15 @@
+{
+  "id": "008-ca-counterfactual-demarc",
+  "title": "CA 184 / CA 30 Counterfactual Match-Inversion Demarcator",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Cellular Automata & SWAR",
+  "difficulty": "Medium",
+  "depends_on": ["004-ca184-demarcation", "006-ca30-chaos-step"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["cellular-automata", "rule-184", "rule-30", "demarcation", "counterfactual"]
+}

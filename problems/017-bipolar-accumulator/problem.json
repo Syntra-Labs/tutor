@@ -1,0 +1,15 @@
+{
+  "id": "017-bipolar-accumulator",
+  "title": "Bipolar Majority-Vote Accumulator & Unrolled Projection",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Medium",
+  "depends_on": ["016-bipolar-byte-lut"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["vsa", "bundling", "majority-vote", "bipolar", "simd"]
+}

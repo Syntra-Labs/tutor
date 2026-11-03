@@ -1,0 +1,15 @@
+{
+  "id": "012-ternary-dot-product",
+  "title": "Multiplier-Free Ternary Dot Product",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Balanced Ternary & SWAR",
+  "difficulty": "Easy",
+  "depends_on": ["010-swar-trit-multiply"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["balanced-ternary", "dot-product", "popcount", "multiplier-free"]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "027-phase-spike-stream-chunker",
+  "title": "Grammar-Free Byte-Markov + CA 184/30 Stream Chunker",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Hard",
+  "depends_on": ["008-ca-counterfactual-demarc", "024-dirichlet-byte-markov"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["chunker", "cellular-automata", "markov", "surprisal", "demarcation"]
+}

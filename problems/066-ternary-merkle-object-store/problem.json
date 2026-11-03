@@ -1,0 +1,15 @@
+{
+  "id": "066-ternary-merkle-object-store",
+  "title": "Canonical Ternary Merkle Object Store (fold & range)",
+  "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Hard",
+  "depends_on": ["005-fnv1a-splitmix64"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["ternary-merkle-dag", "content-addressable", "deduplication", "range-read"]
+}

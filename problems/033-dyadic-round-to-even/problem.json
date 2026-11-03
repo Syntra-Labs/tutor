@@ -1,0 +1,15 @@
+{
+  "id": "033-dyadic-round-to-even",
+  "title": "Bounded-Precision Dyadic Dy<P> Canonicalization & Rounding",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Hard",
+  "depends_on": ["032-u256-exact-primitives"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["dyadic", "round-to-even", "canonical", "multiprecision", "exact-arithmetic"]
+}

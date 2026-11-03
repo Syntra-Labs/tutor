@@ -1,0 +1,15 @@
+{
+  "id": "043-quat-hamilton-rotor",
+  "title": "Non-Commutative Hamilton Product & Axis-Angle Rotor",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Easy",
+  "depends_on": ["042-quat-norm-conjugate"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["quaternions", "hamilton-product", "rotor", "so3", "non-commutative"]
+}

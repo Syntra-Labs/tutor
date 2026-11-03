@@ -1,0 +1,15 @@
+{
+  "id": "070-tree-rotor-dag-folder",
+  "title": "Non-Commutative Tree Rotor DAG Folder on S^3",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Hard",
+  "depends_on": ["043-quat-hamilton-rotor", "069-hashcons-expr-unification"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["tree-rotor", "quaternion-s3", "non-commutative", "dag-folding"]
+}

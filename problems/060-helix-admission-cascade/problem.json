@@ -1,0 +1,15 @@
+{
+  "id": "060-helix-admission-cascade",
+  "title": "Two-Stage Helix Signature + Admission Pre-Filter Cascade",
+  "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Medium",
+  "depends_on": ["019-helix-signature-256", "059-e8-shortlist-admission"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["helix-signature", "shortlist-cascade", "nth-element", "l2-cache-routing"]
+}

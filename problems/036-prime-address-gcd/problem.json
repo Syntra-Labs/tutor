@@ -1,0 +1,15 @@
+{
+  "id": "036-prime-address-gcd",
+  "title": "Prime Token Factor Set & Exact GCD Set Intersection",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["primes", "gcd", "unique-factorization", "set-intersection", "number-theory"]
+}

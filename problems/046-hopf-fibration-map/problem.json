@@ -1,0 +1,15 @@
+{
+  "id": "046-hopf-fibration-map",
+  "title": "Hopf Fibration Projection (S3 to S2) & Fibre Invariance",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Hopf Fibration & Fibre Bundles",
+  "difficulty": "Medium",
+  "depends_on": ["043-quat-hamilton-rotor"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hopf-fibration", "s3-to-s2", "fibre-bundle", "u1-gauge-invariance"]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "039-spherical-haversine",
+  "title": "Great-Circle Haversine Distance on S2",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Spherical Geometry",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["sphere", "haversine", "geodesic", "trigonometry"]
+}

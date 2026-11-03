@@ -1,0 +1,15 @@
+{
+  "id": "015-hypervec-cyclic-rotl",
+  "title": "8192-Bit Cross-Word Cyclic Permutation",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Medium",
+  "depends_on": ["013-hypervec-seed-zscore"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["vsa", "permutation", "cyclic-shift", "hypervector", "bit-manipulation"]
+}

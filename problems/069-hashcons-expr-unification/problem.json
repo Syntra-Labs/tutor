@@ -1,0 +1,15 @@
+{
+  "id": "069-hashcons-expr-unification",
+  "title": "Hash-Consed Lean.Expr DAG & First-Order Unification Gate",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Hard",
+  "depends_on": ["068-alpha-premise-canonicalizer"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hash-consing", "dag-unification", "lean-expr", "admissibility-gate"]
+}

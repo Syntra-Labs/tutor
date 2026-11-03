@@ -1,0 +1,15 @@
+{
+  "id": "065-bell15-hazard-repulsor",
+  "title": "Bell-15 Counterfactual Task-Split & +3sigma Hazard Repulsor",
+  "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Medium",
+  "depends_on": ["064-lucidity-delta-readout"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["counterfactual-split", "hazard-repulsor", "bell-margin", "task-placement"]
+}

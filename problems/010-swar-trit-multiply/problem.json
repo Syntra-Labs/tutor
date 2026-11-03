@@ -1,0 +1,15 @@
+{
+  "id": "010-swar-trit-multiply",
+  "title": "Branchless SWAR Balanced Ternary Multiplication",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Balanced Ternary & SWAR",
+  "difficulty": "Easy",
+  "depends_on": ["009-packed-trit-encoding"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["balanced-ternary", "swar", "bit-manipulation", "monoid"]
+}

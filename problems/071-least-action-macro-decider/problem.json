@@ -1,0 +1,15 @@
+{
+  "id": "071-least-action-macro-decider",
+  "title": "Least-Action Macro-Action Decider",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Medium",
+  "depends_on": ["044-quat-geodesic-dist", "070-tree-rotor-dag-folder"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["macro-decider", "least-action", "geodesic-convergence", "tactic-routing"]
+}

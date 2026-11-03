@@ -1,0 +1,15 @@
+{
+  "id": "020-triad-majority-consensus",
+  "title": "Inline 3-Block Triad Majority Consensus Signature",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Easy",
+  "depends_on": ["019-helix-signature-256"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["triad", "majority-consensus", "helix-signature", "median-graph", "swar"]
+}

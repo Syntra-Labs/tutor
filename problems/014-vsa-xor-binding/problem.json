@@ -1,0 +1,15 @@
+{
+  "id": "014-vsa-xor-binding",
+  "title": "VSA XOR Binding & Self-Inverse Unbinding",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Easy",
+  "depends_on": ["013-hypervec-seed-zscore"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["vsa", "xor-binding", "isometry", "hypervector", "unbinding"]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "073-exact-simplex-pivot",
+  "title": "Exact Rational Simplex Basis Pivot & Certificate Verifier",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Hard",
+  "depends_on": ["033-dyadic-round-to-even"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["simplex-tableau", "blands-rule", "exact-rational", "duality-certificate"]
+}

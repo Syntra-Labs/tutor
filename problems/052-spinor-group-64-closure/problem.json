@@ -1,0 +1,15 @@
+{
+  "id": "052-spinor-group-64-closure",
+  "title": "Order-64 Spinor Group Closure & Cayley Table",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "Octonions & Clifford Algebra",
+  "difficulty": "Medium",
+  "depends_on": ["051-cl06-bivector-generators"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["clifford-algebra", "spinor-group", "cayley-table", "bfs-closure", "signed-permutations"]
+}

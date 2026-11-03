@@ -1,0 +1,15 @@
+{
+  "id": "005-fnv1a-splitmix64",
+  "title": "FNV-1a Hash & SplitMix64 Bijective Finalizer",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Hashing & Bit-Dispersion",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hashing", "fnv1a", "splitmix64", "bijection", "avalanche"]
+}

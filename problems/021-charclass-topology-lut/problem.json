@@ -1,0 +1,15 @@
+{
+  "id": "021-charclass-topology-lut",
+  "title": "Constexpr Character-Class Topology & Transition Flux",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["lut", "constexpr", "character-class", "topology", "streaming"]
+}

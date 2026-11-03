@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Syntra Tutor Atomic Curriculum Verification",
+      "setup": "",
+      "run": "python3 -m tutor.cli status",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 100
+    }
+  ]
+}

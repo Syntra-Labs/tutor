@@ -1,0 +1,15 @@
+{
+  "id": "024-dirichlet-byte-markov",
+  "title": "Order-2 Interpolated Dirichlet Byte-Markov Surprisal",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Medium",
+  "depends_on": ["022-shannon-entropy-q8"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["markov", "dirichlet", "surprisal", "information-theory", "bigram"]
+}

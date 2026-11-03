@@ -1,0 +1,15 @@
+{
+  "id": "009-packed-trit-encoding",
+  "title": "Packed 2-Bit Balanced Ternary Representation",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Balanced Ternary & SWAR",
+  "difficulty": "Easy",
+  "depends_on": ["002-hypervector-hamming"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["balanced-ternary", "bit-planes", "swar", "popcount"]
+}

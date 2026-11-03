@@ -1,0 +1,15 @@
+{
+  "id": "074-hoare-contract-skeletonizer",
+  "title": "Hoare Logic Contract Parser & Function Skeletonizer (lgcc)",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hoare-logic", "contract-parser", "ast-skeletonizer", "lgcc"]
+}

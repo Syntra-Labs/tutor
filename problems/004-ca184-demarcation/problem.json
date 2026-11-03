@@ -1,8 +1,15 @@
 {
   "id": "004-ca184-demarcation",
   "title": "Rule 184 Stream Boundary Demarcation",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Information Theory & Automata",
-  "difficulty": "Hard",
+  "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
   "languages": ["cpp"],
   "tags": ["cellular-automata", "rule-184", "swar", "stream-chunking"]
 }

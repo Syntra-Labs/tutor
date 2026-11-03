@@ -1,0 +1,15 @@
+{
+  "id": "055-hypervec-e8-carrier-decoder",
+  "title": "Hypervector-to-E8 256-Cell Product-Address Decoder",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "E8 Lattice & Discrete Routing",
+  "difficulty": "Medium",
+  "depends_on": ["054-e8-root-lexicographic-snap"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hypervector", "e8-lattice", "product-quantization", "admission-cell"]
+}

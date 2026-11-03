@@ -1,0 +1,15 @@
+{
+  "id": "013-hypervec-seed-zscore",
+  "title": "Deterministic Hypervector Expansion & Z-Score Metric",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Easy",
+  "depends_on": ["002-hypervector-hamming", "005-fnv1a-splitmix64"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hypervector", "vsa", "splitmix64", "z-score", "concentration-of-measure"]
+}

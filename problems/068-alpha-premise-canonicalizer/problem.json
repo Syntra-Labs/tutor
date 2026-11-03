@@ -1,0 +1,15 @@
+{
+  "id": "068-alpha-premise-canonicalizer",
+  "title": "Reversible Alpha & Premise IR Canonicalizer",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Medium",
+  "depends_on": ["067-symbolic-ast-evaluator"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["alpha-renaming", "lean4-ir", "canonicalization", "theorem-proving"]
+}

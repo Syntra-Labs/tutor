@@ -1,0 +1,15 @@
+{
+  "id": "026-semantic-mass-sparsifier",
+  "title": "90% Salience Sparsification (Top-K Semantic Mass Nodes)",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Medium",
+  "depends_on": ["023-surprisal-frequency-sketch", "025-prime-skipgram-extractor"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["sparsification", "top-k", "semantic-mass", "salience", "partial-sort"]
+}

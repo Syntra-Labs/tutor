@@ -1,0 +1,15 @@
+{
+  "id": "058-e8-h4-golden-construction",
+  "title": "E8 = H4 + phi*H4 Reduced-Metric Bilinear Form",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "600-Cell, Icosians & H4",
+  "difficulty": "Hard",
+  "depends_on": ["056-icosian-600cell-generator"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["e8-lattice", "h4-root-system", "600-cell", "reduced-metric", "weyl-reflection"]
+}

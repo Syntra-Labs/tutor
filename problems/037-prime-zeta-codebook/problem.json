@@ -1,0 +1,15 @@
+{
+  "id": "037-prime-zeta-codebook",
+  "title": "Riemann Zeta Critical-Line Phase Codebook",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Medium",
+  "depends_on": ["036-prime-address-gcd"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["riemann-zeta", "primes", "unitary-phase", "homomorphism", "q30"]
+}

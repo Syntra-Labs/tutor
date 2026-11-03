@@ -1,0 +1,15 @@
+{
+  "id": "045-quat-slerp",
+  "title": "Spherical Linear Interpolation (SLERP) with Small-Angle Fallback",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Medium",
+  "depends_on": ["044-quat-geodesic-dist"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["quaternions", "slerp", "interpolation", "geodesic"]
+}

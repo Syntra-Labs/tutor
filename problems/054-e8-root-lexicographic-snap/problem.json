@@ -1,0 +1,15 @@
+{
+  "id": "054-e8-root-lexicographic-snap",
+  "title": "16-Root E8 Lexicographic Snapper (L1 + Hamming)",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "E8 Lattice & Discrete Routing",
+  "difficulty": "Medium",
+  "depends_on": ["053-e8-16root-orbit-bfs"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["e8-lattice", "quantization", "l1-distance", "hamming-distance", "lexicographic-snap"]
+}

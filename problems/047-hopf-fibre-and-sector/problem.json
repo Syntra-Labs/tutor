@@ -1,0 +1,15 @@
+{
+  "id": "047-hopf-fibre-and-sector",
+  "title": "Hopf Kept-Fibre Angle & 512-Sector Quantizer",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Hopf Fibration & Fibre Bundles",
+  "difficulty": "Medium",
+  "depends_on": ["046-hopf-fibration-map"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hopf-fibration", "fibre-phase", "sector-quantization", "holonomy"]
+}

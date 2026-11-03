@@ -1,7 +1,8 @@
 import os
 import json
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 STATE_DIR = Path.home() / ".local" / "share" / "tutor"
 STATE_FILE = STATE_DIR / "progress.json"
@@ -47,20 +48,34 @@ def get_progress() -> Dict[str, Any]:
     except Exception:
         return {}
 
-def mark_solved(problem_id: str, lang: str, runtime_ms: float = 0.0):
+def mark_solved(
+    problem_id: str,
+    lang: str,
+    runtime_ms: float = 0.0,
+    cycles_per_op: float = 0.0,
+    code_bytes: int = 0,
+):
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     progress = get_progress()
     if problem_id not in progress:
         progress[problem_id] = {}
+
+    prev = progress[problem_id].get(lang, {})
+    best_cycles = cycles_per_op
+    if prev.get("cycles_per_op", 0.0) > 0.0 and cycles_per_op > 0.0:
+        best_cycles = min(prev["cycles_per_op"], cycles_per_op)
+
     progress[problem_id][lang] = {
         "status": "solved",
-        "runtime_ms": runtime_ms,
-        "solved_at": os.popen("date -Iseconds 2>/dev/null").read().strip(),
+        "runtime_ms": round(runtime_ms, 3),
+        "cycles_per_op": round(best_cycles, 3),
+        "code_bytes": code_bytes,
+        "solved_at": datetime.now(timezone.utc).isoformat(),
     }
     with open(STATE_FILE, "w") as f:
         json.dump(progress, f, indent=2)
 
-def is_solved(problem_id: str, lang: str = None) -> bool:
+def is_solved(problem_id: str, lang: Optional[str] = None) -> bool:
     progress = get_progress()
     p = progress.get(problem_id, {})
     if lang:

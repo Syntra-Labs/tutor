@@ -1,0 +1,15 @@
+{
+  "id": "040-spherical-forward-waypoint",
+  "title": "Spherical Forward Geodesic Waypoint & Bearing",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Spherical Geometry",
+  "difficulty": "Medium",
+  "depends_on": ["039-spherical-haversine"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["sphere", "geodesic", "rodrigues", "tangent-bundle", "turtle-geometry"]
+}

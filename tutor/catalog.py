@@ -1,16 +1,22 @@
-import os
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from tutor.state import is_solved
+from tutor.state import is_solved, get_progress
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BUILTIN_PROBLEMS = REPO_ROOT / "problems"
 USER_PROBLEMS = Path.home() / ".local" / "share" / "tutor" / "problems"
 
+DEFAULT_COLSPEC = [
+    {"hdr": "Score", "asc": False},
+    {"hdr": "Cycles/Op", "asc": True},
+    {"hdr": "Bytes", "asc": True},
+]
+
+
 class ProblemCatalog:
-    """Discovers, indexes, and retrieves available problem sets."""
+    """Discovers, indexes, and resolves prerequisite DAGs for available problem sets."""
 
     def __init__(self):
         self.search_paths = [BUILTIN_PROBLEMS, USER_PROBLEMS]
@@ -37,21 +43,42 @@ class ProblemCatalog:
                     seen_ids.add(pid)
                     meta["dir"] = str(prob_dir)
                     meta["solved"] = is_solved(pid)
+                    meta.setdefault("depends_on", [])
+                    meta.setdefault("colspec", DEFAULT_COLSPEC)
+                    meta.setdefault("track", meta.get("category", "Systems"))
                     problems.append(meta)
-                except Exception as e:
+                except Exception:
                     continue
 
-        return sorted(problems, key=lambda x: x.get("id", ""))
+        problems.sort(key=lambda x: x.get("id", ""))
+
+        # Resolve DAG unlock status
+        solved_map = {p["id"]: p["solved"] for p in problems}
+        progress = get_progress()
+
+        for p in problems:
+            deps = p.get("depends_on", [])
+            missing = [
+                dep for dep in deps
+                if not (solved_map.get(dep, False) or is_solved(dep))
+            ]
+            p["missing_deps"] = missing
+            p["unlocked"] = len(missing) == 0
+            p["progress"] = progress.get(p["id"], {})
+
+        return problems
 
     def get_problem(self, problem_id_or_num: str) -> Optional[Dict[str, Any]]:
         problems = self.list_problems()
+        query = str(problem_id_or_num).strip()
         for p in problems:
-            # Match exact ID (e.g. 001-lockfree-ringbuffer), number prefix (e.g. 1 or 001), or title substring
             pid = p.get("id", "")
-            if pid == problem_id_or_num:
+            if pid == query:
                 return p
-            if pid.startswith(f"{problem_id_or_num.zfill(3)}-"):
+            if pid.startswith(f"{query.zfill(3)}-"):
                 return p
-            if pid.split("-")[0].lstrip("0") == problem_id_or_num.lstrip("0"):
+            prefix = pid.split("-")[0].lstrip("0") or "0"
+            q_strip = query.lstrip("0") or "0"
+            if prefix == q_strip and query.isdigit():
                 return p
         return None

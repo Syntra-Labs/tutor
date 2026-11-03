@@ -1,0 +1,15 @@
+{
+  "id": "042-quat-norm-conjugate",
+  "title": "Unit Quaternion Normalization, Conjugate & Inverse on S3",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["quaternions", "s3-manifold", "normalization", "conjugate"]
+}

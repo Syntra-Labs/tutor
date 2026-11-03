@@ -1,0 +1,15 @@
+{
+  "id": "050-octonion-fano-product",
+  "title": "Fano Plane Octonion Basis Multiplication",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "Octonions & Clifford Algebra",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["octonions", "fano-plane", "non-associative", "cayley-dickson"]
+}

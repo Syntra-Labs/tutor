@@ -1,133 +1,66 @@
 # tutor
 
 > **"A Coding Tutor Rather Than a Coding Agent."**  
-> Hands-on systems programming problem sets with an in-editor test runner and contract linter (`lgcc`).
+> 74 Atomic Math, Geometry, Hyperdimensional Computing & Systems Programming Problem Sets (`001`–`074`) with Prerequisite Skill-Tree DAG, Local Test Harness, and $0 GitHub Pages Autolab Scoreboard.
 
 ---
 
 ## 1. Overview
 
-`tutor` is a lightweight, local-first practice harness for systems programming.
+`tutor` is a local-first and Git-native practice harness for systems programming, geometric algebra, exact arithmetic, information theory, and neurosymbolic theorem proving.
 
-Inspired by the quick workflow of tools like **leetvim**, `tutor` provides:
-- **Fast CLI & Neovim Integration**: Pick, code, and test problems directly in your editor without browser tabs or signups.
-- **Real-World Systems Problems**: Exercises on low-level topics like lock-free concurrency, memory models, cache optimization, and buffer management.
-- **Exercise Generator (`tutor slice` / `lgcc --skeletonize`)**: Tool to strip function bodies into empty practice exercises while keeping signatures and comments intact.
-- **Instant Local Tests**: Compiles and runs test suites locally on your machine in milliseconds.
-- **Optional Problem Updates**: Pull updated problem sets and regression tests from upstream repositories (`tutor pull`).
+- **74 Atomic Problem Sets Across 8 Progressive Tracks**: Every problem isolates **one atomic mathematical law, operator, or data structure primitive** (10–35 lines of C++20 code) arranged in a strict **Prerequisite DAG** (`depends_on`).
+- **Locked Test Harnesses & Cycle/Byte Profiling**: `tutor test` always compiles your solution against the locked `problems/<id>/cpp/harness.cpp` inside an isolated sandbox and measures **Score**, **Cycles/Op**, and **Effective Code Bytes**.
+- **Autolab Multi-Metric Scoreboard (`colspec`)**: Solutions are ranked using CMU Autolab's multi-column lexicographical comparator (`Score DESC`, `Cycles/Op ASC`, `Bytes ASC`, with earliest-timestamp tie-breaking and `zero_all_scoreboards` suppression on failed tests).
+- **$0 Public Judge & GitHub Pages Dashboard**: Uses the battle-tested two-stage GitHub Actions Pull Request pattern (`grade-pr.yml` + `update-scoreboard.yml`) to verify submission isolation on free GitHub runners and publish live rankings + the interactive Prerequisite DAG to GitHub Pages (`docs/index.html`).
 
 ---
 
 ## 2. Quick Start
 
-### Installation
-```bash
-git clone https://github.com/Syntra-Labs/tutor.git
-cd tutor
-
-# Build the native logical compiler (lgcc) and symlink CLI tools
-make install
-```
-
 ### CLI Workflow
 ```bash
-# 1. Browse available problem sets
-tutor list
+# 1. Browse all 74 problems grouped by Track with live DAG unlock status (✓ SOLVED, ○ READY, 🔒 LOCKED)
+python3 tutor.py list
 
-# 2. Pick a problem and scaffold solution stub in your workspace (~/tutor-workspace/)
-tutor pick 001-lockfree-ringbuffer
+# 2. Visualize the 8-Track Prerequisite Skill-Tree DAG
+python3 tutor.py dag
 
-# 3. Run test harness against your solution
-tutor test 001-lockfree-ringbuffer
+# 3. Pick an unlocked problem and scaffold its solution stub in ~/tutor-workspace/<id>/
+python3 tutor.py pick 002
 
-# 4. Strip an existing source file into an empty problem stub
-tutor slice src/engine.cpp -o stub.hpp
+# 4. Run the locked C++20 test harness and view your Autolab Scoreboard metrics
+python3 tutor.py test 002
 
-# 5. Pull new or updated problem sets and tests from remote
-tutor pull
+# 5. View the Global or Per-Problem Autolab Scoreboard
+python3 tutor.py scoreboard
+python3 tutor.py scoreboard -p 002
 
-# 6. Connect to an optional distributed evaluation node
-tutor connect cluster.syntralabs.org:9000
+# 6. Stage a verified solution for the public GitHub Pages Scoreboard
+python3 tutor.py submit 002 --user <your-github-username> --update-board
 ```
 
 ---
 
-## 3. Neovim / Leetvim-Style Experience
+## 3. The 8 Progressive Tracks (`001`–`074`)
 
-Run `tutorvim` to open an isolated Neovim session loaded with the Tutor dashboard:
-```bash
-tutorvim
-```
+See [`ROADMAP_MATH_AND_ML.md`](ROADMAP_MATH_AND_ML.md) for the full Mermaid dependency graph and mathematical specifications:
 
-### Dashboard Keybindings:
-- <kbd>Enter</kbd> or <kbd>p</kbd>: Pick the problem under cursor, scaffold files, and open `solution.<ext>`.
-- <kbd>t</kbd>: Run test suite for the problem under cursor in a floating terminal.
-- <kbd>r</kbd>: Refresh problem list and solved status.
-- <kbd>q</kbd>: Close dashboard.
-
-### User Commands (Available in Synvim & Neovim):
-- `:Tutor` / `:Tutor list` — Open interactive problem dashboard.
-- `:Tutor pick <id>` — Scaffold and open a specific problem.
-- `:Tutor test` — Test current active problem solution.
-- `:Tutor pull` — Pull updated problem sets and test harnesses.
-- `:Tutor status` — View progress metrics and connected node.
+1. **Track 1 (`001`–`012`)**: Bit-Parallelism, Cellular Automata (Rules 184, 30, 110) & Balanced Ternary SWAR Logic
+2. **Track 2 (`013`–`020`)**: Hyperdimensional Computing (VSA), Bipolar Accumulators & 8-Register Bit-Sliced Carry-Save Adders
+3. **Track 3 (`021`–`027`)**: Streaming Information Theory, Dirichlet Byte-Markov Surprisal & Phase-Spike Demarcation
+4. **Track 4 (`028`–`038`)**: Exact Algebraic Rings ($\mathbb{Z}[\phi]$), Dyadic Rationals (`U256`, `Dy<P>`), Multiplier-Free LUT Serving & Prime Zeta Codebooks
+5. **Track 5 (`039`–`049`)**: Spherical Manifolds ($S^2, S^3$), Quaternion Rotors, Hopf Fibration ($S^3 \to S^2$) & Hamilton Adjoint Gates
+6. **Track 6 (`050`–`058`)**: Octonion Fano Plane, Clifford Algebra $\mathcal{C}\ell(0,6)$, Order-64 Spinor Group, $E_8$ Lattices & 600-Cell Icosians
+7. **Track 7 (`059`–`066`)**: Sub-Linear Geometric Routing, Helix Cascades, Vicsek/Kuramoto Flock Reads & Ternary Merkle Object Store
+8. **Track 8 (`067`–`074`)**: Symbolic ASTs, Reversible Alpha Canonicalization, Non-Commutative Tree Rotors, Geodesic A* Proving & Exact Simplex
 
 ---
 
-## 4. Problem Catalog (Initial Seed Sets)
+## 4. Public GitHub Pages Scoreboard & Two-Stage CI Judge
 
-| ID | Title | Category | Difficulty | Focus |
-| :--- | :--- | :--- | :--- | :--- |
-| `001-lockfree-ringbuffer` | **SPSC Lock-Free Ring Buffer** | Concurrency & Systems | Medium | Atomic head/tail, `acquire`/`release` memory barriers |
-| `002-hypervector-hamming` | **8192-bit Hypervector Hamming Distance** | Geometric Systems & Compute | Easy | SWAR / `std::popcount`, normalized cosine metric |
-| `003-lru-cache-o1` | **O(1) Intrusive LRU Cache** | Data Structures & Memory | Medium | Hash index + linked list promotion & eviction |
-| `004-ca184-demarcation` | **Rule 184 Boundary Demarcation** | Information Theory & Automata | Hard | 64-bit SWAR Rule 184 traffic particle conservation |
-
----
-
-## 5. Logical Compiler & Problem Stub Generator (`lgcc`)
-
-The native Rust logical compiler located in `crates/lgcc` is designed to analyze code for **logical errors, invariant breaches, and semantic contract bugs** (analogous to how `gcc` checks syntax and types, `lgcc` checks logic):
-- **Logical Error & Bug Detection**: Analyzes implementations against declared preconditions, postconditions, and invariant contracts.
-- **`lgcc --skeletonize <file>`**: Strips function bodies into empty problem stubs while keeping signatures and docstring specifications (`tutor slice <file>`).
-- **`lgcc --extract <file>`**: Extracts AST symbols, call graphs, and structural types.
-
-*(Note: Task DAG linting and task routing belong strictly to [`Syntra-Labs/taskflow`](https://github.com/Syntra-Labs/taskflow).)*
-
----
-
-## 6. Directory Layout
-
-```
-tutor/
-├── bin/
-│   ├── tutor                  # Standalone CLI launcher
-│   ├── tutorvim               # Neovim launcher (like leetvim)
-│   └── lgcc                   # Compiled native Rust logical compiler
-├── crates/
-│   └── lgcc/                  # Logical compiler & problem stub generator
-│       ├── src/
-│       │   ├── ast/           # Extractor & function skeletonizer
-│       │   ├── graph/         # Dependency graph & symbol table
-│       │   ├── router/        # Context budgeting & prime router
-│       │   └── spec/          # LexLean parser & task linter
-│       └── Cargo.toml
-├── lua/
-│   └── tutor/
-│       └── init.lua           # Neovim plugin (:Tutor, floating runner, dashboard)
-├── problems/                  # Problem catalog
-│   ├── 001-lockfree-ringbuffer/
-│   ├── 002-hypervector-hamming/
-│   ├── 003-lru-cache-o1/
-│   └── 004-ca184-demarcation/
-├── tutor/
-│   ├── catalog.py             # Problem sets loader & indexer
-│   ├── workspace.py           # Solution scaffolding engine
-│   ├── runner.py              # Local compilation & test harness runner
-│   ├── sync.py                # Remote pull & optional node connection
-│   ├── state.py               # Local progress ledger (~/.local/share/tutor/)
-│   └── cli.py                 # Colorized terminal interface
-├── Makefile
-├── pyproject.toml
-└── README.md
-```
+To host the public leaderboard and skill tree for **$0**:
+1. Enable **GitHub Pages** in your repository settings pointing to the `main` branch `/docs` folder.
+2. When a contributor opens a Pull Request modifying `submissions/<github-username>/<problem-id>/solution.hpp`:
+   - **Workflow 1 (`.github/workflows/grade-pr.yml`)** runs in an unprivileged `pull_request` sandbox, verifies that the PR *only* modifies files inside `submissions/<github-username>/`, runs the locked test harness from `main`, and uploads `scoreboard_entries.json`.
+   - **Workflow 2 (`.github/workflows/update-scoreboard.yml`)** triggers via `workflow_run`, reduces the new scores using Autolab's `colspec` rules (`tutor/scoreboard.py`), and commits the updated `docs/data/leaderboard.json`.

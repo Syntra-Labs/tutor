@@ -1,0 +1,15 @@
+{
+  "id": "051-cl06-bivector-generators",
+  "title": "Clifford Algebra Cl(0,6) Generators & 15 Bivectors",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "Octonions & Clifford Algebra",
+  "difficulty": "Medium",
+  "depends_on": ["050-octonion-fano-product"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["clifford-algebra", "bivectors", "octonions", "signed-matrices"]
+}

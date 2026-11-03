@@ -1,0 +1,15 @@
+{
+  "id": "029-golden-integers-norm-inv",
+  "title": "Z[phi] Galois Conjugate, Norm & Unit Inversion",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Easy",
+  "depends_on": ["028-golden-integers-ring"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["galois-conjugate", "algebraic-norm", "units", "golden-ratio", "ring"]
+}

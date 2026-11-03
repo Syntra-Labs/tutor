@@ -1,0 +1,15 @@
+{
+  "id": "022-shannon-entropy-q8",
+  "title": "Empirical Byte Shannon Entropy & Q8 Quantizer",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Easy",
+  "depends_on": ["021-charclass-topology-lut"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["entropy", "shannon", "quantization", "information-theory"]
+}

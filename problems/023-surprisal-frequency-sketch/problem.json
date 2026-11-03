@@ -1,0 +1,15 @@
+{
+  "id": "023-surprisal-frequency-sketch",
+  "title": "Online Hash-Bucket Document-Frequency Surprisal Sketch",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Medium",
+  "depends_on": ["005-fnv1a-splitmix64"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["sketch", "surprisal", "idf", "streaming", "hash-table"]
+}

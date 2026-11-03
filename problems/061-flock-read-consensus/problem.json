@@ -1,0 +1,15 @@
+{
+  "id": "061-flock-read-consensus",
+  "title": "Flock Read (Vicsek/Kuramoto Neighbour Consensus)",
+  "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Hard",
+  "depends_on": ["054-e8-root-lexicographic-snap"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["flock-read", "vicsek-consensus", "e8-roots", "softmax-free-attention"]
+}

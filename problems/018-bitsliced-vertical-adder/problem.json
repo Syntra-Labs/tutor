@@ -1,0 +1,15 @@
+{
+  "id": "018-bitsliced-vertical-adder",
+  "title": "8-Register Bit-Sliced Carry-Save Hypervector Encoder",
+  "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+  "category": "Hyperdimensional Computing (VSA)",
+  "difficulty": "Hard",
+  "depends_on": ["017-bipolar-accumulator"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["bit-slicing", "carry-save-adder", "swar", "hypervector", "vsa"]
+}

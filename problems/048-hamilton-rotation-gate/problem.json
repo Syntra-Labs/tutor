@@ -1,0 +1,15 @@
+{
+  "id": "048-hamilton-rotation-gate",
+  "title": "Hamilton Rotation Gate Forward & Exact Adjoint Backward",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Geometric Neural Gates",
+  "difficulty": "Medium",
+  "depends_on": ["043-quat-hamilton-rotor"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["hamilton-gate", "quaternions", "autodiff", "adjoint", "norm-preserving"]
+}

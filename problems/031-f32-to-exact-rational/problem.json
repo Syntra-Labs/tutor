@@ -1,0 +1,15 @@
+{
+  "id": "031-f32-to-exact-rational",
+  "title": "Bit-Exact IEEE-754 binary32 to Dyadic Rational Decoder",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["ieee754", "dyadic", "exact-rational", "bit-manipulation", "subnormal"]
+}

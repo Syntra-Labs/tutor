@@ -1,8 +1,15 @@
 {
   "id": "001-lockfree-ringbuffer",
   "title": "SPSC Lock-Free Ring Buffer",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Concurrency & Systems",
   "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
   "languages": ["cpp"],
   "tags": ["atomics", "memory-ordering", "spsc", "lock-free", "ring-buffer"]
 }

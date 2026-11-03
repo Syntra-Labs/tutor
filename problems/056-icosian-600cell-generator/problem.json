@@ -1,0 +1,15 @@
+{
+  "id": "056-icosian-600cell-generator",
+  "title": "Binary Icosahedral Group 2I (120 Icosians Generator)",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "600-Cell, Icosians & H4",
+  "difficulty": "Hard",
+  "depends_on": ["029-golden-integers-norm-inv", "043-quat-hamilton-rotor"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["600-cell", "icosians", "binary-icosahedral-group", "golden-integers", "h4-root-system"]
+}

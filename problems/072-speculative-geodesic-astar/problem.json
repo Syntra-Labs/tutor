@@ -1,0 +1,15 @@
+{
+  "id": "072-speculative-geodesic-astar",
+  "title": "Speculative Geodesic A* Search over Proof States",
+  "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+  "category": "Neurosymbolic & Formal Verification",
+  "difficulty": "Hard",
+  "depends_on": ["071-least-action-macro-decider"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["geodesic-astar", "speculative-routing", "proof-search", "cosine-tangent"]
+}

@@ -1,0 +1,54 @@
+name: Grade Pull Request (Untrusted Sandbox)
+
+on:
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'submissions/**'
+
+# Strict least-privilege: read-only token, zero secrets exposed to untrusted PR code
+permissions:
+  contents: read
+
+concurrency:
+  group: grade-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sandbox-grade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout base branch (locked test harnesses & grader)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Fetch only PR submission changes
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          git fetch origin "$PR_HEAD_SHA" --depth=1
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$PR_HEAD_SHA")
+          echo "Changed files in PR:"
+          echo "$CHANGED"
+
+          # Restore ONLY the submissions/<author>/ directory from the PR commit
+          # so locked problems/, tutor/, and .github/ from base branch cannot be altered
+          git checkout "$PR_HEAD_SHA" -- "submissions/$PR_AUTHOR" 2>/dev/null || true
+
+          python3 -m tutor.cli ci-grade-pr \
+            --user "$PR_AUTHOR" \
+            --commit-sha "$PR_HEAD_SHA" \
+            --output /tmp/scoreboard_entries.json \
+            $CHANGED
+
+      - name: Upload verified Scoreboard Artifact for Workflow 2
+        uses: actions/upload-artifact@v4
+        with:
+          name: scoreboard-entries
+          path: /tmp/scoreboard_entries.json
+          retention-days: 7

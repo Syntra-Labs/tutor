@@ -1,0 +1,15 @@
+{
+  "id": "032-u256-exact-primitives",
+  "title": "256-Bit Unsigned Integer (U256) Shift, Add & Multiply",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["u256", "multiprecision", "dyadic", "sticky-shift", "exact-arithmetic"]
+}

@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Syntra Tutor — 74-Problem Math & Systems Studio (Neovim WASM + Autolab Judge)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f8f8f8;
+  --panel: #f2f2f2;
+  --panel-2: #e8e8e8;
+  --line: #dcdcdc;
+  --line-strong: #000000;
+  --fg: #000000;
+  --fg-dim: #444444;
+  --fg-muted: #777777;
+  --green: #065f46;
+  --green-bg: #ecfdf5;
+  --red: #991b1b;
+  --red-bg: #fef2f2;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --sans: "Inter", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--sans); }
+
+/* --- 50/50 Vertical Split (sphere-route architecture) --- */
+.split-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* --- Left Pane: Problem Studio, DAG & Autolab Scoreboard --- */
+.left-pane {
+  width: 50%;
+  min-width: 320px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.studio-topbar {
+  height: 44px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.brand-pill {
+  background: #000000;
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 11px;
+}
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+}
+.tab-btn {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .12s;
+}
+.tab-btn:hover { border-color: #000000; color: #000000; }
+.tab-btn.active {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.left-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+/* Problem Selector Bar */
+.problem-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.problem-select {
+  flex: 1;
+  min-width: 200px;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  border: 1px solid #000000;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+}
+.small-btn {
+  background: #ffffff;
+  border: 1px solid #000000;
+  color: #000000;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 9px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.small-btn:hover { background: #000000; color: #ffffff; }
+.small-btn.primary { background: #000000; color: #ffffff; }
+.small-btn.primary:hover { background: #333333; }
+
+/* Spec & Judge Output */
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-dim);
+  margin-bottom: 12px;
+}
+.meta-badge {
+  border: 1px solid #000000;
+  padding: 1px 6px;
+  font-weight: 700;
+  font-size: 10.5px;
+}
+.meta-badge.solved { background: #000000; color: #ffffff; }
+
+.spec-box {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  padding: 14px 16px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+
+.judge-panel {
+  border: 1px solid #000000;
+  background: #ffffff;
+  margin-top: 8px;
+}
+.judge-header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  padding: 7px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.judge-header.pass { background: #000000; color: #ffffff; }
+.judge-header.fail { background: var(--red-bg); color: var(--red); border-bottom-color: var(--red); }
+
+.judge-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg-subtle);
+}
+.metric-cell {
+  padding: 6px 10px;
+  border-right: 1px solid var(--line);
+}
+.metric-cell:last-child { border-right: none; }
+.metric-cell span { color: var(--fg-muted); display: block; font-size: 10px; text-transform: uppercase; }
+.metric-cell b { font-size: 13px; }
+
+.judge-log {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 12px;
+  white-space: pre-wrap;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fafafa;
+  color: #111111;
+}
+
+/* DAG Grid */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.filter-bar input, .filter-bar select {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.filter-bar input { flex: 1; min-width: 160px; }
+
+.track-block { margin-bottom: 18px; }
+.track-title {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid #000000;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+.dag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+}
+.dag-card {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: var(--mono);
+  transition: all .1s;
+}
+.dag-card:hover { border-color: #000000; background: var(--bg-subtle); }
+.dag-card.active { border: 2px solid #000000; }
+.dag-card.solved { border-left: 4px solid #000000; }
+.dag-card.locked { opacity: 0.6; border-style: dashed; }
+.dag-card-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--fg-muted);
+}
+.dag-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 3px 0;
+  color: #000000;
+}
+.dag-card-deps {
+  font-size: 10px;
+  color: var(--fg-dim);
+}
+
+/* Autolab Scoreboard Table */
+table.autolab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+table.autolab-table th, table.autolab-table td {
+  border: 1px solid var(--line);
+  padding: 6px 8px;
+  text-align: left;
+}
+table.autolab-table th {
+  background: var(--panel);
+  font-weight: 700;
+  font-size: 10.5px;
+  text-transform: uppercase;
+}
+
+/* --- Resizable Split Gutter --- */
+.split-gutter {
+  width: 12px;
+  margin: 0 -6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+.gutter-handle {
+  width: 1px;
+  height: 100%;
+  background: var(--line);
+  pointer-events: none;
+}
+.split-gutter:hover .gutter-handle,
+.split-gutter.dragging .gutter-handle {
+  width: 3px;
+  background: #000000;
+}
+body.is-resizing, body.is-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* --- Right Pane: Genuine Neovim WASM Editor --- */
+.editor-pane {
+  flex: 1;
+  min-width: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.nvim-container {
+  flex: 1;
+  position: relative;
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+}
+
+.nvim-grid {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.45;
+  white-space: pre;
+  overflow: hidden;
+  outline: none;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #000000;
+  cursor: text;
+  user-select: text;
+}
+
+.cursor {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.nvim-statusline {
+  height: 28px;
+  background: #f0f0f0;
+  border-top: 1px solid #dcdcdc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  user-select: none;
+  z-index: 5;
+}
+.nvim-mode {
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  letter-spacing: .06em;
+  font-size: 10.5px;
+}
+.mode-normal { background: #000000; color: #ffffff; }
+.mode-insert { background: #555555; color: #ffffff; }
+.mode-visual { background: #999999; color: #000000; }
+.mode-command { background: #222222; color: #ffffff; }
+
+.nvim-file {
+  color: #444444;
+  padding: 0 10px;
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nvim-file b { color: #000000; font-weight: 600; }
+
+.nvim-info {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: #555555;
+  padding-right: 10px;
+}
+.nvim-btn {
+  background: #ffffff;
+  border: 1px solid #000000;
+  color: #000000;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.nvim-btn:hover { background: #000000; color: #ffffff; }
+
+/* Help Overlay (:Manual / <Space>m) */
+.help-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.98);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #000000;
+  font-family: var(--mono);
+}
+.help-overlay.hidden { display: none; }
+.help-header {
+  height: 28px;
+  background: #f0f0f0;
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 11.5px;
+}
+.help-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.nvim-loading-splash {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #000000;
+  gap: 10px;
+}
+.nvim-loading-splash.hidden { display: none; }
+.nvim-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #000000;
+  border-radius: 50%;
+  animation: nvim-spin .8s linear infinite;
+}
+@keyframes nvim-spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="split-container">
+
+  <!-- LEFT PANE: SPEC, JUDGE TERMINAL, SKILL-TREE DAG & AUTOLAB SCOREBOARD -->
+  <div class="left-pane" id="left-pane">
+    <div class="studio-topbar">
+      <div class="brand-group">
+        <span class="brand-pill">SYNTRA // TUTOR</span>
+        <span id="top-progress">0 / 74 SOLVED</span>
+      </div>
+      <div class="nav-tabs">
+        <button class="tab-btn active" id="tab-btn-spec" onclick="switchTab('spec')">Spec &amp; Judge</button>
+        <button class="tab-btn" id="tab-btn-dag" onclick="switchTab('dag')">Skill-Tree DAG (74)</button>
+        <button class="tab-btn" id="tab-btn-board" onclick="switchTab('board')">🏆 Scoreboard</button>
+      </div>
+    </div>
+
+    <div class="left-scroll">
+      <!-- Persistent Problem Switcher & Judge Trigger -->
+      <div class="problem-bar">
+        <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">&#9664;</button>
+        <select class="problem-select" id="problem-select" onchange="loadProblemById(this.value)"></select>
+        <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">&#9654;</button>
+        <button class="small-btn primary" onclick="triggerRun()">&#9654; :Run / Test (&lt;F5&gt;)</button>
+      </div>
+
+      <!-- TAB 1: PROBLEM SPEC & LIVE C++20 JUDGE OUTPUT -->
+      <div id="tab-spec">
+        <div class="meta-row" id="prob-meta-row"></div>
+        <div class="spec-box" id="prob-readme">Loading problem catalog...</div>
+
+        <div class="judge-panel">
+          <div class="judge-header" id="judge-header">
+            <span id="judge-status-text">READY — Type :w or :Run (or press &lt;Space&gt;r / &lt;F5&gt;) in Neovim to compile &amp; test</span>
+            <span id="judge-engine-badge">C++20 (-O3)</span>
+          </div>
+          <div class="judge-metrics">
+            <div class="metric-cell">
+              <span>Autolab Score</span>
+              <b id="metric-score">—</b>
+            </div>
+            <div class="metric-cell">
+              <span>Cycles / Op (ASC)</span>
+              <b id="metric-cycles">—</b>
+            </div>
+            <div class="metric-cell">
+              <span>Effective Code Bytes (ASC)</span>
+              <b id="metric-bytes">—</b>
+            </div>
+          </div>
+          <div class="judge-log" id="judge-log">Locked harness ready. Implement solution.hpp in Neovim on the right and run :w or :Run.</div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="gh-username" placeholder="GitHub username (for scoreboard)" style="font-family:var(--mono);font-size:11.5px;padding:5px 8px;border:1px solid var(--line);flex:1;min-width:170px;" />
+          <button class="small-btn" onclick="downloadOrCopySubmission()">📋 Copy / Download Submission</button>
+          <button class="small-btn primary" onclick="openGitHubPrSubmission()">🏆 Submit to Public Scoreboard (PR)</button>
+        </div>
+      </div>
+
+      <!-- TAB 2: 74-PROBLEM PREREQUISITE SKILL-TREE DAG -->
+      <div id="tab-dag" class="hidden">
+        <div class="filter-bar">
+          <input type="search" id="dag-search" placeholder="Filter 74 problems by ID, title, tag..." oninput="renderDag()" />
+          <select id="dag-track-filter" onchange="renderDag()">
+            <option value="">All 8 Tracks</option>
+          </select>
+          <select id="dag-status-filter" onchange="renderDag()">
+            <option value="">All Statuses</option>
+            <option value="ready">○ Ready / Unlocked</option>
+            <option value="solved">✓ Solved</option>
+          </select>
+        </div>
+        <div id="dag-container"></div>
+      </div>
+
+      <!-- TAB 3: AUTOLAB MULTI-METRIC SCOREBOARD -->
+      <div id="tab-board" class="hidden">
+        <div class="filter-bar">
+          <select id="board-scope-select" onchange="renderScoreboard()" style="width:100%;">
+            <option value="__global__">🌍 Global Championship Standings (All 74 Problems)</option>
+          </select>
+        </div>
+        <div id="board-colspec-note" style="font-family:var(--mono);font-size:11px;color:var(--fg-dim);margin-bottom:8px;"></div>
+        <table class="autolab-table">
+          <thead id="board-thead"></thead>
+          <tbody id="board-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESIZABLE SPLIT GUTTER -->
+  <div class="split-gutter" id="split-gutter" title="Drag to resize split (Double-click for 50/50)">
+    <div class="gutter-handle"></div>
+  </div>
+
+  <!-- RIGHT PANE: GENUINE NEOVIM WEBASSEMBLY EDITOR -->
+  <div class="editor-pane" id="editor-pane">
+    <div class="nvim-container" id="nvim-container">
+      <div id="nvim-grid" class="nvim-grid" tabindex="0" aria-label="Neovim WebAssembly grid"></div>
+
+      <div class="nvim-loading-splash" id="nvim-loading-splash">
+        <div class="nvim-spinner"></div>
+        <div>Starting Neovim WebAssembly...</div>
+        <div style="font-size:11px;color:#777;">(nvim-asyncify.wasm + C++20 Judge)</div>
+      </div>
+    </div>
+
+    <!-- Help Drawer (:Manual / <Space>m / <F1>) -->
+    <div class="help-overlay hidden" id="help-drawer">
+      <div class="help-header">
+        <span><b>tutor.txt</b> [RO] — SYNTRA TUTOR NEOVIM MANUAL</span>
+        <button class="small-btn" id="help-close-btn">[x] :q</button>
+      </div>
+      <div class="help-body">
+*tutor.txt*   Syntra Tutor Studio — Genuine Neovim WebAssembly + C++20 Judge
+
+==============================================================================
+1. NEOVIM EX COMMANDS &amp; KEYBINDINGS                                 *commands*
+
+  :w                       Save buffer &amp; immediately run the locked C++20 Judge!
+  :Run, :R                 Compile &amp; run solution.hpp against locked harness.cpp.
+  &lt;Space&gt;r, &lt;F5&gt;, &lt;C-CR&gt;   Compile &amp; run from Normal or Insert mode.
+  :Next, &lt;Space&gt;n          Switch to the next problem in the 74-problem catalog.
+  :Prev, &lt;Space&gt;p          Switch to the previous problem.
+  :DAG, &lt;Space&gt;d           Open the 74-Problem Prerequisite Skill-Tree DAG.
+  :Board, &lt;Space&gt;b         Open the Autolab Scoreboard for the current problem.
+  :Reset                   Reset buffer back to the clean starter solution_stub.hpp.
+  :Manual, &lt;Space&gt;m, &lt;F1&gt;  Toggle this reference manual.
+
+==============================================================================
+2. HOW THE DUAL-MODE C++20 JUDGE &amp; SCOREBOARD WORK                     *judge*
+
+  • Every problem has a locked `harness.cpp` and a starter `solution_stub.hpp`.
+  • When you type `:w` or `:Run`:
+    1. If running via `python3 tutor.py serve`, your local `g++ -O3 -std=c++20`
+       compiles and benchmarks your code in ~50ms and updates `leaderboard.json`.
+    2. If running on static GitHub Pages, the browser bundles your `solution.hpp`
+       with the locked `harness.cpp` and executes it on `g++ 13.2 -O3 -std=c++20`
+       (via Compiler Explorer API), parsing `SCOREBOARD_JSON` cycles &amp; code bytes!
+  • Passing 100% of assertions marks the problem ✓ SOLVED and unlocks downstream
+    problems in the Prerequisite DAG.
+      </div>
+    </div>
+
+    <!-- Neovim Statusline -->
+    <div class="nvim-statusline">
+      <div class="nvim-mode mode-normal" id="nvim-mode">NORMAL</div>
+      <div class="nvim-file"><b id="nvim-filename">002-hypervector-hamming/solution.hpp</b> [C++20] · Neovim WASM</div>
+      <div class="nvim-info">
+        <span id="nvim-cursor">ln 1, col 1</span>
+        <button class="nvim-btn" onclick="resetCurrentStub()" title=":Reset">:Reset</button>
+        <button class="nvim-btn" id="help-btn">:Manual (&lt;Space&gt;m)</button>
+        <button class="nvim-btn" id="run-trigger">&#9654; :Run / :w (&lt;F5&gt;)</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+"use strict";
+import { encode } from "./msgpack.js";
+
+/* ========================================================================= */
+/* 1. CATALOG, PREREQUISITE DAG & AUTOLAB SCOREBOARD STATE                   */
+/* ========================================================================= */
+let catalog = [];
+let leaderboard = { problems: {}, global_rankings: [] };
+let currentIdx = 0;
+let solvedSet = new Set(JSON.parse(localStorage.getItem("tutor_solved_v1") || "[]"));
+let isJudging = false;
+
+window.switchTab = switchTab;
+window.loadProblemById = loadProblemById;
+window.stepProblem = stepProblem;
+window.triggerRun = triggerRun;
+window.renderDag = renderDag;
+window.renderScoreboard = renderScoreboard;
+window.resetCurrentStub = resetCurrentStub;
+window.downloadOrCopySubmission = downloadOrCopySubmission;
+window.openGitHubPrSubmission = openGitHubPrSubmission;
+
+function isUnlocked(prob) {
+  const deps = prob.depends_on || [];
+  return deps.every(d => solvedSet.has(d));
+}
+
+function countEffectiveCodeBytes(src) {
+  let clean = String(src || "");
+  clean = clean.replace(/\/\*[\s\S]*?\*\//g, "");
+  clean = clean.replace(/\/\/[^\n]*/g, "");
+  clean = clean.replace(/#[^\n]*/g, "");
+  clean = clean.replace(/\s+/g, "");
+  return new TextEncoder().encode(clean).length;
+}
+
+function savedCodeKey(probId) {
+  return `tutor_code_${probId}`;
+}
+
+async function initStudio() {
+  try {
+    const [catRes, boardRes] = await Promise.all([
+      fetch("data/catalog.json"),
+      fetch("data/leaderboard.json")
+    ]);
+    if (catRes.ok) {
+      const data = await catRes.json();
+      catalog = data.problems || [];
+    }
+    if (boardRes.ok) {
+      leaderboard = await boardRes.json();
+    }
+  } catch (err) {
+    console.warn("Failed to load catalog/leaderboard:", err);
+  }
+
+  const savedUser = localStorage.getItem("tutor_gh_user") || "";
+  const userEl = document.getElementById("gh-username");
+  if (savedUser) userEl.value = savedUser;
+  userEl.addEventListener("change", () => {
+    localStorage.setItem("tutor_gh_user", userEl.value.trim());
+  });
+
+  populateSelectors();
+  // Default to 002-hypervector-hamming or first problem
+  const defaultIdx = catalog.findIndex(p => p.id.startsWith("002-"));
+  loadProblem(defaultIdx >= 0 ? defaultIdx : 0);
+  renderDag();
+  renderScoreboard();
+  startNeovimWasm();
+}
+
+function populateSelectors() {
+  const sel = document.getElementById("problem-select");
+  const boardSel = document.getElementById("board-scope-select");
+  const trackSel = document.getElementById("dag-track-filter");
+
+  sel.innerHTML = "";
+  const tracks = new Set();
+
+  catalog.forEach((p, idx) => {
+    tracks.add(p.track);
+    const solved = solvedSet.has(p.id);
+    const unlocked = isUnlocked(p);
+    const mark = solved ? "✓" : (unlocked ? "○" : "🔒");
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = `${mark} ${p.id} — ${p.title} [${p.difficulty}]`;
+    sel.appendChild(opt);
+
+    if (boardSel.querySelectorAll(`option[value="${p.id}"]`).length === 0) {
+      const bOpt = document.createElement("option");
+      bOpt.value = p.id;
+      bOpt.textContent = `📊 ${p.id} — ${p.title}`;
+      boardSel.appendChild(bOpt);
+    }
+  });
+
+  if (trackSel.options.length <= 1) {
+    [...tracks].forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      trackSel.appendChild(opt);
+    });
+  }
+
+  document.getElementById("top-progress").textContent = `${solvedSet.size} / ${catalog.length} SOLVED`;
+  if (catalog[currentIdx]) {
+    sel.value = catalog[currentIdx].id;
+  }
+}
+
+function loadProblemById(probId) {
+  const idx = catalog.findIndex(p => p.id === probId);
+  if (idx >= 0) loadProblem(idx);
+}
+
+function stepProblem(delta) {
+  if (!catalog.length) return;
+  const next = (currentIdx + delta + catalog.length) % catalog.length;
+  loadProblem(next);
+}
+
+function loadProblem(idx) {
+  if (!catalog.length) return;
+  currentIdx = Math.max(0, Math.min(idx, catalog.length - 1));
+  const prob = catalog[currentIdx];
+
+  document.getElementById("problem-select").value = prob.id;
+  document.getElementById("nvim-filename").textContent = `${prob.id}/solution.hpp`;
+
+  const solved = solvedSet.has(prob.id);
+  const unlocked = isUnlocked(prob);
+  const statusBadge = solved
+    ? `<span class="meta-badge solved">✓ SOLVED</span>`
+    : (unlocked ? `<span class="meta-badge">○ READY</span>` : `<span class="meta-badge">🔒 LOCKED</span>`);
+  const deps = (prob.depends_on || []).length
+    ? `Prereqs: ${prob.depends_on.map(d => d.split("-")[0]).join(", ")}`
+    : "Root Primitive (No Prereqs)";
+
+  document.getElementById("prob-meta-row").innerHTML = `
+    ${statusBadge}
+    <span class="meta-badge">${prob.difficulty}</span>
+    <span><b>${prob.track}</b></span>
+    <span>&bull; ${deps}</span>
+  `;
+  document.getElementById("prob-readme").textContent = prob.readme || "";
+
+  const savedCode = localStorage.getItem(savedCodeKey(prob.id));
+  const initialCode = savedCode !== null ? savedCode : (prob.stub || "");
+
+  document.getElementById("metric-score").textContent = solved ? "100.0" : "—";
+  document.getElementById("metric-cycles").textContent = "—";
+  document.getElementById("metric-bytes").textContent = `${countEffectiveCodeBytes(initialCode)} B`;
+
+  if (workerReady) {
+    setBufferCode(initialCode, `${prob.id}/solution.hpp`);
+  } else {
+    currentBufferText = initialCode;
+  }
+  renderDag();
+}
+
+function resetCurrentStub() {
+  const prob = catalog[currentIdx];
+  if (!prob) return;
+  localStorage.removeItem(savedCodeKey(prob.id));
+  setBufferCode(prob.stub || "", `${prob.id}/solution.hpp`);
+}
+
+function switchTab(tabName) {
+  ["spec", "dag", "board"].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tabName);
+    document.getElementById(`tab-btn-${t}`).classList.toggle("active", t === tabName);
+  });
+  if (tabName === "dag") renderDag();
+  if (tabName === "board") renderScoreboard();
+}
+
+/* ========================================================================= */
+/* 2. DUAL-ENGINE C++20 JUDGE (LOCAL `/api/judge` + CLOUD GODBOLT FALLBACK)  */
+/* ========================================================================= */
+async function executeJudge(codeStr) {
+  if (isJudging || !catalog.length) return;
+  const prob = catalog[currentIdx];
+  isJudging = true;
+
+  localStorage.setItem(savedCodeKey(prob.id), codeStr);
+  const codeBytes = countEffectiveCodeBytes(codeStr);
+  document.getElementById("metric-bytes").textContent = `${codeBytes} B`;
+
+  const headerEl = document.getElementById("judge-header");
+  const statusEl = document.getElementById("judge-status-text");
+  const engineEl = document.getElementById("judge-engine-badge");
+  const logEl = document.getElementById("judge-log");
+
+  headerEl.className = "judge-header";
+  statusEl.textContent = `⚡ Compiling & running ${prob.id} with g++ -O3 -std=c++20...`;
+  logEl.textContent = "Running locked test harness...";
+  switchTab("spec");
+
+  const user = (document.getElementById("gh-username").value || "browser-user").trim();
+
+  // 1. Try local `python3 tutor.py serve` endpoint first
+  try {
+    const localRes = await fetch("/api/judge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ problem_id: prob.id, code: codeStr, user, update_board: true })
+    });
+    if (localRes.ok) {
+      const data = await localRes.json();
+      isJudging = false;
+      engineEl.textContent = "Local g++ -O3 -std=c++20";
+      applyJudgeResult(prob, data.ok, data.log, data.metrics?.cycles_per_op || (data.runtime_ms * 100), codeBytes, user);
+      return;
+    }
+  } catch (_) {
+    // Static GitHub Pages mode — proceed to Cloud C++20 Judge
+  }
+
+  // 2. Cloud C++20 Judge via Compiler Explorer (Godbolt) Public API
+  try {
+    engineEl.textContent = "GitHub Pages Cloud g++ 13.2 (-O3 -std=c++20)";
+    const harnessSrc = prob.harness || "";
+    const combinedSource = harnessSrc.replace(
+      /#include\s+["<]solution\.hpp[">]/,
+      `// --- BEGIN USER solution.hpp ---\n${codeStr}\n// --- END USER solution.hpp ---`
+    );
+
+    const t0 = performance.now();
+    const gbRes = await fetch("https://godbolt.org/api/compiler/g132/compile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        source: combinedSource,
+        options: {
+          userArguments: "-O3 -std=c++20 -Wall -Wextra",
+          executeParameters: { args: [], stdin: "" },
+          compilerOptions: { executorRequest: true },
+          filters: { execute: true }
+        }
+      })
+    });
+
+    if (!gbRes.ok) {
+      throw new Error(`Compiler API returned HTTP ${gbRes.status}`);
+    }
+
+    const gbData = await gbRes.json();
+    const elapsedMs = performance.now() - t0;
+    const stripAnsi = (s) => String(s || "").replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "");
+    const buildStderr = stripAnsi((gbData.buildResult?.stderr || []).map(x => x.text).join("\n"));
+    const execStdout = stripAnsi((gbData.stdout || []).map(x => x.text).join("\n"));
+    const execStderr = stripAnsi((gbData.stderr || []).map(x => x.text).join("\n"));
+    const exitCode = gbData.code;
+
+    let rawLog = "";
+    if (buildStderr) rawLog += buildStderr + "\n";
+    if (execStdout) rawLog += execStdout + "\n";
+    if (execStderr) rawLog += execStderr + "\n";
+
+    let cyclesPerOp = Number((gbData.execTime || elapsedMs) * 10.0).toFixed(2);
+    const cleanLines = [];
+    for (const line of rawLog.split(/\r?\n/)) {
+      if (line.startsWith("SCOREBOARD_JSON:")) {
+        try {
+          const parsed = JSON.parse(line.slice("SCOREBOARD_JSON:".length).trim());
+          if (parsed.cycles_per_op !== undefined) {
+            cyclesPerOp = Number(parsed.cycles_per_op).toFixed(2);
+          }
+        } catch (_) {}
+      } else {
+        cleanLines.push(line);
+      }
+    }
+
+    const success = (gbData.buildResult?.code === 0) && (exitCode === 0) && Boolean(gbData.didExecute);
+    isJudging = false;
+    applyJudgeResult(prob, success, cleanLines.join("\n").trim() || "(No output)", Number(cyclesPerOp), codeBytes, user);
+  } catch (err) {
+    isJudging = false;
+    headerEl.className = "judge-header fail";
+    statusEl.textContent = "✗ COMPILER SERVICE ERROR";
+    logEl.textContent = `Could not reach C++20 execution service: ${err.message}\nTip: You can also run 'python3 tutor.py serve' or 'python3 tutor.py test ${prob.id}' locally.`;
+  }
+}
+
+function applyJudgeResult(prob, success, logText, cyclesPerOp, codeBytes, user) {
+  const headerEl = document.getElementById("judge-header");
+  const statusEl = document.getElementById("judge-status-text");
+  const logEl = document.getElementById("judge-log");
+
+  logEl.textContent = logText || "(No output)";
+
+  if (success) {
+    headerEl.className = "judge-header pass";
+    statusEl.textContent = `✓ ALL TESTS PASSED — ${prob.id} SOLVED!`;
+    document.getElementById("metric-score").textContent = "100.0";
+    document.getElementById("metric-cycles").textContent = `${Number(cyclesPerOp).toFixed(2)}`;
+    document.getElementById("metric-bytes").textContent = `${codeBytes} B`;
+
+    solvedSet.add(prob.id);
+    localStorage.setItem("tutor_solved_v1", JSON.stringify([...solvedSet]));
+    populateSelectors();
+
+    // Update live in-memory Autolab scoreboard preview
+    recordInBrowserScoreboardEntry(user, prob.id, [100.0, Number(Number(cyclesPerOp).toFixed(2)), codeBytes]);
+  } else {
+    headerEl.className = "judge-header fail";
+    statusEl.textContent = `✗ TESTS FAILED — Autolab Scoreboard entry suppressed until 100% pass`;
+    document.getElementById("metric-score").textContent = "0.0";
+    document.getElementById("metric-cycles").textContent = "—";
+  }
+}
+
+function recordInBrowserScoreboardEntry(user, probId, vec) {
+  if (!leaderboard.problems) leaderboard.problems = {};
+  const list = leaderboard.problems[probId] || [];
+  list.push({
+    user,
+    problem_id: probId,
+    score: 100.0,
+    scoreboard: vec,
+    submitted_at: new Date().toISOString()
+  });
+  // Sort by Score DESC, Cycles ASC, Bytes ASC
+  list.sort((a, b) => {
+    const va = a.scoreboard || [0, 1e18, 1e18];
+    const vb = b.scoreboard || [0, 1e18, 1e18];
+    if (va[0] !== vb[0]) return vb[0] - va[0];
+    if (va[1] !== vb[1]) return va[1] - vb[1];
+    return va[2] - vb[2];
+  });
+  // Deduplicate by user (Autolab DISTINCT ON user)
+  const dedup = [];
+  const seen = new Set();
+  for (const item of list) {
+    if (seen.has(item.user)) continue;
+    seen.add(item.user);
+    dedup.push({ ...item, rank: dedup.length + 1 });
+  }
+  leaderboard.problems[probId] = dedup;
+}
+
+/* ========================================================================= */
+/* 3. DAG & AUTOLAB SCOREBOARD RENDERERS                                     */
+/* ========================================================================= */
+function renderDag() {
+  const q = (document.getElementById("dag-search")?.value || "").toLowerCase().trim();
+  const trackF = document.getElementById("dag-track-filter")?.value || "";
+  const statusF = document.getElementById("dag-status-filter")?.value || "";
+
+  const filtered = catalog.filter(p => {
+    if (trackF && p.track !== trackF) return false;
+    const solved = solvedSet.has(p.id);
+    const unlocked = isUnlocked(p);
+    if (statusF === "solved" && !solved) return false;
+    if (statusF === "ready" && (!unlocked || solved)) return false;
+    if (q) {
+      const hay = `${p.id} ${p.title} ${(p.tags || []).join(" ")}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const grouped = {};
+  filtered.forEach(p => {
+    if (!grouped[p.track]) grouped[p.track] = [];
+    grouped[p.track].push(p);
+  });
+
+  const container = document.getElementById("dag-container");
+  container.innerHTML = "";
+  const activeId = catalog[currentIdx]?.id;
+
+  Object.entries(grouped).forEach(([track, probs]) => {
+    const block = document.createElement("div");
+    block.className = "track-block";
+    block.innerHTML = `<div class="track-title"><span>${track}</span><span>${probs.length}</span></div>`;
+    const grid = document.createElement("div");
+    grid.className = "dag-grid";
+
+    probs.forEach(p => {
+      const solved = solvedSet.has(p.id);
+      const unlocked = isUnlocked(p);
+      const statusText = solved ? "✓ SOLVED" : (unlocked ? "○ READY" : "🔒 LOCKED");
+      const deps = (p.depends_on || []).map(d => d.split("-")[0]).join(", ");
+
+      const card = document.createElement("div");
+      card.className = `dag-card ${solved ? "solved" : (!unlocked ? "locked" : "")} ${p.id === activeId ? "active" : ""}`;
+      card.onclick = () => {
+        loadProblemById(p.id);
+        switchTab("spec");
+      };
+      card.innerHTML = `
+        <div class="dag-card-top">
+          <span>${p.id.split("-")[0]} &bull; ${statusText}</span>
+          <span>${p.difficulty}</span>
+        </div>
+        <div class="dag-card-title">${p.title}</div>
+        <div class="dag-card-deps">${deps ? `Requires: [${deps}]` : "Root Primitive"}</div>
+      `;
+      grid.appendChild(card);
+    });
+    block.appendChild(grid);
+    container.appendChild(block);
+  });
+}
+
+function renderScoreboard() {
+  const scope = document.getElementById("board-scope-select").value;
+  const thead = document.getElementById("board-thead");
+  const tbody = document.getElementById("board-tbody");
+  const note = document.getElementById("board-colspec-note");
+
+  if (scope === "__global__") {
+    note.textContent = "Autolab Global Ranking: Solved (DESC) → Rank #1s (DESC) → Total Score (DESC) → Total Cycles (ASC)";
+    thead.innerHTML = `
+      <tr>
+        <th>Rank</th>
+        <th>Competitor</th>
+        <th>Solved</th>
+        <th>#1 Finishes</th>
+        <th>Score</th>
+        <th>Cycles/Op</th>
+        <th>Bytes</th>
+      </tr>
+    `;
+    const rows = leaderboard.global_rankings || [];
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="7">No global entries yet. Run :w or :Run in Neovim to test a solution!</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><b>#${r.rank}</b></td>
+        <td><b>@${r.user}</b></td>
+        <td>${r.solved_count} / ${catalog.length || 74}</td>
+        <td>${r.first_place_count}</td>
+        <td>${Number(r.total_score).toFixed(1)}</td>
+        <td>${Number(r.total_cycles).toFixed(2)}</td>
+        <td>${r.total_bytes} B</td>
+      </tr>
+    `).join("");
+  } else {
+    const prob = catalog.find(p => p.id === scope) || {};
+    const colspec = prob.colspec || [
+      { hdr: "Score", asc: false },
+      { hdr: "Cycles/Op", asc: true },
+      { hdr: "Bytes", asc: true }
+    ];
+    note.textContent = `Autolab colspec for ${scope}: ` + colspec.map(c => `${c.hdr} (${c.asc ? "ASC" : "DESC"})`).join(" → ");
+    thead.innerHTML = `
+      <tr>
+        <th>Rank</th>
+        <th>Competitor</th>
+        ${colspec.map(c => `<th>${c.hdr} (${c.asc ? "↑" : "↓"})</th>`).join("")}
+        <th>Submitted (UTC)</th>
+      </tr>
+    `;
+    const rows = (leaderboard.problems || {})[scope] || [];
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="${colspec.length + 3}">No passing submissions yet for ${scope}. Run :Run in Neovim to claim #1!</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const vec = r.scoreboard || [];
+      return `
+        <tr>
+          <td><b>#${r.rank}</b></td>
+          <td><b>@${r.user}</b></td>
+          ${colspec.map((_, i) => `<td>${vec[i] !== undefined ? vec[i] : "—"}</td>`).join("")}
+          <td>${(r.submitted_at || "").slice(0, 19).replace("T", " ")}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+}
+
+function downloadOrCopySubmission() {
+  const prob = catalog[currentIdx];
+  if (!prob) return;
+  navigator.clipboard?.writeText(currentBufferText).catch(() => {});
+  const blob = new Blob([currentBufferText], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "solution.hpp";
+  a.click();
+}
+
+function openGitHubPrSubmission() {
+  const prob = catalog[currentIdx];
+  if (!prob) return;
+  const user = (document.getElementById("gh-username").value || "your-username").trim();
+  navigator.clipboard?.writeText(currentBufferText).catch(() => {});
+  const encoded = encodeURIComponent(currentBufferText);
+  const filename = encodeURIComponent(`submissions/${user}/${prob.id}/solution.hpp`);
+  const repoUrl = "https://github.com/Syntra-Labs/tutor";
+  window.open(`${repoUrl}/new/main?filename=${filename}&value=${encoded}`, "_blank");
+}
+
+/* ========================================================================= */
+/* 4. GENUINE NEOVIM WEBASSEMBLY CLIENT & LINEGRID RENDERER                  */
+/* ========================================================================= */
+const gridEl = document.getElementById("nvim-grid");
+const modeBadge = document.getElementById("nvim-mode");
+const cursorBadge = document.getElementById("nvim-cursor");
+const splashEl = document.getElementById("nvim-loading-splash");
+
+let worker = null;
+let reqId = 1;
+const pendingRpcResolvers = new Map();
+let workerReady = false;
+let primeSent = false;
+let pendingChunks = [];
+let pendingKeys = "";
+let pendingKeysScheduled = false;
+let currentBufferText = "";
+let cols = 80, rows = 30;
+
+function computeGridDimensions() {
+  const container = document.getElementById("nvim-container");
+  const rect = container.getBoundingClientRect();
+  const charW = 8.15;
+  const charH = 19.5;
+  const c = Math.max(30, Math.floor((rect.width - 24) / charW));
+  const r = Math.max(12, Math.floor((rect.height - 16) / charH));
+  return { cols: c, rows: r };
+}
+
+function startNeovimWasm() {
+  const dims = computeGridDimensions();
+  cols = dims.cols;
+  rows = dims.rows;
+
+  worker = new Worker("./nvim-worker.js", { type: "module" });
+  worker.onmessage = handleWorkerMessage;
+  worker.postMessage({ type: "start", cols, rows });
+}
+
+function sendRpc(method, params = []) {
+  const curId = reqId++;
+  const payload = [0, curId, method, params];
+  const chunk = encode(payload);
+  if (!workerReady) {
+    pendingChunks.push({ chunk, id: curId, method });
+    return Promise.resolve(null);
+  }
+  worker.postMessage({ type: "stdin", chunk }, [chunk.buffer]);
+  return new Promise((resolve, reject) => {
+    pendingRpcResolvers.set(curId, { resolve, reject });
+  });
+}
+
+function sendRpcResponse(requestId, error, result) {
+  const payload = [1, requestId, error, result];
+  const chunk = encode(payload);
+  if (!workerReady) {
+    pendingChunks.push({ chunk });
+    return;
+  }
+  worker.postMessage({ type: "stdin", chunk }, [chunk.buffer]);
+}
+
+function enqueueInput(keys) {
+  pendingKeys += keys;
+  if (pendingKeysScheduled) return;
+  pendingKeysScheduled = true;
+  queueMicrotask(() => {
+    pendingKeysScheduled = false;
+    const k = pendingKeys;
+    pendingKeys = "";
+    if (k) sendRpc("nvim_input", [k]);
+  });
+}
+
+function primeNeovim() {
+  primeSent = true;
+  sendRpc("nvim_ui_attach", [cols, rows, { rgb: true, ext_linegrid: true, ext_hlstate: true }]);
+  sendRpc("nvim_ui_set_focus", [true]);
+  sendRpc("nvim_command", ["set noswapfile nobackup nowritebackup noundofile noreadonly"]);
+  sendRpc("nvim_command", ["set number background=light fillchars=eob:~"]);
+  sendRpc("nvim_command", ["set tabstop=4 shiftwidth=4 expandtab"]);
+
+  sendRpc("nvim_command", ["highlight Normal guibg=#ffffff guifg=#000000"]);
+  sendRpc("nvim_command", ["highlight LineNr guibg=#fafafa guifg=#888888"]);
+  sendRpc("nvim_command", ["highlight CursorLineNr guibg=#fafafa guifg=#000000 gui=bold"]);
+  sendRpc("nvim_command", ["highlight StatusLine guibg=#f0f0f0 guifg=#000000 gui=none"]);
+  sendRpc("nvim_command", ["highlight StatusLineNC guibg=#f0f0f0 guifg=#666666 gui=none"]);
+  sendRpc("nvim_command", ["highlight Cursor guibg=#000000 guifg=#ffffff"]);
+  sendRpc("nvim_command", ["highlight Comment guifg=#777777 gui=italic"]);
+  sendRpc("nvim_command", ["highlight Keyword guifg=#000000 gui=bold"]);
+  sendRpc("nvim_command", ["highlight Type guifg=#000000 gui=bold"]);
+  sendRpc("nvim_command", ["highlight String guifg=#333333"]);
+  sendRpc("nvim_command", ["highlight Number guifg=#000000 gui=bold"]);
+
+  const lua = `
+    local ui_chan = (vim.api.nvim_get_api_info() or {})[1]
+    if ui_chan then
+      vim.g.mapleader = " "
+      vim.g.maplocalleader = " "
+
+      local function execute_tutor_judge()
+        local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        vim.rpcnotify(ui_chan, 'tutor_run', lines)
+        print("[syntra-tutor] compiling & running locked C++20 harness...")
+      end
+
+      vim.api.nvim_create_user_command("Run", execute_tutor_judge, { desc = "Compile & run locked C++20 harness" })
+      vim.api.nvim_create_user_command("R", execute_tutor_judge, { desc = "Compile & run locked C++20 harness" })
+      vim.api.nvim_create_user_command("Manual", function() vim.rpcnotify(ui_chan, 'tutor_manual') end, { desc = "Open manual" })
+      vim.api.nvim_create_user_command("Next", function() vim.rpcnotify(ui_chan, 'tutor_next') end, { desc = "Next problem" })
+      vim.api.nvim_create_user_command("Prev", function() vim.rpcnotify(ui_chan, 'tutor_prev') end, { desc = "Previous problem" })
+      vim.api.nvim_create_user_command("DAG", function() vim.rpcnotify(ui_chan, 'tutor_dag') end, { desc = "Open Skill-Tree DAG" })
+      vim.api.nvim_create_user_command("Board", function() vim.rpcnotify(ui_chan, 'tutor_board') end, { desc = "Open Autolab Scoreboard" })
+      vim.api.nvim_create_user_command("Reset", function() vim.rpcnotify(ui_chan, 'tutor_reset') end, { desc = "Reset stub" })
+
+      vim.keymap.set('n', '<leader>r', execute_tutor_judge, { silent = true })
+      vim.keymap.set('n', '<leader><CR>', execute_tutor_judge, { silent = true })
+      vim.keymap.set({'n', 'i'}, '<F5>', execute_tutor_judge, { silent = true })
+      vim.keymap.set({'n', 'i'}, '<C-CR>', execute_tutor_judge, { silent = true })
+      vim.keymap.set('n', '<leader>m', function() vim.rpcnotify(ui_chan, 'tutor_manual') end, { silent = true })
+      vim.keymap.set({'n', 'i'}, '<F1>', function() vim.rpcnotify(ui_chan, 'tutor_manual') end, { silent = true })
+      vim.keymap.set('n', '<leader>n', function() vim.rpcnotify(ui_chan, 'tutor_next') end, { silent = true })
+      vim.keymap.set('n', '<leader>p', function() vim.rpcnotify(ui_chan, 'tutor_prev') end, { silent = true })
+      vim.keymap.set('n', '<leader>d', function() vim.rpcnotify(ui_chan, 'tutor_dag') end, { silent = true })
+      vim.keymap.set('n', '<leader>b', function() vim.rpcnotify(ui_chan, 'tutor_board') end, { silent = true })
+
+      vim.api.nvim_create_autocmd({"TextChanged", "TextChangedI"}, {
+        pattern = "*",
+        callback = function(ev)
+          local lines = vim.api.nvim_buf_get_lines(ev.buf, 0, -1, false)
+          vim.rpcnotify(ui_chan, 'tutor_change', lines)
+        end
+      })
+
+      vim.api.nvim_create_autocmd("BufWriteCmd", {
+        pattern = "*",
+        callback = function(ev)
+          vim.bo[ev.buf].modified = false
+          local lines = vim.api.nvim_buf_get_lines(ev.buf, 0, -1, false)
+          vim.rpcnotify(ui_chan, 'tutor_run', lines)
+          vim.api.nvim_echo({{'"solution.hpp" [written] — running C++20 judge...', "Normal"}}, false, {})
+        end
+      })
+    end
+  `;
+  sendRpc("nvim_exec_lua", [lua, []]);
+
+  const prob = catalog[currentIdx];
+  const savedCode = prob ? localStorage.getItem(savedCodeKey(prob.id)) : null;
+  setBufferCode(savedCode !== null ? savedCode : (prob?.stub || ""), `${prob?.id || "002"}/solution.hpp`);
+
+  splashEl.classList.add("hidden");
+}
+
+function setBufferCode(codeStr, bufName = "solution.hpp") {
+  currentBufferText = codeStr;
+  const lines = String(codeStr || "").split(/\r?\n/);
+  const lua = `
+    local lines, bname = ...
+    local buf = vim.api.nvim_get_current_buf()
+    pcall(vim.api.nvim_buf_set_name, buf, bname)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    vim.bo[buf].filetype = "cpp"
+    vim.bo[buf].readonly = false
+    vim.bo[buf].buftype = ""
+    vim.bo[buf].modified = false
+    vim.api.nvim_win_set_cursor(0, {1, 0})
+  `;
+  sendRpc("nvim_exec_lua", [lua, [lines, bufName]]);
+}
+
+function handleWorkerMessage(event) {
+  const { type } = event.data || {};
+  if (type === "draw-text") {
+    renderGrid(event.data.cells, event.data.cursor, event.data.cursorHlId, event.data.mode, event.data.hls);
+  } else if (type === "response") {
+    const resolver = pendingRpcResolvers.get(event.data.msgid);
+    if (resolver) {
+      pendingRpcResolvers.delete(event.data.msgid);
+      if (event.data.error) resolver.reject(event.data.error);
+      else resolver.resolve(event.data.result);
+    }
+  } else if (type === "notification") {
+    const { method, params } = event.data;
+    if (method === "tutor_run") {
+      const lines = params?.[0] || [];
+      currentBufferText = lines.join("\n");
+      executeJudge(currentBufferText);
+    } else if (method === "tutor_change") {
+      const lines = params?.[0] || [];
+      currentBufferText = lines.join("\n");
+      const prob = catalog[currentIdx];
+      if (prob) localStorage.setItem(savedCodeKey(prob.id), currentBufferText);
+    } else if (method === "tutor_manual") {
+      openHelp();
+    } else if (method === "tutor_next") {
+      stepProblem(1);
+    } else if (method === "tutor_prev") {
+      stepProblem(-1);
+    } else if (method === "tutor_dag") {
+      switchTab("dag");
+    } else if (method === "tutor_board") {
+      const prob = catalog[currentIdx];
+      if (prob) document.getElementById("board-scope-select").value = prob.id;
+      switchTab("board");
+    } else if (method === "tutor_reset") {
+      resetCurrentStub();
+    }
+  } else if (type === "ready") {
+    workerReady = true;
+    for (const item of pendingChunks) {
+      if (item.chunk) worker.postMessage({ type: "stdin", chunk: item.chunk }, [item.chunk.buffer]);
+    }
+    pendingChunks = [];
+    if (!primeSent) primeNeovim();
+  } else if (type === "clipboard-copy") {
+    const text = (event.data.lines || []).join("\n");
+    navigator.clipboard?.writeText(text).catch(() => {});
+  } else if (type === "clipboard-paste") {
+    const req = event.data.requestId;
+    if (navigator.clipboard?.readText) {
+      navigator.clipboard.readText().then(text => {
+        sendRpcResponse(req, null, [String(text || "").split(/\r?\n/), "v"]);
+      }).catch(() => sendRpcResponse(req, null, [[], "v"]));
+    } else {
+      sendRpcResponse(req, null, [[], "v"]);
+    }
+  }
+}
+
+function renderGrid(cells = [], cursor = null, cursorHlId = 0, mode = "normal", hls = {}) {
+  const rowsArr = Array.isArray(cells) && cells.length ? cells : [];
+  const cur = cursor || { row: 0, col: 0 };
+  const row = Math.max(0, Math.min(cur.row || 0, rowsArr.length ? rowsArr.length - 1 : 0));
+  const col = Math.max(0, cur.col || 0);
+  const hlMap = hls || {};
+
+  cursorBadge.textContent = `ln ${row + 1}, col ${col + 1}`;
+  updateModeBadge(mode);
+
+  let html = "";
+  for (let r = 0; r < rowsArr.length; r += 1) {
+    const rowCells = Array.isArray(rowsArr[r]) ? rowsArr[r] : [];
+    const lineLen = rowCells.length;
+    for (let c = 0; c < lineLen; c += 1) {
+      const cell = rowCells[c] || {};
+      const ch = escapeChar(cell.ch || " ");
+      const isCursor = (r === row && c === col);
+      const attr = isCursor ? getHl(hlMap, cursorHlId, true) : getHl(hlMap, cell.hl, false);
+      const style = styleFromHl(attr);
+
+      if (isCursor) {
+        html += `<span class="cursor" style="${style}">${ch}</span>`;
+      } else if (style) {
+        html += `<span style="${style}">${ch}</span>`;
+      } else {
+        html += ch;
+      }
+    }
+    if (r === row && col >= lineLen) {
+      html += " ".repeat(col - lineLen);
+      html += `<span class="cursor"> </span>`;
+    }
+    if (r < rowsArr.length - 1) html += "\n";
+  }
+
+  gridEl.innerHTML = html || " ";
+}
+
+function updateModeBadge(mode) {
+  const m = String(mode || "normal").toLowerCase();
+  modeBadge.textContent = m.toUpperCase();
+  if (m.includes("insert")) modeBadge.className = "nvim-mode mode-insert";
+  else if (m.includes("visual")) modeBadge.className = "nvim-mode mode-visual";
+  else if (m.includes("cmd") || m.includes("command")) modeBadge.className = "nvim-mode mode-command";
+  else modeBadge.className = "nvim-mode mode-normal";
+}
+
+function escapeChar(ch) {
+  if (ch === "&") return "&amp;";
+  if (ch === "<") return "&lt;";
+  if (ch === ">") return "&gt;";
+  if (ch === "\"") return "&quot;";
+  return ch;
+}
+
+function styleFromHl(attr) {
+  if (!attr) return "";
+  const parts = [];
+  if (attr.reverse) {
+    parts.push(`color:${attr.background || "#ffffff"}`);
+    parts.push(`background:${attr.foreground || "#000000"}`);
+  } else {
+    if (attr.foreground) parts.push(`color:${attr.foreground}`);
+    if (attr.background && attr.background !== "#ffffff") parts.push(`background:${attr.background}`);
+  }
+  if (attr.bold) parts.push("font-weight:700");
+  if (attr.italic) parts.push("font-style:italic");
+  if (attr.underline) parts.push("text-decoration:underline");
+  return parts.join(";");
+}
+
+function getHl(map, id, isCursor) {
+  const key = id != null && map[id] !== undefined ? id : String(id);
+  const hl = (key != null && map[key] !== undefined ? map[key] : null) || map[0] || map["0"] || null;
+  if (!hl) {
+    if (isCursor) return { foreground: "#ffffff", background: "#000000", reverse: true };
+    return null;
+  }
+  return { ...hl, reverse: Boolean(hl.reverse) || isCursor };
+}
+
+function translateKey(ev) {
+  const key = ev.key;
+  if (key === "F5") return "<F5>";
+  if (key === "F1") return "<F1>";
+  if (key === "Backspace") return "<BS>";
+  if (key === "Enter") return ev.ctrlKey ? "<C-CR>" : "<CR>";
+  if (key === "Tab") return ev.shiftKey ? "<S-Tab>" : "<Tab>";
+  if (key === "Escape") return "<Esc>";
+  if (key === "ArrowUp") return "<Up>";
+  if (key === "ArrowDown") return "<Down>";
+  if (key === "ArrowLeft") return "<Left>";
+  if (key === "ArrowRight") return "<Right>";
+  if (key === "PageUp") return "<PageUp>";
+  if (key === "PageDown") return "<PageDown>";
+  if (key === "Home") return "<Home>";
+  if (key === "End") return "<End>";
+  if (key === "Delete") return "<Del>";
+  if (key === "Insert") return "<Ins>";
+  if (ev.ctrlKey && key.length === 1) {
+    const k = key.toLowerCase();
+    if (k === "[") return "<Esc>";
+    return `<C-${k}>`;
+  }
+  if (ev.altKey && key.length === 1) return `<M-${key}>`;
+  if (key && key.length === 1) return key === "<" ? "<lt>" : key;
+  return null;
+}
+
+gridEl.addEventListener("click", () => gridEl.focus());
+gridEl.addEventListener("keydown", (ev) => {
+  if (!document.getElementById("help-drawer").classList.contains("hidden")) {
+    if (ev.key === "Escape" || ev.key === "q" || (ev.ctrlKey && ev.key === "[")) {
+      ev.preventDefault();
+      closeHelp();
+      return;
+    }
+  }
+  if (ev.key === "Enter" && ev.ctrlKey) {
+    ev.preventDefault();
+    triggerRun();
+    return;
+  }
+  const keys = translateKey(ev);
+  if (!keys) return;
+  ev.preventDefault();
+  enqueueInput(keys);
+});
+
+window.addEventListener("resize", () => {
+  if (!workerReady) return;
+  const dims = computeGridDimensions();
+  if (dims.cols !== cols || dims.rows !== rows) {
+    cols = dims.cols;
+    rows = dims.rows;
+    sendRpc("nvim_ui_try_resize", [cols, rows]);
+  }
+});
+
+function openHelp() { document.getElementById("help-drawer").classList.remove("hidden"); }
+function closeHelp() { document.getElementById("help-drawer").classList.add("hidden"); gridEl.focus(); }
+document.getElementById("help-btn").addEventListener("click", openHelp);
+document.getElementById("help-close-btn").addEventListener("click", closeHelp);
+
+function triggerRun() {
+  if (workerReady) enqueueInput("<Esc>:Run<CR>");
+  else executeJudge(currentBufferText);
+}
+document.getElementById("run-trigger").addEventListener("click", triggerRun);
+
+/* ========================================================================= */
+/* 5. DRAGGABLE SPLIT GUTTER                                                 */
+/* ========================================================================= */
+const gutter = document.getElementById("split-gutter");
+const leftPane = document.getElementById("left-pane");
+let isDraggingSplit = false;
+
+gutter.addEventListener("pointerdown", (e) => {
+  isDraggingSplit = true;
+  gutter.classList.add("dragging");
+  document.body.classList.add("is-resizing");
+  gutter.setPointerCapture(e.pointerId);
+});
+gutter.addEventListener("pointermove", (e) => {
+  if (!isDraggingSplit) return;
+  const w = window.innerWidth;
+  const clamped = Math.max(320, Math.min(w - 300, e.clientX));
+  leftPane.style.width = `${(clamped / w) * 100}%`;
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    if (dims.cols !== cols || dims.rows !== rows) {
+      cols = dims.cols;
+      rows = dims.rows;
+      sendRpc("nvim_ui_try_resize", [cols, rows]);
+    }
+  }
+});
+function endSplit() {
+  if (!isDraggingSplit) return;
+  isDraggingSplit = false;
+  gutter.classList.remove("dragging");
+  document.body.classList.remove("is-resizing");
+}
+gutter.addEventListener("pointerup", endSplit);
+gutter.addEventListener("pointercancel", endSplit);
+gutter.addEventListener("dblclick", () => { leftPane.style.width = "50%"; });
+
+initStudio();
+</script>
+</body>
+</html>

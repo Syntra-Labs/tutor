@@ -1,0 +1,15 @@
+{
+  "id": "049-recurrence-gate-secant",
+  "title": "Dyadic Recurrence Gate LUT & Secant Surrogate Credit",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Geometric Neural Gates",
+  "difficulty": "Hard",
+  "depends_on": ["048-hamilton-rotation-gate"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["recurrence-gate", "dyadic-lut", "secant-surrogate", "quaternion-scan"]
+}

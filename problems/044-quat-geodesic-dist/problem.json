@@ -1,0 +1,15 @@
+{
+  "id": "044-quat-geodesic-dist",
+  "title": "Geodesic Distance on the Double-Cover S3",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Easy",
+  "depends_on": ["043-quat-hamilton-rotor"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["quaternions", "s3-manifold", "geodesic-distance", "double-cover", "bi-invariance"]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "035-uorlut01-group-projection",
+  "title": "4-Bit Group-Scaled LUT Matrix-Vector Projection",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Medium",
+  "depends_on": ["034-isqrt-and-nibble-mul"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["uorlut01", "lut", "quantization", "group-scale", "integer-serving"]
+}

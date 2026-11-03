@@ -1,0 +1,15 @@
+{
+  "id": "059-e8-shortlist-admission",
+  "title": "E8 256-Cell Product-Address Shortlist Admission Gate",
+  "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Medium",
+  "depends_on": ["055-hypervec-e8-carrier-decoder"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["e8-lattice", "shortlist-admission", "sublinear-routing", "product-address"]
+}

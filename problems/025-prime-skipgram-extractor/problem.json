@@ -1,0 +1,15 @@
+{
+  "id": "025-prime-skipgram-extractor",
+  "title": "CamelCase, N-Gram & Prime-Stride Skip-Gram Extractor",
+  "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+  "category": "Information Theory & Surprisal",
+  "difficulty": "Medium",
+  "depends_on": ["015-hypervec-cyclic-rotl"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
+  "languages": ["cpp"],
+  "tags": ["skipgram", "fnv1a", "camelcase", "ngram", "rotl"]
+}
