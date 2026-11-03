@@ -451,7 +451,8 @@ body.is-resizing, body.is-resizing * {
   white-space: pre;
   overflow: hidden;
   outline: none;
-  padding: 8px 12px;
+  padding: 4px 0;
+  margin: 0;
   background: #ffffff;
   color: #000000;
   cursor: text;
@@ -1376,10 +1377,24 @@ let cols = 80, rows = 30;
 function computeGridDimensions() {
   const container = document.getElementById("nvim-container");
   const rect = container.getBoundingClientRect();
-  const charW = 8.15;
-  const charH = 19.5;
-  const c = Math.max(30, Math.floor((rect.width - 24) / charW));
-  const r = Math.max(12, Math.floor((rect.height - 16) / charH));
+  let charW = 8.1;
+  let charH = 19.575;
+  const probe = document.createElement("span");
+  probe.style.fontFamily = 'var(--mono)';
+  probe.style.fontSize = "13.5px";
+  probe.style.lineHeight = "1.45";
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.whiteSpace = "pre";
+  probe.textContent = "01234567890123456789";
+  container.appendChild(probe);
+  const pRect = probe.getBoundingClientRect();
+  container.removeChild(probe);
+  if (pRect.width > 0) charW = pRect.width / 20;
+  if (pRect.height > 0) charH = pRect.height;
+
+  const c = Math.max(30, Math.floor(rect.width / charW));
+  const r = Math.max(12, Math.floor((rect.height - 8) / charH));
   return { cols: c, rows: r };
 }
 
