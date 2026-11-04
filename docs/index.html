@@ -1812,16 +1812,50 @@ function sendRpcResponse(requestId, error, result) {
   worker.postMessage({ type: "stdin", chunk }, [chunk.buffer]);
 }
 
-function enqueueInput(keys) {
-  pendingKeys += keys;
-  if (pendingKeysScheduled) return;
-  pendingKeysScheduled = true;
-  queueMicrotask(() => {
-    pendingKeysScheduled = false;
-    const k = pendingKeys;
-    pendingKeys = "";
-    if (k) sendRpc("nvim_input", [k]);
-  });
+let inputInFlight = false;
+let inputInFlightTimer = null;
+const inputQueue = [];
+
+function notifyInputDrawn() {
+  if (inputInFlight) {
+    if (inputInFlightTimer) {
+      clearTimeout(inputInFlightTimer);
+      inputInFlightTimer = null;
+    }
+    inputInFlight = false;
+    pumpInputQueue();
+  }
+}
+
+function pumpInputQueue() {
+  if (inputInFlight || inputQueue.length === 0 || !workerReady) return;
+  const item = inputQueue.shift();
+  inputInFlight = true;
+  inputInFlightTimer = setTimeout(() => {
+    inputInFlightTimer = null;
+    inputInFlight = false;
+    pumpInputQueue();
+  }, 45);
+  sendRpc("nvim_input", [item.keys]);
+}
+
+function enqueueInput(keys, isRepeat = false) {
+  if (!keys) return;
+  if (isRepeat) {
+    const pendingCount = inputQueue.filter(item => item.keys === keys && item.isRepeat).length;
+    if (pendingCount >= 1) return;
+  }
+  inputQueue.push({ keys, isRepeat });
+  pumpInputQueue();
+}
+
+function clearRepeatQueue(keys) {
+  if (!keys) return;
+  for (let i = inputQueue.length - 1; i >= 0; i--) {
+    if (inputQueue[i].keys === keys && inputQueue[i].isRepeat) {
+      inputQueue.splice(i, 1);
+    }
+  }
 }
 
 function primeNeovim() {
@@ -2009,6 +2043,7 @@ function handleWorkerMessage(event) {
       event.data.mode,
       event.data.hls
     );
+    notifyInputDrawn();
   } else if (type === "response") {
     const resolver = pendingRpcResolvers.get(event.data.msgid);
     if (resolver) {
@@ -2049,6 +2084,7 @@ function handleWorkerMessage(event) {
     }
     pendingChunks = [];
     if (!primeSent) primeNeovim();
+    pumpInputQueue();
   } else if (type === "clipboard-copy") {
     const text = (event.data.lines || []).join("\n");
     navigator.clipboard?.writeText(text).catch(() => {});
@@ -2372,7 +2408,18 @@ gridEl.addEventListener("keydown", (ev) => {
   const keys = translateKey(ev);
   if (!keys) return;
   ev.preventDefault();
-  enqueueInput(keys);
+  enqueueInput(keys, Boolean(ev.repeat));
+});
+
+gridEl.addEventListener("keyup", (ev) => {
+  const keys = translateKey(ev);
+  if (keys) clearRepeatQueue(keys);
+});
+
+gridEl.addEventListener("blur", () => {
+  for (let i = inputQueue.length - 1; i >= 0; i--) {
+    if (inputQueue[i].isRepeat) inputQueue.splice(i, 1);
+  }
 });
 
 window.addEventListener("resize", () => {
