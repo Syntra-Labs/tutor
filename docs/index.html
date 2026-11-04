@@ -1604,7 +1604,7 @@ echo DONE > /mnt/done_${nonce}.txt
     let done = false;
     let fullOutput = "";
 
-    while (performance.now() - t0 < 10000) {
+    while (performance.now() - t0 < 25000) {
       await new Promise(r => setTimeout(r, 200));
       try {
         const d = await v86Instance.read_file(`done_${nonce}.txt`);
@@ -1618,9 +1618,12 @@ echo DONE > /mnt/done_${nonce}.txt
     }
 
     if (!done) {
+      try {
+        await v86Instance.keyboard_send_text("\x03\n", 10);
+      } catch (_) {}
       headerEl.className = "judge-header fail";
-      statusEl.textContent = "Execution timed out in guest VM";
-      logEl.textContent += "[!] Error: Harness execution did not finish within timeout.\n";
+      statusEl.textContent = "Execution timed out in guest VM (> 25s)";
+      logEl.textContent += "[!] Error: Harness execution did not finish within timeout (sent Ctrl+C to terminate runaway process).\n";
       return;
     }
 
@@ -1707,7 +1710,7 @@ async function executeJudge(codeStr) {
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
     try {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 1200);
+      const timer = setTimeout(() => ctrl.abort(), 18000);
       const resp = await fetch("/api/judge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

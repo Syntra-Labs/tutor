@@ -140,9 +140,17 @@ class TestRunner:
                     "-o",
                     str(bin_path),
                 ]
-                c_proc = subprocess.run(
-                    compile_cmd, cwd=str(sandbox_dir), capture_output=True, text=True
-                )
+                try:
+                    c_proc = subprocess.run(
+                        compile_cmd, cwd=str(sandbox_dir), capture_output=True, text=True, timeout=25
+                    )
+                except subprocess.TimeoutExpired:
+                    return (
+                        False,
+                        "Compilation Error: Compiler timed out (> 25s) — possible infinite template instantiation or recursive macro bomb.",
+                        0.0,
+                        {"score": 0.0, "scoreboard": None},
+                    )
                 if c_proc.returncode != 0:
                     return (
                         False,
@@ -213,7 +221,23 @@ class TestRunner:
                         clean_lines.append(line)
                 clean_log = "\n".join(clean_lines).strip()
 
-                if not done_received:
+                if proc.returncode != 0:
+                    success = False
+                    signame = ""
+                    if proc.returncode == -11:
+                        signame = " (SIGSEGV - Segmentation Fault / Memory Access Violation / Stack Overflow)"
+                    elif proc.returncode == -8:
+                        signame = " (SIGFPE - Floating Point Exception / Division by Zero)"
+                    elif proc.returncode == -6:
+                        signame = " (SIGABRT - Process Aborted / Out-Of-Memory / Unhandled Exception)"
+                    elif proc.returncode == -9:
+                        signame = " (SIGKILL - Process Killed / Memory Limit Exceeded)"
+                    elif proc.returncode < 0:
+                        signame = f" (Fatal Signal {-proc.returncode})"
+                    else:
+                        signame = f" (Exit status {proc.returncode})"
+                    clean_log = (clean_log + f"\n[Runtime Error]: Process terminated abnormally{signame}.").strip()
+                elif not done_received:
                     success = False
                     clean_log = (clean_log + "\n[Security Error]: Test harness did not reach normal completion (exit(0) bypass or premature termination detected).").strip()
                 else:

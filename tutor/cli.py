@@ -478,18 +478,25 @@ def cmd_serve(args):
                         self._send_json(404, {"ok": False, "log": f"Problem '{prob_id}' not found."})
                         return
 
+                    lang = req.get("lang")
+                    if not lang:
+                        lang = "sh" if "sh" in prob.get("languages", []) else "cpp"
+                    sol_filename = "solution.sh" if lang == "sh" else "solution.hpp"
+
                     with tempfile.TemporaryDirectory(prefix="tutor_web_") as tmp_dir:
-                        sol_path = Path(tmp_dir) / "solution.hpp"
+                        sol_path = Path(tmp_dir) / sol_filename
                         sol_path.write_text(code, encoding="utf-8")
+                        if lang == "sh":
+                            sol_path.chmod(0o755)
                         runner = TestRunner()
                         success, log, runtime_ms, metrics = runner.run_test(
-                            prob, lang="cpp", submission_dir=Path(tmp_dir)
+                            prob, lang=lang, submission_dir=Path(tmp_dir)
                         )
                         if success:
                             from tutor.state import mark_solved
                             mark_solved(
                                 prob["id"],
-                                "cpp",
+                                lang,
                                 runtime_ms=runtime_ms,
                                 cycles_per_op=metrics.get("cycles_per_op", 0.0),
                                 code_bytes=metrics.get("code_bytes", 0),
@@ -500,7 +507,7 @@ def cmd_serve(args):
                                         {
                                             "user": user,
                                             "problem_id": prob["id"],
-                                            "lang": "cpp",
+                                            "lang": lang,
                                             "score": metrics["score"],
                                             "scoreboard": metrics["scoreboard"],
                                             "submitted_at": datetime.now(timezone.utc).isoformat(),
