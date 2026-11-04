@@ -1457,107 +1457,147 @@ async function executeVMSolution(codeStr, prob) {
   const engineEl = document.getElementById("judge-engine-badge");
   const headerEl = document.getElementById("judge-header");
 
+  isJudging = true;
   engineEl.textContent = "Live Linux 5.6 VM (x86_WASM)";
   statusEl.textContent = `Running container harness inside guest VM...`;
   logEl.textContent = "[*] Launching execution in Live Linux 5.6 WebAssembly VM...\n";
 
-  if (!v86Instance || !v86Booted) {
-    logEl.textContent += "[*] Booting x86 guest Linux kernel (cold boot ~2.4s)...\n";
-    bootLinuxVM();
-    const tStart = performance.now();
-    while (!v86Booted && performance.now() - tStart < 8000) {
-      await new Promise(r => setTimeout(r, 200));
+  try {
+    if (!v86Instance || !v86Booted) {
+      logEl.textContent += "[*] Booting x86 guest Linux kernel (cold boot ~2.4s)...\n";
+      bootLinuxVM();
+      const tStart = performance.now();
+      while (!v86Booted && performance.now() - tStart < 12000) {
+        await new Promise(r => setTimeout(r, 200));
+      }
+      if (!v86Booted) {
+        headerEl.className = "judge-header fail";
+        statusEl.textContent = "VM boot timed out";
+        logEl.textContent += "[!] Error: Linux VM did not reach shell prompt in time.\n";
+        return;
+      }
     }
-    if (!v86Booted) {
-      isJudging = false;
-      headerEl.className = "judge-header fail";
-      statusEl.textContent = "VM boot timed out";
-      logEl.textContent += "[!] Error: Linux VM did not reach shell prompt in time.\n";
-      return;
+
+    const needsGit = prob.id === "076-git-object-plumbing" || (prob.readme || "").includes("git ");
+    if (needsGit && !v86GitInstalled) {
+      statusEl.textContent = "Installing Git binaries in guest Linux...";
+      logEl.textContent += "[*] Fetching and installing Git runtime into guest VM...\n";
+      const resp = await fetch("./images/git_bundle.tar.gz");
+      if (!resp.ok) throw new Error("Failed to load git_bundle.tar.gz");
+      const buf = await resp.arrayBuffer();
+      await v86Instance.create_file("git_bundle.tar.gz", new Uint8Array(buf));
+      const installScript = "zcat /mnt/git_bundle.tar.gz | tar -x -C / && rm -f /mnt/git_bundle.tar.gz && echo GIT_READY > /mnt/git_ready.txt\n";
+      await v86Instance.create_file("install_git.sh", new TextEncoder().encode(installScript));
+      await v86Instance.keyboard_send_text("sh /mnt/install_git.sh\n", 10);
+      const tStartGit = performance.now();
+      while (performance.now() - tStartGit < 8000) {
+        try {
+          const r = await v86Instance.read_file("git_ready.txt");
+          if (r) { v86GitInstalled = true; break; }
+        } catch (_) {}
+        await new Promise(r => setTimeout(r, 150));
+      }
+      if (!v86GitInstalled) {
+        throw new Error("Git runtime installation timed out inside guest VM");
+      }
+      logEl.textContent += "[*] Git 2.45 runtime installed successfully.\n";
     }
-  }
 
-  logEl.textContent += "[*] Injecting solution and running test suite...\n";
+    logEl.textContent += "[*] Injecting solution and running test suite...\n";
 
-  const user = (document.getElementById("gh-username").value || "browser-user").trim();
-  const codeBytes = countEffectiveCodeBytes(codeStr);
-  const nonce = "TUTOR_" + Math.random().toString(36).slice(2);
+    const user = (document.getElementById("gh-username").value || "browser-user").trim();
+    const codeBytes = countEffectiveCodeBytes(codeStr);
+    const nonce = "tutor_" + Math.random().toString(36).slice(2);
 
-  const b64Sol = btoa(unescape(encodeURIComponent(codeStr || "")));
-  const b64Harn = btoa(unescape(encodeURIComponent(prob.harness || "")));
+    const enc = new TextEncoder();
+    await v86Instance.create_file(`sol_${nonce}.sh`, enc.encode(codeStr || ""));
+    await v86Instance.create_file(`harn_${nonce}.sh`, enc.encode(prob.harness || ""));
 
-  const runScript = `mkdir -p /tmp/run_${nonce} && cd /tmp/run_${nonce}
-echo '${b64Sol}' | base64 -d > solution.sh
-echo '${b64Harn}' | base64 -d > harness.sh
+    const runner = `mkdir -p /tmp/run_${nonce} && cd /tmp/run_${nonce}
+cp /mnt/sol_${nonce}.sh ./solution.sh
+cp /mnt/harn_${nonce}.sh ./harness.sh
 chmod +x solution.sh harness.sh
-echo '=== ${nonce}:BEGIN ==='
-/bin/sh harness.sh
-echo '=== ${nonce}:DONE ==='
+/bin/sh harness.sh > /mnt/out_${nonce}.txt 2>&1 || true
+echo DONE > /mnt/done_${nonce}.txt
 `;
+    await v86Instance.create_file(`run_${nonce}.sh`, enc.encode(runner));
+    await v86Instance.keyboard_send_text(`sh /mnt/run_${nonce}.sh\n`, 10);
 
-  v86Instance.keyboard_send_text(runScript + "\n");
+    const t0 = performance.now();
+    let done = false;
+    let fullOutput = "";
 
-  const container = document.getElementById("vm-screen-container");
-  const t0 = performance.now();
-  let done = false;
-  let fullOutput = "";
-
-  while (performance.now() - t0 < 8000) {
-    await new Promise(r => setTimeout(r, 300));
-    const lines = Array.from(container.querySelectorAll("div"))
-      .map(d => d.innerText.trim())
-      .filter(t => t.length > 0);
-    const joined = lines.join("\n");
-    if (joined.includes(`${nonce}:DONE`)) {
-      done = true;
-      fullOutput = joined;
-      break;
-    }
-  }
-
-  isJudging = false;
-  const testCases = [];
-  let allPassed = true;
-
-  for (const line of fullOutput.split("\n")) {
-    if (line.includes("TESTCASE_JSON:")) {
+    while (performance.now() - t0 < 10000) {
+      await new Promise(r => setTimeout(r, 200));
       try {
-        const jsonStr = line.substring(line.indexOf("TESTCASE_JSON:") + "TESTCASE_JSON:".length).trim();
-        const tc = JSON.parse(jsonStr);
-        testCases.push({
-          name: tc.name,
-          passed: tc.passed,
-          input: prob.id,
-          output: tc.details || (tc.passed ? "PASSED" : "FAILED"),
-          expected: tc.details || "PASSED"
-        });
-        if (!tc.passed) allPassed = false;
+        const d = await v86Instance.read_file(`done_${nonce}.txt`);
+        if (d) {
+          const outBytes = await v86Instance.read_file(`out_${nonce}.txt`);
+          fullOutput = new TextDecoder().decode(outBytes);
+          done = true;
+          break;
+        }
       } catch (_) {}
     }
-  }
 
-  if (testCases.length === 0) {
-    testCases.push({
-      name: "Script Execution",
-      passed: done,
-      input: "harness.sh",
-      output: done ? "Command finished" : "Execution timeout in guest VM",
-      expected: "Command finished"
-    });
-    allPassed = done;
-  }
+    if (!done) {
+      headerEl.className = "judge-header fail";
+      statusEl.textContent = "Execution timed out in guest VM";
+      logEl.textContent += "[!] Error: Harness execution did not finish within timeout.\n";
+      return;
+    }
 
-  applyJudgeResult(
-    prob,
-    allPassed,
-    true,
-    "",
-    allPassed ? "" : "One or more container assertions failed",
-    testCases,
-    1.0,
-    codeBytes,
-    user
-  );
+    logEl.textContent += "\n--- Harness Execution Log ---\n" + fullOutput + "\n";
+
+    const testCases = [];
+    let allPassed = true;
+
+    for (const line of fullOutput.split("\n")) {
+      if (line.includes("TESTCASE_JSON:")) {
+        try {
+          const jsonStr = line.substring(line.indexOf("TESTCASE_JSON:") + "TESTCASE_JSON:".length).trim();
+          const tc = JSON.parse(jsonStr);
+          testCases.push({
+            name: tc.name,
+            passed: tc.passed,
+            input: prob.id,
+            output: tc.details || (tc.passed ? "PASSED" : "FAILED"),
+            expected: tc.details || "PASSED"
+          });
+          if (!tc.passed) allPassed = false;
+        } catch (_) {}
+      }
+    }
+
+    if (testCases.length === 0) {
+      testCases.push({
+        name: "Script Execution",
+        passed: done,
+        input: "harness.sh",
+        output: done ? "Command finished" : "Execution timeout in guest VM",
+        expected: "Command finished"
+      });
+      allPassed = done;
+    }
+
+    applyJudgeResult(
+      prob,
+      allPassed,
+      true,
+      "",
+      allPassed ? "" : "One or more container assertions failed",
+      testCases,
+      1.0,
+      codeBytes,
+      user
+    );
+  } catch (err) {
+    headerEl.className = "judge-header fail";
+    statusEl.textContent = "VM Execution Error";
+    logEl.textContent += `[!] Error: ${err.message || err}\n`;
+  } finally {
+    isJudging = false;
+  }
 }
 
 async function executeJudge(codeStr) {
@@ -2829,6 +2869,7 @@ window.toggleVMPane = toggleVMPane;
 let v86Instance = null;
 let v86Booted = false;
 let v86Booting = false;
+let v86GitInstalled = false;
 let v86BootCheckInterval = null;
 
 function bootLinuxVM() {
@@ -2856,6 +2897,7 @@ function bootLinuxVM() {
       vga_bios: { url: "./v86/vgabios.bin" },
       bzimage: { url: "./images/buildroot-bzimage.bin" },
       cmdline: "tsc=reliable mitigations=off random.trust_cpu=on",
+      filesystem: {},
       autostart: true,
     });
 
@@ -2867,7 +2909,7 @@ function bootLinuxVM() {
         .replace(/[\s\u00a0]+/g, " ")
         .trim();
 
-      if (text.includes("~%") || text.includes("# ") || text.includes("buildroot")) {
+      if (text.includes("~%") || text.includes("# ")) {
         clearInterval(v86BootCheckInterval);
         v86Booted = true;
         v86Booting = false;
@@ -2883,6 +2925,9 @@ function bootLinuxVM() {
   }
 }
 window.bootLinuxVM = bootLinuxVM;
+window.getV86State = () => ({ hasInstance: !!v86Instance, v86Booted, v86Booting, v86GitInstalled });
+window.getV86Instance = () => v86Instance;
+window.isStudioReady = () => Boolean(catalog && catalog.length);
 
 function rebootLinuxVM() {
   if (v86BootCheckInterval) {
@@ -2895,6 +2940,7 @@ function rebootLinuxVM() {
   }
   v86Booted = false;
   v86Booting = false;
+  v86GitInstalled = false;
   bootLinuxVM();
 }
 window.rebootLinuxVM = rebootLinuxVM;

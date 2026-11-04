@@ -16,12 +16,15 @@ else
 fi
 
 TEST_ROOT="/tmp/test_jail_$$"
-mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/usr/bin" "$TEST_ROOT/proc" "$TEST_ROOT/tmp"
+mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/usr/bin" "$TEST_ROOT/proc" "$TEST_ROOT/tmp" "$TEST_ROOT/dev"
+mknod -m 666 "$TEST_ROOT/dev/null" c 1 3 2>/dev/null || touch "$TEST_ROOT/dev/null"
 
 # Copy minimal busybox binaries into jail
 if [ -f "/bin/busybox" ]; then
+    mkdir -p "$TEST_ROOT/lib"
+    cp -a /lib/* "$TEST_ROOT/lib/" 2>/dev/null || true
     cp /bin/busybox "$TEST_ROOT/bin/"
-    for applet in sh ls cat ps echo mkdir; do
+    for applet in sh ls cat ps echo mkdir test; do
         ln -sf /bin/busybox "$TEST_ROOT/bin/$applet" 2>/dev/null || true
     done
 fi
