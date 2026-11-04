@@ -224,10 +224,17 @@ def export_static_site_data() -> Tuple[Path, Path]:
         prob_dir = Path(p["dir"])
         readme_path = prob_dir / "README.md"
         readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
-        stub_path = prob_dir / "cpp" / "solution_stub.hpp"
-        stub_text = stub_path.read_text(encoding="utf-8") if stub_path.exists() else ""
-        harness_path = prob_dir / "cpp" / "harness.cpp"
-        harness_text = harness_path.read_text(encoding="utf-8") if harness_path.exists() else ""
+
+        stub_text = ""
+        harness_text = ""
+        if (prob_dir / "sh" / "solution_stub.sh").exists():
+            stub_text = (prob_dir / "sh" / "solution_stub.sh").read_text(encoding="utf-8")
+            harness_path = prob_dir / "sh" / "harness.sh"
+            harness_text = harness_path.read_text(encoding="utf-8") if harness_path.exists() else ""
+        elif (prob_dir / "cpp" / "solution_stub.hpp").exists():
+            stub_text = (prob_dir / "cpp" / "solution_stub.hpp").read_text(encoding="utf-8")
+            harness_path = prob_dir / "cpp" / "harness.cpp"
+            harness_text = harness_path.read_text(encoding="utf-8") if harness_path.exists() else ""
 
         export_list.append(
             {

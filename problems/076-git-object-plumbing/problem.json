@@ -1,0 +1,15 @@
+{
+  "id": "076-git-object-plumbing",
+  "title": "Git Internals: Object Database Plumbing",
+  "track": "Track 9: Systems Engineering, Containers & Git Internals",
+  "category": "Systems & Tooling",
+  "difficulty": "Medium",
+  "depends_on": ["075-container-namespace-isolation"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Plumbing Pass", "asc": false},
+    {"hdr": "Tree Integrity", "asc": false}
+  ],
+  "languages": ["sh"],
+  "tags": ["git", "internals", "hash-object", "write-tree", "commit-tree", "dag"]
+}

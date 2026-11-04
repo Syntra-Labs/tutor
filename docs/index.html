@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" crossorigin="anonymous"></script>
+<script src="./v86/libv86.js"></script>
 
 <style>
 :root {
@@ -522,6 +523,97 @@ body.is-resizing, body.is-resizing * {
   overflow: hidden;
 }
 
+/* --- Right Pane: Live Linux x86 WebAssembly VM --- */
+.vm-pane {
+  width: 35%;
+  min-width: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  border-left: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.vm-topbar {
+  height: 44px;
+  background: #111111;
+  border-bottom: 1px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #f0f6fc;
+  flex-shrink: 0;
+}
+.vm-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.vm-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8b949e;
+  transition: background 0.2s ease;
+}
+.vm-status-dot.online { background: #3fb950; }
+.vm-status-dot.booting { background: #d29922; }
+.vm-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vm-actions .small-btn {
+  background: #21262d;
+  color: #f0f6fc;
+  border: 1px solid #30363d;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.vm-actions .small-btn:hover {
+  background: #30363d;
+  border-color: #8b949e;
+}
+.vm-screen-wrapper {
+  flex: 1;
+  background: #000000;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 15px;
+  overflow: auto;
+  color: #f0f6fc;
+  cursor: text;
+  outline: none;
+}
+.vm-screen-wrapper span {
+  font-family: var(--mono) !important;
+  font-size: 13px !important;
+  line-height: 15px !important;
+}
+.vm-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8b949e;
+  font-size: 12px;
+  font-family: var(--mono);
+  text-align: center;
+  padding: 24px;
+  line-height: 1.6;
+}
+
 .nvim-container {
   flex: 1;
   position: relative;
@@ -705,6 +797,7 @@ body.is-resizing, body.is-resizing * {
         <select class="problem-select" id="problem-select" onchange="loadProblemById(this.value)"></select>
         <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next</button>
         <button class="small-btn primary" onclick="triggerRun()">:Run / Test (&lt;F5&gt;)</button>
+        <button class="small-btn" id="vm-toggle-btn" onclick="toggleVMPane()" title="Toggle Live Linux VM Terminal (Right Split)">Terminal</button>
       </div>
 
       <!-- TAB 1: PROBLEM SPEC & LIVE C++20 JUDGE OUTPUT -->
@@ -835,6 +928,31 @@ body.is-resizing, body.is-resizing * {
         <button class="nvim-btn" onclick="resetCurrentStub()" title="Reset to starter stub (:Reset)">:Reset</button>
         <button class="nvim-btn" id="help-btn" title="Reference manual (:Manual / <Space>m)">:Manual</button>
         <button class="nvim-btn" id="run-trigger" title="Compile &amp; test (:Run / :w / <F5>)">:Run</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESIZABLE SPLIT GUTTER 2 (VM SPLIT) -->
+  <div class="split-gutter vm-gutter hidden" id="vm-split-gutter" title="Drag to resize VM terminal (Double-click for equal splits)">
+    <div class="gutter-handle"></div>
+  </div>
+
+  <!-- RIGHT PANE: LIVE LINUX VM TERMINAL -->
+  <div class="vm-pane hidden" id="vm-pane">
+    <div class="vm-topbar">
+      <div class="vm-brand">
+        <span class="vm-status-dot" id="vm-status-dot"></span>
+        <span id="vm-status-label">LINUX 5.6 VM (x86_WASM)</span>
+      </div>
+      <div class="vm-actions">
+        <button class="small-btn" id="btn-vm-boot" onclick="window.bootLinuxVM()">Boot VM</button>
+        <button class="small-btn" id="btn-vm-reset" onclick="window.rebootLinuxVM()" title="Restart Linux VM">Reboot</button>
+        <button class="small-btn" id="btn-vm-close" onclick="window.closeVMPane()" title="Close VM Split">[x]</button>
+      </div>
+    </div>
+    <div class="vm-screen-wrapper" id="vm-screen-container" tabindex="0">
+      <div class="vm-placeholder">
+        <span>Click <b>[Boot VM]</b> or open a Track 9 problem to start the live Linux shell.</span>
       </div>
     </div>
   </div>
@@ -1038,8 +1156,11 @@ function loadProblem(idx) {
   currentIdx = Math.max(0, Math.min(idx, catalog.length - 1));
   const prob = catalog[currentIdx];
 
+  const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
+  const solFilename = isSh ? `${prob.id}/solution.sh` : `${prob.id}/solution.hpp`;
+
   document.getElementById("problem-select").value = prob.id;
-  document.getElementById("nvim-filename").textContent = `${prob.id}/solution.hpp`;
+  document.getElementById("nvim-filename").textContent = solFilename;
 
   const solved = solvedSet.has(prob.id);
   const unlocked = isUnlocked(prob);
@@ -1066,18 +1187,24 @@ function loadProblem(idx) {
   document.getElementById("metric-bytes").textContent = `${countEffectiveCodeBytes(initialCode)} B`;
 
   if (workerReady) {
-    setBufferCode(initialCode, `${prob.id}/solution.hpp`);
+    setBufferCode(initialCode, solFilename, isSh ? "sh" : "cpp");
   } else {
     currentBufferText = initialCode;
   }
   renderDag();
+
+  if (isSh) {
+    openVMPane();
+  }
 }
 
 function resetCurrentStub() {
   const prob = catalog[currentIdx];
   if (!prob) return;
   localStorage.removeItem(savedCodeKey(prob.id));
-  setBufferCode(prob.stub || "", `${prob.id}/solution.hpp`);
+  const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
+  const solFilename = isSh ? `${prob.id}/solution.sh` : `${prob.id}/solution.hpp`;
+  setBufferCode(prob.stub || "", solFilename, isSh ? "sh" : "cpp");
 }
 
 function switchTab(tabName) {
@@ -1323,6 +1450,116 @@ function renderLeetCodeJudgeBody() {
   logEl.innerHTML = html;
 }
 
+async function executeVMSolution(codeStr, prob) {
+  openVMPane();
+  const logEl = document.getElementById("judge-log");
+  const statusEl = document.getElementById("judge-status-text");
+  const engineEl = document.getElementById("judge-engine-badge");
+  const headerEl = document.getElementById("judge-header");
+
+  engineEl.textContent = "Live Linux 5.6 VM (x86_WASM)";
+  statusEl.textContent = `Running container harness inside guest VM...`;
+  logEl.textContent = "[*] Launching execution in Live Linux 5.6 WebAssembly VM...\n";
+
+  if (!v86Instance || !v86Booted) {
+    logEl.textContent += "[*] Booting x86 guest Linux kernel (cold boot ~2.4s)...\n";
+    bootLinuxVM();
+    const tStart = performance.now();
+    while (!v86Booted && performance.now() - tStart < 8000) {
+      await new Promise(r => setTimeout(r, 200));
+    }
+    if (!v86Booted) {
+      isJudging = false;
+      headerEl.className = "judge-header fail";
+      statusEl.textContent = "VM boot timed out";
+      logEl.textContent += "[!] Error: Linux VM did not reach shell prompt in time.\n";
+      return;
+    }
+  }
+
+  logEl.textContent += "[*] Injecting solution and running test suite...\n";
+
+  const user = (document.getElementById("gh-username").value || "browser-user").trim();
+  const codeBytes = countEffectiveCodeBytes(codeStr);
+  const nonce = "TUTOR_" + Math.random().toString(36).slice(2);
+
+  const b64Sol = btoa(unescape(encodeURIComponent(codeStr || "")));
+  const b64Harn = btoa(unescape(encodeURIComponent(prob.harness || "")));
+
+  const runScript = `mkdir -p /tmp/run_${nonce} && cd /tmp/run_${nonce}
+echo '${b64Sol}' | base64 -d > solution.sh
+echo '${b64Harn}' | base64 -d > harness.sh
+chmod +x solution.sh harness.sh
+echo '=== ${nonce}:BEGIN ==='
+/bin/sh harness.sh
+echo '=== ${nonce}:DONE ==='
+`;
+
+  v86Instance.keyboard_send_text(runScript + "\n");
+
+  const container = document.getElementById("vm-screen-container");
+  const t0 = performance.now();
+  let done = false;
+  let fullOutput = "";
+
+  while (performance.now() - t0 < 8000) {
+    await new Promise(r => setTimeout(r, 300));
+    const lines = Array.from(container.querySelectorAll("div"))
+      .map(d => d.innerText.trim())
+      .filter(t => t.length > 0);
+    const joined = lines.join("\n");
+    if (joined.includes(`${nonce}:DONE`)) {
+      done = true;
+      fullOutput = joined;
+      break;
+    }
+  }
+
+  isJudging = false;
+  const testCases = [];
+  let allPassed = true;
+
+  for (const line of fullOutput.split("\n")) {
+    if (line.includes("TESTCASE_JSON:")) {
+      try {
+        const jsonStr = line.substring(line.indexOf("TESTCASE_JSON:") + "TESTCASE_JSON:".length).trim();
+        const tc = JSON.parse(jsonStr);
+        testCases.push({
+          name: tc.name,
+          passed: tc.passed,
+          input: prob.id,
+          output: tc.details || (tc.passed ? "PASSED" : "FAILED"),
+          expected: tc.details || "PASSED"
+        });
+        if (!tc.passed) allPassed = false;
+      } catch (_) {}
+    }
+  }
+
+  if (testCases.length === 0) {
+    testCases.push({
+      name: "Script Execution",
+      passed: done,
+      input: "harness.sh",
+      output: done ? "Command finished" : "Execution timeout in guest VM",
+      expected: "Command finished"
+    });
+    allPassed = done;
+  }
+
+  applyJudgeResult(
+    prob,
+    allPassed,
+    true,
+    "",
+    allPassed ? "" : "One or more container assertions failed",
+    testCases,
+    1.0,
+    codeBytes,
+    user
+  );
+}
+
 async function executeJudge(codeStr) {
   if (isJudging || !catalog.length) return;
   const prob = catalog[currentIdx];
@@ -1341,6 +1578,11 @@ async function executeJudge(codeStr) {
   statusEl.textContent = `Running testcases for ${prob.id}...`;
   logEl.textContent = "Compiling and executing test suite...";
   switchTab("spec");
+
+  if ((prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9")) {
+    await executeVMSolution(codeStr, prob);
+    return;
+  }
 
   const user = (document.getElementById("gh-username").value || "browser-user").trim();
 
@@ -2008,18 +2250,18 @@ function primeNeovim() {
   splashEl.classList.add("hidden");
 }
 
-function setBufferCode(codeStr) {
+function setBufferCode(codeStr, filename, filetype) {
   currentBufferText = codeStr;
   const lines = String(codeStr || "").split(/\r?\n/);
+  const fn = filename || "solution.hpp";
+  const ft = filetype || (fn.endsWith(".sh") ? "sh" : "cpp");
   const lua = `
-    local lines = ...
+    local lines, fn, ft = ...
     local buf = vim.api.nvim_get_current_buf()
-    if vim.api.nvim_buf_get_name(buf) == "" then
-      pcall(vim.api.nvim_buf_set_name, buf, "solution.hpp")
-    end
+    pcall(vim.api.nvim_buf_set_name, buf, fn)
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-    vim.bo[buf].filetype = "cpp"
-    vim.bo[buf].syntax = "cpp"
+    vim.bo[buf].filetype = ft
+    vim.bo[buf].syntax = ft
     vim.bo[buf].readonly = false
     vim.bo[buf].buftype = ""
     vim.bo[buf].modified = false
@@ -2029,7 +2271,7 @@ function setBufferCode(codeStr) {
     vim.bo[buf].expandtab = true
     vim.api.nvim_win_set_cursor(0, {1, 0})
   `;
-  sendRpc("nvim_exec_lua", [lua, [lines]]);
+  sendRpc("nvim_exec_lua", [lua, [lines, fn, ft]]);
 }
 
 function handleWorkerMessage(event) {
@@ -2443,12 +2685,18 @@ function triggerRun() {
 document.getElementById("run-trigger").addEventListener("click", triggerRun);
 
 /* ========================================================================= */
-/* 5. DRAGGABLE SPLIT GUTTER                                                 */
+/* 5. DUAL VERTICAL SPLITS & IN-BROWSER LINUX VM LIFECYCLE                  */
 /* ========================================================================= */
 const gutter = document.getElementById("split-gutter");
+const vmGutter = document.getElementById("vm-split-gutter");
 const leftPane = document.getElementById("left-pane");
-let isDraggingSplit = false;
+const vmPane = document.getElementById("vm-pane");
+const editorPane = document.getElementById("editor-pane");
 
+let isDraggingSplit = false;
+let isDraggingVmSplit = false;
+
+// Left-to-Middle Split Dragging
 gutter.addEventListener("pointerdown", (e) => {
   isDraggingSplit = true;
   gutter.classList.add("dragging");
@@ -2458,7 +2706,9 @@ gutter.addEventListener("pointerdown", (e) => {
 gutter.addEventListener("pointermove", (e) => {
   if (!isDraggingSplit) return;
   const w = window.innerWidth;
-  const clamped = Math.max(320, Math.min(w - 300, e.clientX));
+  const isVmOpen = !vmPane.classList.contains("hidden");
+  const maxLeft = isVmOpen ? w * 0.5 : w - 300;
+  const clamped = Math.max(320, Math.min(maxLeft, e.clientX));
   leftPane.style.width = `${(clamped / w) * 100}%`;
   if (workerReady) {
     const dims = computeGridDimensions();
@@ -2477,7 +2727,177 @@ function endSplit() {
 }
 gutter.addEventListener("pointerup", endSplit);
 gutter.addEventListener("pointercancel", endSplit);
-gutter.addEventListener("dblclick", () => { leftPane.style.width = "50%"; });
+gutter.addEventListener("dblclick", () => {
+  const isVmOpen = !vmPane.classList.contains("hidden");
+  if (isVmOpen) {
+    leftPane.style.width = "33.3%";
+    vmPane.style.width = "33.3%";
+  } else {
+    leftPane.style.width = "50%";
+  }
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+  }
+});
+
+// Middle-to-Right (VM) Split Dragging
+vmGutter.addEventListener("pointerdown", (e) => {
+  isDraggingVmSplit = true;
+  vmGutter.classList.add("dragging");
+  document.body.classList.add("is-resizing");
+  vmGutter.setPointerCapture(e.pointerId);
+});
+vmGutter.addEventListener("pointermove", (e) => {
+  if (!isDraggingVmSplit) return;
+  const w = window.innerWidth;
+  const rightWidth = w - e.clientX;
+  const clamped = Math.max(280, Math.min(w * 0.55, rightWidth));
+  vmPane.style.width = `${(clamped / w) * 100}%`;
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    if (dims.cols !== cols || dims.rows !== rows) {
+      cols = dims.cols;
+      rows = dims.rows;
+      sendRpc("nvim_ui_try_resize", [cols, rows]);
+    }
+  }
+});
+function endVmSplit() {
+  if (!isDraggingVmSplit) return;
+  isDraggingVmSplit = false;
+  vmGutter.classList.remove("dragging");
+  document.body.classList.remove("is-resizing");
+}
+vmGutter.addEventListener("pointerup", endVmSplit);
+vmGutter.addEventListener("pointercancel", endVmSplit);
+vmGutter.addEventListener("dblclick", () => {
+  leftPane.style.width = "33.3%";
+  vmPane.style.width = "33.3%";
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+  }
+});
+
+// VM Pane Open/Close Functions
+function openVMPane() {
+  vmPane.classList.remove("hidden");
+  vmGutter.classList.remove("hidden");
+  leftPane.style.width = "32%";
+  vmPane.style.width = "34%";
+
+  const btn = document.getElementById("vm-toggle-btn");
+  if (btn) btn.classList.add("primary");
+
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+  }
+
+  if (!v86Instance && !v86Booting) {
+    bootLinuxVM();
+  }
+}
+window.openVMPane = openVMPane;
+
+function closeVMPane() {
+  vmPane.classList.add("hidden");
+  vmGutter.classList.add("hidden");
+  leftPane.style.width = "50%";
+
+  const btn = document.getElementById("vm-toggle-btn");
+  if (btn) btn.classList.remove("primary");
+
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+  }
+}
+window.closeVMPane = closeVMPane;
+
+function toggleVMPane() {
+  if (vmPane.classList.contains("hidden")) {
+    openVMPane();
+  } else {
+    closeVMPane();
+  }
+}
+window.toggleVMPane = toggleVMPane;
+
+// In-Browser Linux VM Lifecycle (v86)
+let v86Instance = null;
+let v86Booted = false;
+let v86Booting = false;
+let v86BootCheckInterval = null;
+
+function bootLinuxVM() {
+  if (v86Instance || v86Booting) return;
+  v86Booting = true;
+  const dot = document.getElementById("vm-status-dot");
+  const label = document.getElementById("vm-status-label");
+  if (dot) dot.className = "vm-status-dot booting";
+  if (label) label.textContent = "BOOTING LINUX 5.6...";
+
+  const container = document.getElementById("vm-screen-container");
+  container.innerHTML = "";
+  container.focus();
+
+  try {
+    const V86Constructor = window.V86 || window.V86Starter;
+    if (!V86Constructor) throw new Error("v86 library not loaded");
+
+    v86Instance = new V86Constructor({
+      wasm_path: "./v86/v86.wasm",
+      memory_size: 64 * 1024 * 1024,
+      vga_memory_size: 2 * 1024 * 1024,
+      screen_container: container,
+      bios: { url: "./v86/seabios.bin" },
+      vga_bios: { url: "./v86/vgabios.bin" },
+      bzimage: { url: "./images/buildroot-bzimage.bin" },
+      cmdline: "tsc=reliable mitigations=off random.trust_cpu=on",
+      autostart: true,
+    });
+
+    v86BootCheckInterval = setInterval(() => {
+      if (!v86Instance) { clearInterval(v86BootCheckInterval); return; }
+      const text = Array.from(container.querySelectorAll("span"))
+        .map(s => s.innerText)
+        .join("")
+        .replace(/[\s\u00a0]+/g, " ")
+        .trim();
+
+      if (text.includes("~%") || text.includes("# ") || text.includes("buildroot")) {
+        clearInterval(v86BootCheckInterval);
+        v86Booted = true;
+        v86Booting = false;
+        if (dot) dot.className = "vm-status-dot online";
+        if (label) label.textContent = "LINUX 5.6 VM (ONLINE)";
+      }
+    }, 200);
+  } catch (err) {
+    v86Booting = false;
+    if (dot) dot.className = "vm-status-dot";
+    if (label) label.textContent = "VM BOOT ERROR";
+    console.error("V86 initialization error:", err);
+  }
+}
+window.bootLinuxVM = bootLinuxVM;
+
+function rebootLinuxVM() {
+  if (v86BootCheckInterval) {
+    clearInterval(v86BootCheckInterval);
+    v86BootCheckInterval = null;
+  }
+  if (v86Instance) {
+    try { v86Instance.destroy(); } catch (_) {}
+    v86Instance = null;
+  }
+  v86Booted = false;
+  v86Booting = false;
+  bootLinuxVM();
+}
+window.rebootLinuxVM = rebootLinuxVM;
 
 initStudio();
 </script>

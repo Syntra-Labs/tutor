@@ -1,0 +1,15 @@
+{
+  "id": "075-container-namespace-isolation",
+  "title": "Linux Containers from Scratch (Namespaces & Chroot)",
+  "track": "Track 9: Systems Engineering, Containers & Git Internals",
+  "category": "Systems & Containers",
+  "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "PID Isolation", "asc": false},
+    {"hdr": "Mount Jail", "asc": false}
+  ],
+  "languages": ["sh"],
+  "tags": ["containers", "namespaces", "chroot", "linux-kernel", "pid1", "procfs"]
+}
