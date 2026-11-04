@@ -36,7 +36,3 @@ std::vector<size_t> intersect_prime_sets(uint64_t prod_a, uint64_t prod_b);
 
 - **Time:** $O(\log(\min(P_A, P_B)))$ for Euclidean GCD plus $O(|V|)$ trial division over the prime table.
 - **Space:** $O(1)$ auxiliary space.
-
-## Source Reference
-
-- [`primes-and-zeta.md` (lines 30–37)](file:///home/yassine/code/uor-r4/docs/geometry/primes-and-zeta.md#L30-L37)

@@ -36,7 +36,3 @@ constexpr std::optional<ExactDyadicF32> decode_f32_bits(uint32_t bits);
 
 - **Time:** $O(1)$ bitwise operations (zero floating-point instructions).
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [`exact.rs`](file:///home/yassine/code/uor-r4/docs/labs/legal-construction-exact-solve/solver/src/exact.rs)

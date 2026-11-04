@@ -37,7 +37,3 @@ std::string invert_sigma(const std::string& canon_text, const std::unordered_map
 
 - **Time:** $O(|G| + |T|)$ linear scan in string length.
 - **Space:** $O(|\sigma|)$ hash map entries.
-
-## Source Reference
-
-- [canonicalizer.py](file:///home/yassine/code/r4-prover/src/ir/canonicalizer.py)

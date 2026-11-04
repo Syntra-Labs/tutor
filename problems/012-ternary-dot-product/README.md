@@ -31,7 +31,3 @@ int64_t trit_dot(std::span<const PackedTrit64> a, std::span<const PackedTrit64> 
 
 - **Time:** $O(N)$ words — 6 bitwise ops + 2 `popcnt` instructions per 64-trit word.
 - **Space:** $O(1)$ registers.
-
-## Source
-
-- [`ternary-xor.md` (§How it works: The dot product is exact)](file:///home/yassine/code/uor-r4/docs/mechanisms/ternary-xor.md#L25-L28)

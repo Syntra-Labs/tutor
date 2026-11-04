@@ -30,8 +30,3 @@ Quat make_rotor(double angle_rad, double ux, double uy, double uz);
 
 - **Time:** $O(1)$ (16 multiplies + 12 adds per Hamilton product).
 - **Space:** $O(1)$.
-
-## Source
-
-- [tree_rotor.hpp](file:///home/yassine/code/r4-prover/src/cpp/geometry/tree_rotor.hpp#L47-L59)
-- [tree_rotor.cpp](file:///home/yassine/code/r4-prover/src/cpp/geometry/tree_rotor.cpp#L6-L15)

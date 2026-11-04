@@ -44,7 +44,3 @@ bool verify_lp_certificate(
 
 - **Time:** $O(m \cdot n)$ exact rational operations per pivot; $O(m \cdot n)$ for certificate verification.
 - **Space:** $O(m \cdot n)$ tableau entries.
-
-## Source Reference
-
-- [lp.rs](file:///home/yassine/code/uor-r4/docs/labs/legal-construction-exact-solve/solver/src/lp.rs)

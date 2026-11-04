@@ -39,7 +39,3 @@ struct ByteMarkovModel {
 
 - **Time:** $O(1)$ per `byte_surprisal` evaluation; $O(\min(N, 4096))$ per `observe_stream`.
 - **Space:** $256\text{ KiB} + 1\text{ KiB}$ fixed L2-resident tables.
-
-## Source Reference
-
-- [`manifold.cpp` (lines 731–762)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L731-L762)

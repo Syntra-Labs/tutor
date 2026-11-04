@@ -28,7 +28,3 @@ constexpr uint64_t lut_mul_u64(uint32_t a, uint32_t b);
 
 - **Time:** $O(32)$ bitwise shift/sub iterations for `isqrt_u64`; 15 additions + 8 table lookups for `lut_mul_u64`.
 - **Space:** $O(1)$ (16-entry `uint64_t` stack table).
-
-## Source Reference
-
-- [`lut-serving.md`](file:///home/yassine/code/uor-r4/docs/mechanisms/lut-serving.md#L44)

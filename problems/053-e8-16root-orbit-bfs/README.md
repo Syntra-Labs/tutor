@@ -25,7 +25,3 @@ E8Orbit16 build_e8_orbit_16();
 
 - **Time:** $O(1)$ table construction ($16 \times 16 \times 15$ BFS steps).
 - **Space:** $O(1)$ (`bfs` table is $256$ bytes).
-
-## Source
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L285-L330)

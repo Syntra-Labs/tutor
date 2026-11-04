@@ -27,7 +27,3 @@ double spherical_excess_polygon(const std::vector<Vec3>& vertices);
 
 - **Time:** $O(n)$ for an $n$-vertex geodesic polygon.
 - **Space:** $O(1)$.
-
-## Source
-
-- [sphere-route/README.md](file:///home/yassine/code/sphere-route/README.md)

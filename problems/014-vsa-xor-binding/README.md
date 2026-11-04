@@ -43,8 +43,3 @@ size_t unbind_and_match(
 
 - **Time:** $O(128)$ words for `bind` (16 AVX-512 `vpxorq` or 32 AVX2 `vpxor` instructions); $O(K \times 128)$ for candidate lookup.
 - **Space:** $O(1)$ auxiliary space.
-
-## Source
-
-- [`manifold.cpp` (lines 442–448)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L442-L448)
-- [`vsa-and-hamming.md`](file:///home/yassine/code/uor-r4/docs/geometry/vsa-and-hamming.md)

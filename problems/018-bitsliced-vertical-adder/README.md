@@ -38,7 +38,3 @@ Hypervec8192 encode_seeds_bitsliced(
 
 - **Time:** $O(128 \times n)$ — 21 bitwise register ops per seed-word, zero L1D memory traffic inside the inner loop.
 - **Space:** $O(1)$ — 8 CPU general-purpose registers (`b0..b7`).
-
-## Source
-
-- [`manifold.cpp` (lines 544–624)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L544-L624)

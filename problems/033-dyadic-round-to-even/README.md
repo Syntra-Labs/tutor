@@ -41,7 +41,3 @@ struct Dy {
 
 - **Time:** $O(1)$ per `round`, `add`, and `mul` (pure integer arithmetic, zero floats).
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [`dyadic.rs` (lines 154–335)](file:///home/yassine/code/uor-r4/docs/labs/legal-construction-exact-solve/solver/src/dyadic.rs#L154-L335)

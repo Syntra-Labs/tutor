@@ -31,7 +31,3 @@ uint32_t pitch_class_distance_72edo(uint32_t c1, uint32_t c2);
 
 - **Time:** $O(1)$ per character.
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [`tokenizer/README.md`](file:///home/yassine/code/tokenizer/README.md)

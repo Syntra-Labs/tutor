@@ -37,7 +37,3 @@ constexpr ZPhi golden_pow(int64_t n);
 
 - **Time:** $O(\log |n|)$ ring multiplications in $\mathbb{Z}[\phi]$.
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [`golden-integers.md`](file:///home/yassine/code/uor-r4/docs/geometry/golden-integers.md)

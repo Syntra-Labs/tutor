@@ -45,7 +45,3 @@ uint8_t flock_read_step(
 
 - **Time:** $O(N \log K)$ integer comparisons and additions; zero floating-point operations.
 - **Space:** $O(N)$ eligible candidate indices.
-
-## Source Reference
-
-- [flock-read.md](file:///home/yassine/code/uor-r4/docs/mechanisms/flock-read.md#L25-L35)

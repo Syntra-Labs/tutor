@@ -29,8 +29,3 @@ uint16_t quantize_hopf_sector_512(const Vec3& s2);
 
 - **Time:** $O(1)$.
 - **Space:** $O(1)$.
-
-## Source
-
-- [hopf-observation.md](file:///home/yassine/code/uor-r4/docs/mechanisms/hopf-observation.md)
-- [hopf_metric.rs](file:///home/yassine/code/uor-r4/crates/uor-r4-core/src/native_geometric/hopf_metric.rs#L148-L207)

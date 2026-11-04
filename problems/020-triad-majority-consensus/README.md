@@ -40,7 +40,3 @@ HelixSignature256 triad_majority_signature(
 
 - **Time:** $O(1)$ — 20 bitwise instructions (5 per 64-bit word, or 3 with ternary logic `vpternlogq`).
 - **Space:** 32 bytes.
-
-## Source
-
-- [`manifold.cpp` (lines 1606–1623)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L1606-L1623)

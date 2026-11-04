@@ -38,7 +38,3 @@ struct PackedTrit64 {
 
 - **Time:** $O(1)$ (1 instruction) for `is_valid`, `negate`, and `nnz`; $O(64)$ for array pack/unpack.
 - **Space:** 16 bytes (`2 x uint64_t`) for 64 trits (2 bits/trit).
-
-## Source
-
-- [`ternary-xor.md` (§How it works: Storage)](file:///home/yassine/code/uor-r4/docs/mechanisms/ternary-xor.md#L23)

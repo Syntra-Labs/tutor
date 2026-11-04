@@ -51,8 +51,3 @@ double compute_coupled_similarity(
 
 - **Time:** $O(1)$ per block for both wiring and coupled similarity evaluation.
 - **Space:** $O(1)$ auxiliary state (`RelationIndexerState`).
-
-## Source Reference
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L1575-L1635)
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L2077-L2147)

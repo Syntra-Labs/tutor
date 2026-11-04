@@ -32,7 +32,3 @@ struct Quat {
 
 - **Time:** $O(1)$ per operation.
 - **Space:** $O(1)$ (32 bytes per `Quat`).
-
-## Source
-
-- [tree_rotor.hpp](file:///home/yassine/code/r4-prover/src/cpp/geometry/tree_rotor.hpp#L13-L45)

@@ -26,8 +26,3 @@ uint8_t snap_icosian(const std::array<Icosian2, 120>& icosians, double w, double
 
 - **Time:** $O(1)$ per Cayley lookup; $120$ dot products per `snap_icosian`.
 - **Space:** $O(1)$ ($14,400$ bytes for the $120 \times 120$ table).
-
-## Source
-
-- [spin-weights.md](file:///home/yassine/code/uor-r4/docs/mechanisms/spin-weights.md)
-- [verify_connections.py](file:///home/yassine/code/uor-r4/docs/figures/geometry/verify_connections.py#L129-L161)

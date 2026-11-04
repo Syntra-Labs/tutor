@@ -45,7 +45,3 @@ constexpr TritAddResult trit_full_add(PackedTrit64 a, PackedTrit64 b, PackedTrit
 
 - **Time:** $O(1)$ (~18 branchless bitwise operations for 64 parallel full-adder lanes).
 - **Space:** $O(1)$ registers.
-
-## Source
-
-- [`ternary-xor.md`](file:///home/yassine/code/uor-r4/docs/mechanisms/ternary-xor.md)

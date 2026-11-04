@@ -28,7 +28,3 @@ uint64_t step_rule_30(uint64_t state);
 
 - **Time:** $O(1)$ — 4 CPU instructions (`rol`, `ror`, `or`, `xor`) updating all 64 cells simultaneously.
 - **Space:** $O(1)$ registers.
-
-## Source
-
-- [`manifold.cpp` (lines 782–787)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L782-L787)

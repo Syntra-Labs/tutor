@@ -24,7 +24,3 @@ Quat slerp(Quat q1, Quat q2, double t);
 
 - **Time:** $O(1)$ per interpolation.
 - **Space:** $O(1)$.
-
-## Source
-
-- [quaternions-and-rotation.md](file:///home/yassine/code/uor-r4/docs/geometry/quaternions-and-rotation.md)

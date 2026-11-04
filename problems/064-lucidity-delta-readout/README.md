@@ -40,8 +40,3 @@ DeltaFeedback compute_surprise_delta(double query_target_sim, bool positive_rewa
 
 - **Time:** $O(1)$ (< 10 ns/op).
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L1532-L1547)
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L2245-L2265)

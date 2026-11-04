@@ -43,7 +43,3 @@ SparsifiedMassResult sparsify_mass_nodes(
 
 - **Time:** $O(U \log K)$ where $U \le 192$ is the number of unique seeds and $K \le 20$.
 - **Space:** $O(U)$ stack arrays.
-
-## Source Reference
-
-- [`manifold.cpp` (lines 1103–1187)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L1103-L1187)

@@ -43,7 +43,3 @@ void uorlut01_project(
 
 - **Time:** $15 \cdot D_{\text{in}}$ additions to build `luts_out`, plus $D_{\text{out}} \cdot D_{\text{in}}$ table reads and additions (zero `*` instructions).
 - **Space:** $O(D_{\text{in}})$ for the precomputed 16-entry activation tables.
-
-## Source Reference
-
-- [`lut-serving.md` (lines 40–44)](file:///home/yassine/code/uor-r4/docs/mechanisms/lut-serving.md#L40-L44)

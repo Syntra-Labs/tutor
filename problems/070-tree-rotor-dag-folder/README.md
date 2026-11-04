@@ -45,8 +45,3 @@ Quat TreeRotorOperator::fold_dag(
 
 - **Time:** $O(|V|)$ quaternion rotor products with memoization.
 - **Space:** $O(|V|)$ memoization map.
-
-## Source Reference
-
-- [tree_rotor.cpp](file:///home/yassine/code/r4-prover/src/cpp/geometry/tree_rotor.cpp#L17-L158)
-- [tree_rotor.hpp](file:///home/yassine/code/r4-prover/src/cpp/geometry/tree_rotor.hpp)

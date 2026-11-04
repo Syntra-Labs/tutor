@@ -27,7 +27,3 @@ Quat hopf_phase_rotor(double psi);
 
 - **Time:** $O(1)$ (quadratic polynomial in $(w, x, y, z)$, zero trig/sqrt calls for projection).
 - **Space:** $O(1)$.
-
-## Source
-
-- [hopf-observation.md](file:///home/yassine/code/uor-r4/docs/geometry/hopf-observation.md)

@@ -26,8 +26,3 @@ HamiltonGateGrads hamilton_gate_backward(const Quat& g, const Quat& u, const Qua
 
 - **Time:** $O(1)$ per 4-block.
 - **Space:** $O(1)$.
-
-## Source
-
-- [hamilton-gate.md](file:///home/yassine/code/uor-r4/docs/mechanisms/hamilton-gate.md#L19-L30)
-- [cuda_stack.cu](file:///home/yassine/code/uor-r4/crates/uor-r4-training/src/cuda_stack.cu#L172-L220)

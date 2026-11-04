@@ -31,8 +31,3 @@ Quat recurrence_step_forward(const Quat& h_prev, const Quat& u_unit, const Quat&
 
 - **Time:** $O(1)$ per step.
 - **Space:** $O(1)$ (16-entry static tables).
-
-## Source
-
-- [recurrence-gates.md](file:///home/yassine/code/uor-r4/docs/mechanisms/recurrence-gates.md#L25-L33)
-- [cuda_stack.cu](file:///home/yassine/code/uor-r4/crates/uor-r4-training/src/cuda_stack.cu#L231-L291)

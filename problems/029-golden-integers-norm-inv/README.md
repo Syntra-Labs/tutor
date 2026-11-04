@@ -41,7 +41,3 @@ struct ZPhi {
 
 - **Time:** $O(1)$ integer arithmetic per operation.
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [`golden-integers.md`](file:///home/yassine/code/uor-r4/docs/geometry/golden-integers.md)

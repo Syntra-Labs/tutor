@@ -33,7 +33,3 @@ void expand_word_bipolar(uint64_t word, int16_t* out_64);
 
 - **Time:** $O(1)$ — 8 L1D cache-hit 16-byte loads/stores per 64-bit word.
 - **Space:** 4,096 bytes static `constexpr` table in `.rodata`.
-
-## Source
-
-- [`manifold.cpp` (lines 412–423)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L412-L423)

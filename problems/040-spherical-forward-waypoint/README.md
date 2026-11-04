@@ -26,7 +26,3 @@ SphericalTurtle run_spherical_path(const std::vector<Command>& commands);
 
 - **Time:** $O(N)$ for $N$ commands.
 - **Space:** $O(1)$ auxiliary state.
-
-## Source
-
-- [sphere.hpp](file:///home/yassine/code/sphere-route/sphere.hpp)

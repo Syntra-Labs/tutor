@@ -34,7 +34,3 @@ uint8_t snap_e8_root(
 
 - **Time:** $O(1)$ ($16 \times 8 = 128$ integer comparisons/subtractions).
 - **Space:** $O(1)$.
-
-## Source
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L350-L382)

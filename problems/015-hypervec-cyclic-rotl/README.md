@@ -38,7 +38,3 @@ struct Hypervec8192 {
 
 - **Time:** $O(128)$ words (~60–90 CPU cycles).
 - **Space:** $O(1)$ auxiliary registers.
-
-## Source
-
-- [`manifold.cpp` (lines 450–466)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L450-L466)

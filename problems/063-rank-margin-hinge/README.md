@@ -47,7 +47,3 @@ RankMarginResult evaluate_rank_margin_hinge(
 
 - **Time:** $O(256)$ integer comparisons and shifts; zero multiplications or floating-point instructions.
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [rank-margin.md](file:///home/yassine/code/uor-r4/docs/mechanisms/rank-margin.md#L27-L42)

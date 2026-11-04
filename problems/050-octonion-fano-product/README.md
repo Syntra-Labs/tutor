@@ -26,8 +26,3 @@ uint32_t count_anti_associative_triples();
 
 - **Time:** $O(1)$ per basis product.
 - **Space:** $O(1)$.
-
-## Source
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L166-L185)
-- [verify_connections.py](file:///home/yassine/code/uor-r4/docs/figures/geometry/verify_connections.py#L49-L110)

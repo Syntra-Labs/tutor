@@ -50,8 +50,3 @@ public:
 
 - **Time:** $O(B \cdot |A| \cdot D)$ per search step where $|A|$ is action dictionary size and $D$ is tangent dimension.
 - **Space:** $O(\text{max\_steps})$ search tree nodes.
-
-## Source Reference
-
-- [geodesic_search.cpp](file:///home/yassine/code/r4-prover/src/cpp/search/geodesic_search.cpp)
-- [geodesic_search.hpp](file:///home/yassine/code/r4-prover/src/cpp/search/geodesic_search.hpp)

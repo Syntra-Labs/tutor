@@ -37,8 +37,3 @@ namespace sym {
 
 - **Time:** $O(N)$ single-pass recursive descent in expression length $N$.
 - **Space:** $O(T)$ AST nodes.
-
-## Source Reference
-
-- [lawful/symbolic.hpp](file:///home/yassine/code/lawful/symbolic.hpp)
-- [lawful/symbolic.cpp](file:///home/yassine/code/lawful/symbolic.cpp)

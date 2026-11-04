@@ -28,8 +28,3 @@ std::array<uint32_t, 9> compute_icosian_shell_counts(const std::array<Icosian2, 
 
 - **Time:** $O(1)$ exact integer enumeration.
 - **Space:** $O(1)$ ($120 \times 32 = 3840$ bytes).
-
-## Source
-
-- [e8-h4-and-the-600-cell.md](file:///home/yassine/code/uor-r4/docs/geometry/e8-h4-and-the-600-cell.md#L11-L20)
-- [verify_connections.py](file:///home/yassine/code/uor-r4/docs/figures/geometry/verify_connections.py#L144-L175)

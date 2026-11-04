@@ -34,8 +34,3 @@ std::string skeletonize_cpp_source(const std::string& source_code);
 
 - **Time:** $O(N)$ single-pass lexical scan over `source_code`.
 - **Space:** $O(N)$ output buffer.
-
-## Source Reference
-
-- [skeletonizer.rs](file:///home/yassine/code/prover/crates/lgcc/src/ast/skeletonizer.rs)
-- [code_oracle.hpp](file:///home/yassine/code/r4-prover/src/cpp/oracle/code_oracle.hpp)

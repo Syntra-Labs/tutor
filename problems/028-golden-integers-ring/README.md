@@ -36,7 +36,3 @@ struct ZPhi {
 
 - **Time:** $O(1)$ (4 integer multiplications and 3 additions per product, or 3 multiplications via Karatsuba).
 - **Space:** $O(1)$ (16 bytes per `ZPhi`).
-
-## Source Reference
-
-- [`golden-integers.md`](file:///home/yassine/code/uor-r4/docs/geometry/golden-integers.md)

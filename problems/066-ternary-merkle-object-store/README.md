@@ -41,7 +41,3 @@ public:
 
 - **Time:** `fold` in $O(N)$ hashes; `range` in $O(\log_3 N + (end - start)/32)$ node visits.
 - **Space:** $O(U)$ unique records in the deduplicated DAG.
-
-## Source Reference
-
-- [object-store.md](file:///home/yassine/code/uor-r4/docs/mechanisms/object-store.md#L20-L35)

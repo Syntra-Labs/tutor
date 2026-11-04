@@ -23,7 +23,3 @@ void spinor_action(const SpinorGroup64& grp, uint8_t state_id, const int32_t x[8
 
 - **Time:** $O(1)$ per `spinor_action` (8 table lookups + conditional sign flips, zero multiplications).
 - **Space:** $O(1)$ (`SpinorGroup64` fits in $< 5\text{ KB}$ of L1 cache).
-
-## Source
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L233-L284)

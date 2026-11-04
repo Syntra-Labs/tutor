@@ -42,8 +42,3 @@ std::vector<Move> admissible_moves(const HashConsDAG& dag, const std::vector<Hyp
 
 - **Time:** $O(1)$ amortized per `intern`; $O(|P|)$ per unification check.
 - **Space:** $O(N_{\text{unique}})$ DAG nodes.
-
-## Source Reference
-
-- [admissibility.py](file:///home/yassine/code/r4-prover/src/ir/admissibility.py)
-- [kernel_expr.hpp](file:///home/yassine/code/r4-prover/src/cpp/ir/kernel_expr.hpp)

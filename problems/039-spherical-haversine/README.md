@@ -27,7 +27,3 @@ double haversine_distance_deg(double lat1_deg, double lon1_deg, double lat2_deg,
 
 - **Time:** $O(1)$ per pair (3 trigonometric calls + `sqrt` + `asin`).
 - **Space:** $O(1)$.
-
-## Source
-
-- [sphere.hpp](file:///home/yassine/code/sphere-route/sphere.hpp)

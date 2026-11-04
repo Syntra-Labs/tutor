@@ -42,7 +42,3 @@ struct U256 {
 
 - **Time:** $O(1)$ (4 64x64->128-bit hardware `mulx`/`mulq` instructions for `mul_u128`).
 - **Space:** $O(1)$ (32 bytes per `U256`).
-
-## Source Reference
-
-- [`dyadic.rs` (lines 24–127)](file:///home/yassine/code/uor-r4/docs/labs/legal-construction-exact-solve/solver/src/dyadic.rs#L24-L127)

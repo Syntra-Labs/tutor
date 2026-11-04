@@ -22,7 +22,3 @@ PackedTrit64 trit_mul(PackedTrit64 a, PackedTrit64 b);
 
 - **Time:** $O(1)$ — 6 bitwise instructions (`and`, `or`) for 64 parallel trit multiplications (16+ trits/cycle).
 - **Space:** $O(1)$ registers.
-
-## Source
-
-- [`ternary-xor.md` (§How it works)](file:///home/yassine/code/uor-r4/docs/mechanisms/ternary-xor.md#L23-L30)

@@ -37,7 +37,3 @@ struct Hypervec8192 {
 
 - **Time:** $O(128)$ words (~120 cycles for expansion or $z$-score).
 - **Space:** 1024 bytes per `Hypervec8192`.
-
-## Source
-
-- [`manifold.cpp` (lines 428–485)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L428-L485)

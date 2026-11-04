@@ -35,7 +35,3 @@ uint32_t count_demarcs(uint64_t seed_bits, bool& particle_conserved_out);
 
 - **Time:** $O(1)$ (~18 branchless bitwise instructions + 4 `popcnt`).
 - **Space:** $O(1)$ registers.
-
-## Source
-
-- [`manifold.cpp` (lines 767–809)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L767-L809)

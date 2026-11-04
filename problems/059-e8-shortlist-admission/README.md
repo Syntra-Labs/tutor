@@ -31,8 +31,3 @@ std::array<bool, 256> compute_e8_shortlist_admission(
 
 - **Time:** $O(256 \log 32)$ comparisons via `std::partial_sort` or radix bucket selection (< 500 cycles/op).
 - **Space:** $O(1)$ stack memory.
-
-## Source Reference
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L2053-L2073)
-- [admission.md](file:///home/yassine/code/uor-r4/docs/mechanisms/admission.md)

@@ -28,7 +28,3 @@ uint64_t step_rule_110(uint64_t state);
 
 - **Time:** $O(1)$ — 5 CPU instructions updating all 64 cells in parallel.
 - **Space:** $O(1)$ registers.
-
-## Source
-
-- [`manifold.cpp` (lines 775–780)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L775-L780)

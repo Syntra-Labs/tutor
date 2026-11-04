@@ -29,8 +29,3 @@ std::array<Mat8, 15> build_cl06_bivectors();
 
 - **Time:** $O(1)$ fixed $8 \times 8$ integer matrix operations.
 - **Space:** $O(1)$ ($64$ bytes per `Mat8`).
-
-## Source
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L187-L231)
-- [verify_connections.py](file:///home/yassine/code/uor-r4/docs/figures/geometry/verify_connections.py#L274-L294)

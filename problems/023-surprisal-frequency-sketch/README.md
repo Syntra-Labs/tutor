@@ -39,7 +39,3 @@ struct SurprisalSketch {
 
 - **Time:** $O(1)$ per `observe_seed`, `step_span`, and `weight_for_seed` (zero branches on hash lookup).
 - **Space:** Exactly $256\text{ KiB} + 4\text{ B}$ (`65536 * sizeof(uint32_t)`).
-
-## Source Reference
-
-- [`manifold.cpp` (lines 689–726)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L689-L726)

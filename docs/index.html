@@ -1993,26 +1993,17 @@ function setBufferCode(codeStr) {
   sendRpc("nvim_exec_lua", [lua, [lines]]);
 }
 
-let pendingDrawData = null;
-let drawRafId = null;
-
-function scheduleGridRender(drawData) {
-  pendingDrawData = drawData;
-  if (drawRafId !== null) return;
-  drawRafId = requestAnimationFrame(() => {
-    drawRafId = null;
-    if (pendingDrawData) {
-      const d = pendingDrawData;
-      pendingDrawData = null;
-      renderGrid(d.cells, d.cursor, d.cursorHlId, d.cursorShape, d.mode, d.hls);
-    }
-  });
-}
-
 function handleWorkerMessage(event) {
   const { type } = event.data || {};
   if (type === "draw-text") {
-    scheduleGridRender(event.data);
+    renderGrid(
+      event.data.cells,
+      event.data.cursor,
+      event.data.cursorHlId,
+      event.data.cursorShape,
+      event.data.mode,
+      event.data.hls
+    );
   } else if (type === "response") {
     const resolver = pendingRpcResolvers.get(event.data.msgid);
     if (resolver) {
@@ -2301,37 +2292,33 @@ window.addEventListener("mouseup", (ev) => {
 
 gridEl.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
-let wheelDeltaY = 0;
-let wheelDeltaX = 0;
-let wheelRafScheduled = false;
+let pendingWheelLines = 0;
+let pendingWheelCols = 0;
 let wheelInFlight = false;
-let wheelDecayTimer = null;
 
-function flushWheel() {
-  wheelRafScheduled = false;
-  if (!workerReady) return;
-
-  const charH = lastCharH || 19;
-  const charW = lastCharW || 8.5;
-
-  const lines = Math.trunc(wheelDeltaY / charH);
-  const cols = Math.trunc(wheelDeltaX / charW);
-
+function dispatchWheelScroll(lines, cols) {
   if (lines === 0 && cols === 0) return;
 
-  wheelDeltaY -= lines * charH;
-  wheelDeltaX -= cols * charW;
+  if (wheelInFlight) {
+    pendingWheelLines += lines;
+    pendingWheelCols += cols;
+    // Clamp backlog to at most 1 window height of lines
+    const maxLines = (rows || 30);
+    if (Math.abs(pendingWheelLines) > maxLines) {
+      pendingWheelLines = Math.sign(pendingWheelLines) * maxLines;
+    }
+    return;
+  }
 
   wheelInFlight = true;
   sendRpc("nvim_exec_lua", ["_G.tutor_scroll(..., ...)", [lines, cols]]).finally(() => {
     wheelInFlight = false;
-    const cH = lastCharH || 19;
-    const cW = lastCharW || 8.5;
-    if (Math.abs(wheelDeltaY) >= cH || Math.abs(wheelDeltaX) >= cW) {
-      if (!wheelRafScheduled) {
-        wheelRafScheduled = true;
-        requestAnimationFrame(flushWheel);
-      }
+    if (pendingWheelLines !== 0 || pendingWheelCols !== 0) {
+      const l = pendingWheelLines;
+      const c = pendingWheelCols;
+      pendingWheelLines = 0;
+      pendingWheelCols = 0;
+      dispatchWheelScroll(l, c);
     }
   });
 }
@@ -2340,41 +2327,28 @@ gridEl.addEventListener("wheel", (ev) => {
   if (!workerReady) return;
   ev.preventDefault();
 
-  let dy = ev.deltaY;
-  let dx = ev.deltaX;
+  let lines = 0;
+  let cols = 0;
 
-  const charH = lastCharH || 19;
-  const charW = lastCharW || 8.5;
-  if (ev.deltaMode === 1) { // lines
-    dy *= charH;
-    dx *= charW;
-  } else if (ev.deltaMode === 2) { // pages
-    dy *= charH * (rows || 24);
-    dx *= charW * (cols || 80);
+  if (ev.deltaMode === 1) { // DOM_DELTA_LINE
+    lines = Math.round(ev.deltaY);
+    cols = Math.round(ev.deltaX);
+  } else if (ev.deltaMode === 2) { // DOM_DELTA_PAGE
+    lines = Math.round(ev.deltaY * (rows || 25));
+    cols = Math.round(ev.deltaX * (cols || 80));
+  } else { // DOM_DELTA_PIXEL
+    // Standard mouse wheel click is ~100-120px. Map 1 notch to 3 lines:
+    lines = Math.round(ev.deltaY / 36);
+    if (lines === 0 && ev.deltaY !== 0) {
+      lines = ev.deltaY > 0 ? 1 : -1;
+    }
+    cols = Math.round(ev.deltaX / 18);
+    if (cols === 0 && ev.deltaX !== 0) {
+      cols = ev.deltaX > 0 ? 1 : -1;
+    }
   }
 
-  wheelDeltaY += dy;
-  wheelDeltaX += dx;
-
-  const maxBacklogY = charH * (rows || 30) * 2;
-  if (Math.abs(wheelDeltaY) > maxBacklogY) {
-    wheelDeltaY = Math.sign(wheelDeltaY) * maxBacklogY;
-  }
-  const maxBacklogX = charW * (cols || 80);
-  if (Math.abs(wheelDeltaX) > maxBacklogX) {
-    wheelDeltaX = Math.sign(wheelDeltaX) * maxBacklogX;
-  }
-
-  clearTimeout(wheelDecayTimer);
-  wheelDecayTimer = setTimeout(() => {
-    wheelDeltaY = 0;
-    wheelDeltaX = 0;
-  }, 100);
-
-  if (!wheelRafScheduled && !wheelInFlight) {
-    wheelRafScheduled = true;
-    requestAnimationFrame(flushWheel);
-  }
+  dispatchWheelScroll(lines, cols);
 }, { passive: false });
 
 gridEl.addEventListener("keydown", (ev) => {

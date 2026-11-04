@@ -43,7 +43,3 @@ ZetaCodeword compute_zeta_codeword(uint64_t n);
 
 - **Time:** $O(1)$ (`1` natural logarithm and `4` `sin`/`cos` evaluations per integer $n$).
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [`primes-and-zeta.md` (lines 9–25)](file:///home/yassine/code/uor-r4/docs/geometry/primes-and-zeta.md#L9-L25)

@@ -43,7 +43,3 @@ size_t extract_patches(std::string_view text, ExtractedPatch out_patches[128]);
 
 - **Time:** $O(\min(N, 1536))$ single-pass scan with zero heap allocations.
 - **Space:** $O(1)$ stack buffers.
-
-## Source Reference
-
-- [`manifold.cpp` (lines 1037–1146)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L1037-L1146)

@@ -29,7 +29,3 @@ E8CarrierAddress decode_e8_carrier(
 
 - **Time:** $O(1)$ (128 `std::popcount` calls + 4 root snaps).
 - **Space:** $O(1)$.
-
-## Source
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L511-L539)

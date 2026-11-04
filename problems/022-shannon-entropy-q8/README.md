@@ -31,7 +31,3 @@ uint8_t compute_entropy_q8(std::string_view text);
 
 - **Time:** $O(\min(N, 1024) + 256)$.
 - **Space:** $O(256)$ stack histogram (`std::array<uint32_t, 256>`).
-
-## Source Reference
-
-- [`manifold.cpp` (lines 843, 995–1035)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L995-L1035)

@@ -40,8 +40,3 @@ public:
 
 - **Time:** $O(|C|)$ string scan + $O(1)$ quaternion geodesic distance.
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [macro_decider.cpp](file:///home/yassine/code/r4-prover/src/cpp/search/macro_decider.cpp)
-- [macro_decider.hpp](file:///home/yassine/code/r4-prover/src/cpp/search/macro_decider.hpp)

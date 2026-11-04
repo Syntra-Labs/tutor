@@ -32,7 +32,3 @@ HelixSignature256 compute_helix_signature(const Hypervec8192& hv);
 
 - **Time:** $O(128)$ words to build `s0`; $O(1)$ (4 `popcnt` instructions) for `HelixSignature256::hamming`.
 - **Space:** 32 bytes per signature.
-
-## Source
-
-- [`manifold.cpp` (lines 487–509)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L487-L509)

@@ -40,7 +40,3 @@ std::vector<ShortlistCand> run_helix_admission_cascade(
 
 - **Time:** $O(N)$ linear scan with hardware `popcnt` + $O(M \log K)$ selection.
 - **Space:** $O(M)$ candidate buffer.
-
-## Source Reference
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L2178-L2222)

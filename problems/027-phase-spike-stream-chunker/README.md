@@ -42,7 +42,3 @@ std::vector<StreamChunk> chunk_unformatted_byte_stream(
 
 - **Time:** $O(N / 16)$ SWAR evaluations (1 evaluation per 16 bytes).
 - **Space:** $O(\text{number of chunks})$.
-
-## Source Reference
-
-- [`manifold.cpp` (lines 767–809, 1206–1267)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L1206-L1267)

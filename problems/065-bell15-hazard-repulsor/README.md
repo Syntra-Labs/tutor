@@ -40,7 +40,3 @@ TaskPlacementResult evaluate_bell15_and_hazard(
 
 - **Time:** $O(N_{\text{reject}})$ single pass.
 - **Space:** $O(1)$.
-
-## Source Reference
-
-- [manifold.cpp](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L2323-L2369)

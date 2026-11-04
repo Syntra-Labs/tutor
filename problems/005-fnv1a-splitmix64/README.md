@@ -30,7 +30,3 @@ uint64_t splitmix64(uint64_t& state);
 
 - **Time:** $O(\text{len})$ for `fnv1a_64` (~1.5 cycles/byte); $O(1)$ (6 instructions) for `splitmix64`.
 - **Space:** $O(1)$ registers only.
-
-## Source
-
-- [`manifold.cpp` (lines 390–409)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L390-L409)

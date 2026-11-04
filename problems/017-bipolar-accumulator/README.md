@@ -36,7 +36,3 @@ struct BipolarAccumulator {
 
 - **Time:** $O(1024)$ bytes via 16-byte LUT SIMD `vpaddw` and 8-way unrolled projection (~350 cycles per hypervector).
 - **Space:** 16,384 bytes (`8192 x int16_t`, L1D-resident).
-
-## Source
-
-- [`manifold.cpp` (lines 626–684)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L626-L684)

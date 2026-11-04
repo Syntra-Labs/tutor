@@ -27,7 +27,3 @@ double Quat::geodesic_dist(const Quat& q) const;
 
 - **Time:** $O(1)$ per query.
 - **Space:** $O(1)$.
-
-## Source
-
-- [tree_rotor.hpp](file:///home/yassine/code/r4-prover/src/cpp/geometry/tree_rotor.hpp#L61-L72)

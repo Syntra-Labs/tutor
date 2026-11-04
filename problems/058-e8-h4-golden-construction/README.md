@@ -31,8 +31,3 @@ Icosian2 e8_weyl_reflect(const Icosian2& x, const Icosian2& r);
 
 - **Time:** $O(1)$ per inner product or reflection.
 - **Space:** $O(1)$ ($240 \times 32 = 7680$ bytes).
-
-## Source
-
-- [e8-h4-and-the-600-cell.md](file:///home/yassine/code/uor-r4/docs/geometry/e8-h4-and-the-600-cell.md#L25-L38)
-- [verify_connections.py](file:///home/yassine/code/uor-r4/docs/figures/geometry/verify_connections.py#L335-L374)

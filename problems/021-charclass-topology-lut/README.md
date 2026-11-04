@@ -49,7 +49,3 @@ TopologyFluxStats compute_topology_flux(std::string_view text);
 
 - **Time:** $O(\min(N, 1024))$ table lookups per span (`constexpr` $O(1)$ per byte).
 - **Space:** $O(1)$ (256-byte static constexpr LUT).
-
-## Source Reference
-
-- [`manifold.cpp` (lines 963–1035)](file:///home/yassine/code/r4-prover/src/cpp/manifold/manifold.cpp#L963-L1035)
