@@ -4,12 +4,32 @@
   "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
   "category": "Information Theory & Surprisal",
   "difficulty": "Medium",
-  "depends_on": ["022-shannon-entropy-q8"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "022-shannon-entropy-q8"
   ],
-  "languages": ["cpp"],
-  "tags": ["markov", "dirichlet", "surprisal", "information-theory", "bigram"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "markov",
+    "dirichlet",
+    "surprisal",
+    "information-theory",
+    "bigram"
+  ],
+  "spec": "# 024: Order-2 Interpolated Dirichlet Byte-Markov Surprisal\n\n## Problem Statement\n\nTo detect phase boundaries in raw, grammar-free byte streams (minified blobs, binary protocols, DNA sequences), `ByteMarkovModel` maintains an L2-cache-resident $256 \\times 256$ bigram count matrix and a 256-entry unigram count vector, and evaluates the causal per-byte surprisal $s_t = -\\log_2 P(b_t \\mid b_{t-1})$ in bits.\n\nWhen training on `text` via `observe_stream(text)`:\n- If `text.empty()`, return immediately.\n- Compute stride `step = (text.size() > 4096) ? (text.size() / 4096) : 1`.\n- Observe `prev = static_cast<uint8_t>(text[0])`: increment `unigram[prev]` and `total_bytes`.\n- For `i = step; i < text.size(); i += step`: let `cur = static_cast<uint8_t>(text[i])`, increment `bigram[prev][cur]`, `unigram[cur]`, and `total_bytes`, and set `prev = cur`.\n\n## Mathematical Law / Invariant\n\nWith symmetric Dirichlet prior $\\alpha = 0.4$ over the 256-byte alphabet ($256 \\alpha = 102.4$) and Jelinek-Mercer interpolation weights $(\\lambda_2, \\lambda_1) = (0.76, 0.24)$:\n\n$$P(b_t \\mid b_{t-1}) = 0.76 \\cdot \\frac{C(b_{t-1}, b_t) + 0.4}{C(b_{t-1}) + 102.4} + 0.24 \\cdot \\frac{C(b_t) + 0.4}{N + 102.4}$$\n\n$$s_t(b_{t-1}, b_t) = -\\log_2 \\max\\!\\left(P(b_t \\mid b_{t-1}),\\, 10^{-12}\\right)$$\n\n- **Proper Probability Distribution:** For any fixed conditioning byte $b_{t-1}$ (where $C(b_{t-1}) = \\sum_{b} C(b_{t-1}, b)$ and $N = \\sum_b C(b)$):\n  $$\\sum_{b=0}^{255} P(b \\mid b_{t-1}) = 0.76 \\cdot \\frac{C(b_{t-1}) + 256 \\cdot 0.4}{C(b_{t-1}) + 102.4} + 0.24 \\cdot \\frac{N + 256 \\cdot 0.4}{N + 102.4} = 1.0$$\n- **Maximum-Entropy Cold Start:** On an empty model ($N = 0, C(\\cdot) = 0$), every byte transition has $P = \\frac{0.4}{102.4} = \\frac{1}{256}$ and exact surprisal $s_t = 8.0$ bits.\n\n## Function Signature\n\n```cpp\nstruct ByteMarkovModel {\n    std::array<std::array<uint32_t, 256>, 256> bigram{};\n    std::array<uint32_t, 256> unigram{};\n    uint64_t total_bytes = 0;\n\n    void observe_stream(std::string_view text);\n    double byte_surprisal(uint8_t prev, uint8_t cur) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per `byte_surprisal` evaluation; $O(\\min(N, 4096))$ per `observe_stream`.\n- **Space:** $256\\text{ KiB} + 1\\text{ KiB}$ fixed L2-resident tables.\n"
 }

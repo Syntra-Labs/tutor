@@ -4,12 +4,31 @@
   "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Balanced Ternary & SWAR",
   "difficulty": "Medium",
-  "depends_on": ["009-packed-trit-encoding"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "009-packed-trit-encoding"
   ],
-  "languages": ["cpp"],
-  "tags": ["balanced-ternary", "swar", "full-adder", "bit-manipulation"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "balanced-ternary",
+    "swar",
+    "full-adder",
+    "bit-manipulation"
+  ],
+  "spec": "# 011: Branchless SWAR Balanced Ternary Full-Adder\n\n## Problem Statement\n\nIn balanced ternary arithmetic over $\\{-1, 0, +1\\}$, adding three trits $a_i, b_i, c_i \\in \\{-1, 0, +1\\}$ yields a total in $[-3, +3]$, which decomposes uniquely into a balanced ternary carry and sum:\n$$a_i + b_i + c_i = 3 \\cdot \\text{carry}_i + \\text{sum}_i, \\quad \\text{carry}_i, \\text{sum}_i \\in \\{-1, 0, +1\\}$$\n\nFor example, $+1 + +1 = +2 = 3(+1) + (-1)$, so $(\\text{sum}, \\text{carry}) = (-1, +1)$.\n\nImplement `trit_half_add` and `trit_full_add` operating in parallel across all 64 trit lanes of `PackedTrit64`:\n1. `TritAddResult trit_half_add(PackedTrit64 a, PackedTrit64 b)`:\n   - `carry.pos = a.pos & b.pos`\n   - `carry.neg = a.neg & b.neg`\n   - `sum.pos = ((a.pos ^ b.pos) & ~(a.neg | b.neg)) | carry.neg`\n   - `sum.neg = ((a.neg ^ b.neg) & ~(a.pos | b.pos)) | carry.pos`\n2. `TritAddResult trit_full_add(PackedTrit64 a, PackedTrit64 b, PackedTrit64 carry_in)`:\n   - Chain two half-adders `(s1, c1) = trit_half_add(a, b)` and `(sum, c2) = trit_half_add(s1, carry_in)`, then combine `carry = trit_half_add(c1, c2).sum`.\n\n## Mathematical Law / Invariant\n\n- **Exact Decomposition Law:** For every lane $i \\in [0, 63]$:\n  $$a_i + b_i + \\text{carry\\_in}_i = 3 \\cdot \\text{carry}_i + \\text{sum}_i$$\n- **Carry Bound Closure:** Because $|a_i + b_i + \\text{carry\\_in}_i| \\le 3$, the intermediate carries $c_1, c_2$ never both equal $+1$ or both equal $-1$; their sum $c_1 + c_2$ always lies strictly in $\\{-1, 0, +1\\}$.\n- **Negation Anti-Homomorphism:** $\\text{trit\\_full\\_add}(-a, -b, -c) = (-\\text{sum}, -\\text{carry})$.\n\n## Function Signature\n\n```cpp\nstruct PackedTrit64 {\n    uint64_t pos = 0;\n    uint64_t neg = 0;\n    constexpr bool is_valid() const { return (pos & neg) == 0; }\n};\n\nstruct TritAddResult {\n    PackedTrit64 sum;\n    PackedTrit64 carry;\n};\n\nconstexpr TritAddResult trit_half_add(PackedTrit64 a, PackedTrit64 b);\nconstexpr TritAddResult trit_full_add(PackedTrit64 a, PackedTrit64 b, PackedTrit64 carry_in);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (~18 branchless bitwise operations for 64 parallel full-adder lanes).\n- **Space:** $O(1)$ registers.\n"
 }

@@ -4,12 +4,31 @@
   "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
   "category": "Neurosymbolic & Formal Verification",
   "difficulty": "Hard",
-  "depends_on": ["071-least-action-macro-decider"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "071-least-action-macro-decider"
   ],
-  "languages": ["cpp"],
-  "tags": ["geodesic-astar", "speculative-routing", "proof-search", "cosine-tangent"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "geodesic-astar",
+    "speculative-routing",
+    "proof-search",
+    "cosine-tangent"
+  ],
+  "spec": "# 072: Speculative Geodesic A* Search over Proof States\n\n## Problem Statement\n\n`SpeculativeGeodesicRouter` and `SpeculativeGeodesicProver` (`src/cpp/search/geodesic_search.cpp`) guide proof search along the direction of steepest descent in proof space while minimizing expensive Lean REPL kernel calls via margin-gated speculation.\n\nImplement:\n1. **`SpeculativeGeodesicRouter::rank_candidates(tangent_vector, action_dict)`:**\n   - If $\\|\\text{tangent\\_vector}\\|_2 < 10^{-9}$, throw `std::invalid_argument`.\n   - For each `(name, vec)` in `action_dict`, compute cosine similarity:\n     $$\\text{score} = \\begin{cases} \\frac{\\langle \\text{tangent\\_vector}, \\text{vec} \\rangle}{\\|\\text{tangent\\_vector}\\|_2 \\|\\text{vec}\\|_2} & \\text{if } \\|\\text{vec}\\|_2 \\ge 10^{-9} \\\\ 0.0 & \\text{otherwise} \\end{cases}$$\n   - Sort candidates by `(score descending, name ascending)` for deterministic tie-breaking.\n2. **`SpeculativeGeodesicRouter::select_speculative_queue(ranked)`:**\n   - If `ranked.empty()`, return `({}, 0.0, false)`.\n   - If `ranked.size() == 1`, return `({ranked[0]}, 1.0, false)`.\n   - Let $\\text{margin} = \\text{ranked}[0].\\text{score} - \\text{ranked}[1].\\text{score}$.\n   - If $\\text{margin} \\ge \\text{margin\\_threshold\\_}$ or $\\text{max\\_beam\\_width\\_} < 2$, commit solely to `{ranked[0]}` (`is_speculative = false`); otherwise return `{ranked[0], ranked[1]}` (`is_speculative = true`).\n3. **`SpeculativeGeodesicProver::search(initial_goal, policy_fn, action_dict, kernel_eval_fn)`:**\n   - Maintain a best-first open queue ordered by $f(s) = \\text{depth} + h(s)$ (with FIFO tie-breaking) and a `visited` set of expanded `goal_str` states to avoid cycles.\n   - At each step (up to `max_steps_`), pop the best open node `curr`. If `curr->depth >= max_depth_`, skip it.\n   - Compute `tangent_v = policy_fn(curr->goal_str)`, rank candidates, and select the speculative queue `queue`.\n   - Iterate `idx = 0..queue.size()-1`:\n     - Increment `kernel_calls` and invoke `kernel_eval_fn(curr->goal_str, queue[idx].name)`.\n     - If `GoalsClosed`: if `idx == 0 && queue.size() > 1`, increment `repl_calls_saved`. Reconstruct the winning root-to-leaf tactic script by walking parent pointers and return `SuccessProven`.\n     - If `SubgoalsOpen`: if `idx == 0 && queue.size() > 1`, increment `repl_calls_saved`. Push unvisited child goals at `depth = curr->depth + 1` with `parent = curr` and `applied_tactic = queue[idx].name`, then `break` out of the speculative candidate loop.\n     - If `KernelError`: continue to the next fallback candidate in `queue`.\n\n## Mathematical Law / Invariant\n\n- **Margin-Gated Speculation:** When the top tactic leads the runner-up by $\\ge \\theta_{\\text{margin}}$, only 1 candidate is queued; when within $\\theta_{\\text{margin}}$ and candidate #0 succeeds on the first try, `repl_calls_saved` increments by 1.\n- **Exact Path Reconstruction:** Upon `GoalsClosed`, `proof_steps` contains the exact sequence of tactics along the winning root-to-goal branch (excluding dead-end branches).\n\n## Function Signature\n\n```cpp\nclass SpeculativeGeodesicRouter {\npublic:\n    std::vector<TacticCandidate> rank_candidates(\n        const std::vector<double>& tangent_vector,\n        const std::unordered_map<std::string, std::vector<double>>& action_dict\n    ) const;\n\n    std::tuple<std::vector<TacticCandidate>, double, bool> select_speculative_queue(\n        const std::vector<TacticCandidate>& ranked\n    ) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(B \\cdot |A| \\cdot D)$ per search step where $|A|$ is action dictionary size and $D$ is tangent dimension.\n- **Space:** $O(\\text{max\\_steps})$ search tree nodes.\n"
 }

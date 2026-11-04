@@ -4,12 +4,31 @@
   "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
   "category": "Neurosymbolic & Formal Verification",
   "difficulty": "Medium",
-  "depends_on": ["067-symbolic-ast-evaluator"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "067-symbolic-ast-evaluator"
   ],
-  "languages": ["cpp"],
-  "tags": ["hoare-logic", "contract-parser", "ast-skeletonizer", "lgcc"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "hoare-logic",
+    "contract-parser",
+    "ast-skeletonizer",
+    "lgcc"
+  ],
+  "spec": "# 074: Hoare Logic Contract Parser & Function Skeletonizer (`lgcc`)\n\n## Problem Statement\n\nTo compress source code context by $>70\\%$ while preserving complete type signatures and formal Hoare contracts (`crates/lgcc/src/ast/skeletonizer.rs` & `src/cpp/oracle/code_oracle.hpp`), the Contract Skeletonizer extracts `@requires` / `@ensures` annotations and replaces function implementation bodies `{ ... }` with `{ /* TODO */ }`.\n\nImplement two functions:\n1. **`std::vector<HoareContractSpec> extract_hoare_contracts(const std::string& source_code)`:**\n   - Scan `source_code` line by line.\n   - Collect consecutive doc-comment contract annotations of the form:\n     - `// @requires: <expr>`\n     - `// @ensures: <expr>`\n     (ignoring leading whitespace).\n   - When the immediately following function signature line is encountered (a line containing `'('` and `')'` that is not a comment), extract the function identifier `fn_name` (the identifier immediately preceding `'('`) and emit a `HoareContractSpec{fn_name, requires_list, ensures_list}`.\n2. **`std::string skeletonize_cpp_source(const std::string& source_code)`:**\n   - Replace every top-level function body `{ ... }` (ignoring braces inside string literals `\"...\"` and character literals `'...'`) with `{ /* TODO */ }`, while preserving:\n     - All `// @requires:` and `// @ensures:` contract comment lines,\n     - `struct` / `class` / `namespace` declarations (`struct Foo { ... };` keeps its declarations, while methods inside or free functions have their bodies replaced by `{ /* TODO */ }`),\n     - Balanced nested braces inside function bodies (e.g., `if (...) { for (...) { ... } }` collapses cleanly into a single `{ /* TODO */ }`).\n\n## Mathematical Law / Invariant\n\n- **Signature & Contract Preservation:** Every extracted `HoareContractSpec` and function signature before `{` remains intact in the skeletonized output.\n- **Brace Balance Invariant:** Outside string/char literals, the number of `'{'` equals the number of `'}'` in the skeletonized output, and every function body has brace depth reduced to 1 (`{ /* TODO */ }`).\n\n## Function Signature\n\n```cpp\nstd::vector<HoareContractSpec> extract_hoare_contracts(const std::string& source_code);\nstd::string skeletonize_cpp_source(const std::string& source_code);\n```\n\n## Complexity Target\n\n- **Time:** $O(N)$ single-pass lexical scan over `source_code`.\n- **Space:** $O(N)$ output buffer.\n"
 }

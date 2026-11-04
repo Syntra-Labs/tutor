@@ -4,12 +4,32 @@
   "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
   "category": "Exact Algebraic Rings & Number Theory",
   "difficulty": "Hard",
-  "depends_on": ["032-u256-exact-primitives"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "032-u256-exact-primitives"
   ],
-  "languages": ["cpp"],
-  "tags": ["dyadic", "round-to-even", "canonical", "multiprecision", "exact-arithmetic"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "dyadic",
+    "round-to-even",
+    "canonical",
+    "multiprecision",
+    "exact-arithmetic"
+  ],
+  "spec": "# 033: Bounded-Precision Dyadic `Dy<P>` Canonicalization & Rounding\n\n## Problem Statement\n\nA bounded-precision dyadic number `Dy<P>` ($8 \\le P \\le 120$) represents $m \\cdot 2^e$ with a signed 128-bit mantissa `m` of at most $P$ significant bits ($|m| < 2^P$) and a signed 32-bit exponent `e`.\n\nEvery `Dy<P>` value is stored **canonically**:\n- Zero is stored uniquely as `m = 0, e = 0`.\n- Every non-zero value has an **odd** mantissa (`(m & 1) != 0`), obtained by shifting out all trailing zeros of $|m|$ and adding that count to `e`.\n\nImplement `Dy<P>::round(bool neg, U256 mag, int64_t exp, bool sticky)` which rounds $(-1)^{\\text{neg}} (\\text{mag} + f) 2^{\\text{exp}}$ (where $0 < f < 1 \\iff \\text{sticky}$) to at most $P$ significant bits using **round-to-nearest, ties-to-even**, and implement `Dy<P>::add` and `Dy<P>::mul`.\n\n## Mathematical Law / Invariant\n\nGiven `b = mag.bits()`:\n1. If `mag.is_zero()`, return `{0, 0}`.\n2. If `sticky && b <= P + 1`, left-shift `mag` by `k = P + 2 - b` and subtract `k` from `exp` so the sticky fraction lies strictly below the round bit.\n3. Recompute `b = mag.bits()`. If `b > P`:\n   - Let `k = b - P`, and `(kept, low) = mag.shr_sticky(k - 1)`.\n   - `round_bit = (kept.lo & 1) != 0` and `m = kept.lo >> 1`.\n   - **Ties-to-even rule:** Increment `m += 1` iff `round_bit && (low || sticky || (m & 1) != 0)`.\n   - `e = exp + k`. If carry overflowed $P$ bits (`(m >> P) != 0`), shift `m >>= 1` and `e += 1`.\n4. Canonicalize `m` by shifting right by `tz = ctz(m)` and incrementing `e += tz`.\n\n## Function Signature\n\n```cpp\ntemplate <uint32_t P = 120>\nstruct Dy {\n    __int128 m = 0;\n    int32_t e = 0;\n\n    static constexpr Dy round(bool neg, U256 mag, int64_t exp, bool sticky);\n    static constexpr Dy from_i64(int64_t v);\n    constexpr Dy add(Dy o) const;\n    constexpr Dy mul(Dy o) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per `round`, `add`, and `mul` (pure integer arithmetic, zero floats).\n- **Space:** $O(1)$.\n"
 }

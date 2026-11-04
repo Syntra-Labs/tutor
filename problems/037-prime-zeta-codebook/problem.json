@@ -4,12 +4,32 @@
   "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
   "category": "Exact Algebraic Rings & Number Theory",
   "difficulty": "Medium",
-  "depends_on": ["036-prime-address-gcd"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "036-prime-address-gcd"
   ],
-  "languages": ["cpp"],
-  "tags": ["riemann-zeta", "primes", "unitary-phase", "homomorphism", "q30"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "riemann-zeta",
+    "primes",
+    "unitary-phase",
+    "homomorphism",
+    "q30"
+  ],
+  "spec": "# 037: Riemann Zeta Critical-Line Phase Codebook\n\n## Problem Statement\n\nThe non-trivial zeros of the Riemann zeta function on the critical line $\\zeta(\\tfrac{1}{2} + i\\gamma_m) = 0$ have fixed imaginary frequencies:\n\n$$\\gamma_0 = 14.134725141734693790, \\quad \\gamma_1 = 21.022039638771554993, \\quad \\gamma_2 = 25.010857580145688763, \\quad \\gamma_3 = 30.424876125859513210$$\n\nFor a prime (or positive integer) $p$, each frequency $\\gamma_m$ defines a complex phase angle $\\theta_m(p) = \\gamma_m \\ln p$ and a unit complex rotor $z_m(p) = e^{i \\gamma_m \\ln p} = p^{i\\gamma_m} = (\\cos(\\gamma_m \\ln p), \\sin(\\gamma_m \\ln p)) \\in U(1)$.\n\nIn the `prime_zeta` constructor, the four complex channels $(z_0, z_1, z_2, z_3) \\in \\mathbb{C}^4$ are grouped into two 4-real tuples:\n- Tuple A: $\\frac{1}{\\sqrt{2}}(\\operatorname{Re} z_0, \\operatorname{Im} z_0, \\operatorname{Re} z_1, \\operatorname{Im} z_1) \\in S^3$\n- Tuple B: $\\frac{1}{\\sqrt{2}}(\\operatorname{Re} z_2, \\operatorname{Im} z_2, \\operatorname{Re} z_3, \\operatorname{Im} z_3) \\in S^3$\nand quantized to signed 32-bit fixed-point Q30 integers (`round(coord * (1 << 30))`).\n\n## Mathematical Law / Invariant\n\n1. **Multiplicative-to-Unitary Character Homomorphism:**\n   Because $\\ln(a \\cdot b) = \\ln a + \\ln b$, the map $p \\mapsto z_m(p) = e^{i\\gamma_m \\ln p}$ is an exact group homomorphism from $(\\mathbb{R}_{>0}, \\times)$ into the unit circle $(U(1), \\cdot_{\\mathbb{C}})$:\n   $$z_m(a \\cdot b) = z_m(a) \\cdot_{\\mathbb{C}} z_m(b) = \\bigl(\\operatorname{Re} z_m(a)\\operatorname{Re} z_m(b) - \\operatorname{Im} z_m(a)\\operatorname{Im} z_m(b),\\; \\operatorname{Re} z_m(a)\\operatorname{Im} z_m(b) + \\operatorname{Im} z_m(a)\\operatorname{Re} z_m(b)\\bigr)$$\n2. **Unit $S^3$ Norm Invariant:**\n   Since $|z_m(p)|^2 = \\cos^2\\theta_m + \\sin^2\\theta_m = 1$, each normalized 4-real tuple $(\\operatorname{Re} z_{2r}, \\operatorname{Im} z_{2r}, \\operatorname{Re} z_{2r+1}, \\operatorname{Im} z_{2r+1}) / \\sqrt{2}$ lies strictly on the unit 3-sphere $S^3$ with Euclidean norm $1.0$.\n\n## Function Signature\n\n```cpp\nstruct ComplexPhase {\n    double re = 1.0;\n    double im = 0.0;\n    constexpr ComplexPhase operator*(const ComplexPhase& o) const;\n};\n\nstruct ZetaCodeword {\n    std::array<ComplexPhase, 4> channels{};\n    std::array<int32_t, 4> s3_tuple_a_q30{};\n    std::array<int32_t, 4> s3_tuple_b_q30{};\n};\n\nZetaCodeword compute_zeta_codeword(uint64_t n);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (`1` natural logarithm and `4` `sin`/`cos` evaluations per integer $n$).\n- **Space:** $O(1)$.\n"
 }

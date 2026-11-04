@@ -4,12 +4,33 @@
   "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
   "category": "Hyperdimensional Computing (VSA)",
   "difficulty": "Easy",
-  "depends_on": ["002-hypervector-hamming", "005-fnv1a-splitmix64"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "002-hypervector-hamming",
+    "005-fnv1a-splitmix64"
   ],
-  "languages": ["cpp"],
-  "tags": ["hypervector", "vsa", "splitmix64", "z-score", "concentration-of-measure"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "hypervector",
+    "vsa",
+    "splitmix64",
+    "z-score",
+    "concentration-of-measure"
+  ],
+  "spec": "# 013: Deterministic Hypervector Expansion & Z-Score Metric\n\n## Problem Statement\n\nIn 8192-bit Vector Symbolic Architectures (VSA), atomic symbol vectors are expanded deterministically on-the-fly from a 64-bit seed using `splitmix64`, and pairwise similarity is measured in standard deviations ($z$-score) from random chance.\n\nImplement on `Hypervec8192`:\n1. `static Hypervec8192 from_seed(uint64_t seed)`:\n   - Initialize `uint64_t state = seed;` and populate `words[0..127]` with consecutive calls to `splitmix64(state)`.\n2. `uint32_t hamming(const Hypervec8192& other) const`:\n   - Sum `std::popcount(words[i] ^ other.words[i])` across all 128 words.\n3. `double z_score(const Hypervec8192& other) const`:\n   - Compute $z = \\frac{4096.0 - d_H(A, B)}{\\frac{1}{2}\\sqrt{8192.0}}$ where $\\sigma = \\frac{1}{2}\\sqrt{8192} = 32\\sqrt{2} \\approx 45.254834$.\n\n## Mathematical Law / Invariant\n\n- **Concentration of Measure on $\\{0, 1\\}^{8192}$:** Two independent random hypervectors have Hamming distance $d_H \\sim \\mathcal{B}(8192, 0.5)$ with mean $\\mu = \\frac{D}{2} = 4096$ and standard deviation $\\sigma = \\frac{\\sqrt{D}}{2} = 32\\sqrt{2} \\approx 45.254834$.\n- **Quasi-Orthogonality:** Distinct seeds yield $|z| < 3.5$ with overwhelming probability ($1 - 4.6 \\times 10^{-4}$), whereas identical vectors achieve $z = +64\\sqrt{2} \\approx +90.509668$ and antipodal vectors achieve $z = -64\\sqrt{2} \\approx -90.509668$.\n\n## Function Signature\n\n```cpp\nuint64_t splitmix64(uint64_t& state);\n\nstruct Hypervec8192 {\n    static constexpr size_t HV_BITS = 8192;\n    static constexpr size_t HV_WORDS = 128;\n    std::array<uint64_t, HV_WORDS> words{};\n\n    static Hypervec8192 from_seed(uint64_t seed);\n    uint32_t hamming(const Hypervec8192& other) const;\n    double z_score(const Hypervec8192& other) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(128)$ words (~120 cycles for expansion or $z$-score).\n- **Space:** 1024 bytes per `Hypervec8192`.\n"
 }

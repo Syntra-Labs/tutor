@@ -4,12 +4,32 @@
   "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
   "category": "Hyperdimensional Computing (VSA)",
   "difficulty": "Medium",
-  "depends_on": ["016-bipolar-byte-lut"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "016-bipolar-byte-lut"
   ],
-  "languages": ["cpp"],
-  "tags": ["vsa", "bundling", "majority-vote", "bipolar", "simd"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "vsa",
+    "bundling",
+    "majority-vote",
+    "bipolar",
+    "simd"
+  ],
+  "spec": "# 017: Bipolar Majority-Vote Accumulator & Unrolled Projection\n\n## Problem Statement\n\nIn Hyperdimensional Computing, **bundling** (superposition) combines weighted hypervectors $V_1, \\dots, V_m$ into a single 8,192-bit prototype that remains similar to all constituents.\n\nImplement `BipolarAccumulator`:\n1. `void accumulate(const Hypervec8192& hv, int16_t weight = 1)`:\n   - Using `BYTE_BIPOLAR_LUT`, add `weight` to `counts[bit]` where `hv` has bit `1`, and subtract `weight` where `hv` has bit `0`.\n   - Update `total_items`: if `weight > 0`, add `weight`; if `weight < 0`, subtract `min(total_items, -weight)`.\n2. `Hypervec8192 project() const`:\n   - Project `counts[0..8191]` back to an 8,192-bit binary hypervector using **alternating tie-breaking**:\n     - Even bit indices ($2k$): bit is `1` iff `counts[2k] > 0`.\n     - Odd bit indices ($2k+1$): bit is `1` iff `counts[2k+1] >= 0`.\n\n## Mathematical Law / Invariant\n\n- **Zero-Bias Norm Preservation:** When a bit coordinate has a tied sum (`counts[i] == 0`), a uniform threshold (`> 0` or `>= 0`) would bias the projected hypervector toward all-`0` or all-`1`. Alternating `> 0` on even bits and `>= 0` on odd bits guarantees that an all-zero accumulator projects to `0xAAAAAAAAAAAAAAAAULL` in every word (exact popcount $4096 = \\frac{8192}{2}$).\n- **Superposition Capacity:** Bundling $M$ random hypervectors yields expected similarity $z \\approx \\frac{90.51}{\\sqrt{M}}$ to each constituent vector.\n- **Exact Cancellation (Unbundling):** Accumulating $(V, +w)$ followed by $(V, -w)$ restores `counts` to its exact prior state.\n\n## Function Signature\n\n```cpp\nstruct BipolarAccumulator {\n    alignas(64) std::array<int16_t, 8192> counts{};\n    uint32_t total_items = 0;\n\n    void clear();\n    void accumulate(const Hypervec8192& hv, int16_t weight = 1);\n    Hypervec8192 project() const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1024)$ bytes via 16-byte LUT SIMD `vpaddw` and 8-way unrolled projection (~350 cycles per hypervector).\n- **Space:** 16,384 bytes (`8192 x int16_t`, L1D-resident).\n"
 }

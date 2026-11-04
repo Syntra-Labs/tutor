@@ -4,12 +4,31 @@
   "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Balanced Ternary & SWAR",
   "difficulty": "Easy",
-  "depends_on": ["002-hypervector-hamming"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "002-hypervector-hamming"
   ],
-  "languages": ["cpp"],
-  "tags": ["balanced-ternary", "bit-planes", "swar", "popcount"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "balanced-ternary",
+    "bit-planes",
+    "swar",
+    "popcount"
+  ],
+  "spec": "# 009: Packed 2-Bit Balanced Ternary Representation\n\n## Problem Statement\n\nA balanced ternary vector $w \\in \\{-1, 0, +1\\}^{64}$ is stored in two orthogonal 64-bit bit-planes (`PackedTrit64`):\n- `pos`: bit $i$ is `1` iff $w_i = +1$\n- `neg`: bit $i$ is `1` iff $w_i = -1$\n- Both bits are `0` iff $w_i = 0$.\n\nImplement `PackedTrit64`:\n1. `bool is_valid() const`: Verify the disjoint-plane invariant `(pos & neg) == 0`.\n2. `PackedTrit64 negate() const`: $O(1)$ negation over all 64 trits by swapping `pos` and `neg`.\n3. `size_t nnz() const`: Number of non-zero trits via `std::popcount(pos | neg)`.\n4. `PackedTrit64::from_array(const std::array<int8_t, 64>& trits)` and `to_array() const`: Round-trip conversion between `std::array<int8_t, 64>` (values $>0 \\mapsto +1$, $<0 \\mapsto -1$, $0 \\mapsto 0$) and dual bit-planes.\n\n## Mathematical Law / Invariant\n\n- **Orthogonal Plane Exclusivity:** $P \\land N = 0$. Because $+1$ and $-1$ are mutually exclusive states, the fourth 2-bit code $(1, 1)$ is forbidden.\n- **Involution of Negation:** $\\text{negate}(\\text{negate}(x)) = x$, and for every coordinate $i$, $\\text{to\\_array}(\\text{negate}(x))_i = -\\text{to\\_array}(x)_i$.\n- **$L_1$ Norm / Support Partition:** Since $P \\land N = 0$, $\\text{popcount}(P \\lor N) = \\text{popcount}(P) + \\text{popcount}(N) = \\sum_{i=0}^{63} |w_i|$.\n\n## Function Signature\n\n```cpp\nstruct PackedTrit64 {\n    uint64_t pos = 0;\n    uint64_t neg = 0;\n\n    constexpr bool is_valid() const;\n    constexpr PackedTrit64 negate() const;\n    constexpr size_t nnz() const;\n    static PackedTrit64 from_array(const std::array<int8_t, 64>& trits);\n    std::array<int8_t, 64> to_array() const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (1 instruction) for `is_valid`, `negate`, and `nnz`; $O(64)$ for array pack/unpack.\n- **Space:** 16 bytes (`2 x uint64_t`) for 64 trits (2 bits/trit).\n"
 }

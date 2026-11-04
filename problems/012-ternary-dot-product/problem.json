@@ -4,12 +4,31 @@
   "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Balanced Ternary & SWAR",
   "difficulty": "Easy",
-  "depends_on": ["010-swar-trit-multiply"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "010-swar-trit-multiply"
   ],
-  "languages": ["cpp"],
-  "tags": ["balanced-ternary", "dot-product", "popcount", "multiplier-free"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "balanced-ternary",
+    "dot-product",
+    "popcount",
+    "multiplier-free"
+  ],
+  "spec": "# 012: Multiplier-Free Ternary Dot Product\n\n## Problem Statement\n\nFor two balanced ternary vectors $a, b \\in \\{-1, 0, +1\\}^{64N}$ represented as spans of `PackedTrit64`, their exact inner product requires zero integer multiplications:\n$$\\langle a, b \\rangle = \\sum_{w=0}^{N-1} \\Big( \\operatorname{popcount}(P_{a,w}\\land P_{b,w} \\;\\lor\\; N_{a,w}\\land N_{b,w}) - \\operatorname{popcount}(P_{a,w}\\land N_{b,w} \\;\\lor\\; N_{a,w}\\land P_{b,w}) \\Big)$$\n\nImplement `int64_t trit_dot(std::span<const PackedTrit64> a, std::span<const PackedTrit64> b)` using `trit_mul` and `std::popcount`.\n\n## Mathematical Law / Invariant\n\n- **Exact Bilinear Inner Product:** Each coordinate $i$ contributes $+1$ iff $a_i = b_i \\neq 0$, $-1$ iff $a_i = -b_i \\neq 0$, and $0$ if either coordinate is $0$.\n- **Self-Inner-Product ($L_2^2 = L_1$ Support):** Since $(-1)^2 = (+1)^2 = 1$ and $0^2 = 0$, $\\langle a, a \\rangle = \\sum_i a_i^2 = \\sum_i |a_i| = \\operatorname{nnz}(a) \\ge 0$.\n- **Bilinear Skew under Negation:** $\\langle a, -b \\rangle = -\\langle a, b \\rangle$.\n\n## Function Signature\n\n```cpp\nstruct PackedTrit64 {\n    uint64_t pos = 0;\n    uint64_t neg = 0;\n    constexpr bool is_valid() const { return (pos & neg) == 0; }\n    constexpr PackedTrit64 negate() const { return {neg, pos}; }\n};\n\nconstexpr PackedTrit64 trit_mul(PackedTrit64 a, PackedTrit64 b);\nint64_t trit_dot(std::span<const PackedTrit64> a, std::span<const PackedTrit64> b);\n```\n\n## Complexity Target\n\n- **Time:** $O(N)$ words \u2014 6 bitwise ops + 2 `popcnt` instructions per 64-trit word.\n- **Space:** $O(1)$ registers.\n"
 }

@@ -4,12 +4,32 @@
   "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
   "category": "Hyperdimensional Computing (VSA)",
   "difficulty": "Medium",
-  "depends_on": ["013-hypervec-seed-zscore"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "013-hypervec-seed-zscore"
   ],
-  "languages": ["cpp"],
-  "tags": ["vsa", "permutation", "cyclic-shift", "hypervector", "bit-manipulation"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "vsa",
+    "permutation",
+    "cyclic-shift",
+    "hypervector",
+    "bit-manipulation"
+  ],
+  "spec": "# 015: 8192-Bit Cross-Word Cyclic Permutation ($\\rho^s$)\n\n## Problem Statement\n\nIn Vector Symbolic Architectures, non-commutative sequential order (e.g., $n$-grams, AST depth, causal time steps) is encoded using a cyclic bit-permutation operator $\\rho^s$ across all 8,192 bits ($128 \\times 64$-bit words).\n\nImplement `Hypervec8192 Hypervec8192::rotl(uint32_t shift) const`:\n- Reduce `shift %= 8192`. If `shift == 0`, return `*this`.\n- Decompose `word_shift = shift / 64` and `bit_shift = shift % 64`.\n- For each word $i \\in [0, 127]$:\n  - `src_hi = (i + 128 - word_shift) % 128`\n  - If `bit_shift == 0`: `out.words[i] = words[src_hi]`\n  - Else: `src_lo = (src_hi + 127) % 128`, and `out.words[i] = (words[src_hi] << bit_shift) | (words[src_lo] >> (64 - bit_shift))`\n\n## Mathematical Law / Invariant\n\n- **Cyclic Group Homomorphism ($\\mathbb{Z}_{8192}$):**\n  $$\\rho^a(\\rho^b(x)) = \\rho^{(a + b) \\bmod 8192}(x), \\quad \\rho^{8192}(x) = x$$\n- **Distributivity over Binding ($\\oplus$) & Isometry:**\n  $$\\rho^s(A \\oplus B) = \\rho^s(A) \\oplus \\rho^s(B), \\quad d_H(\\rho^s(A), \\rho^s(B)) = d_H(A, B)$$\n- **Quasi-Orthogonality of Non-Zero Shifts:** For a random hypervector $A$ and any $s \\not\\equiv 0 \\pmod{8192}$, $\\rho^s(A)$ is quasi-orthogonal to $A$ ($|z(\\rho^s(A), A)| < 3.5$).\n\n## Function Signature\n\n```cpp\nstruct Hypervec8192 {\n    static constexpr size_t HV_BITS = 8192;\n    static constexpr size_t HV_WORDS = 128;\n    std::array<uint64_t, HV_WORDS> words{};\n\n    static Hypervec8192 from_seed(uint64_t seed);\n    Hypervec8192 rotl(uint32_t shift) const;\n    uint32_t hamming(const Hypervec8192& other) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(128)$ words (~60\u201390 CPU cycles).\n- **Space:** $O(1)$ auxiliary registers.\n"
 }

@@ -6,10 +6,27 @@
   "difficulty": "Medium",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["lru", "cache", "hash-map", "linked-list"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "lru",
+    "cache",
+    "hash-map",
+    "linked-list"
+  ],
+  "spec": "# 003: O(1) Intrusive LRU Cache\n\n## Specification & Contract\n\nDesign and implement a Least Recently Used (LRU) cache supporting $O(1)$ operations without heap fragmentation on hits.\n\n### Requirements:\n1. `std::optional<V> get(const K& key)`:\n   - Returns the cached value if `key` exists and moves the entry to the front (most recently used).\n   - Returns `std::nullopt` if `key` does not exist.\n2. `void put(const K& key, const V& value)`:\n   - Updates value if key exists, promoting it to the front.\n   - Inserts new key-value pair. If capacity is exceeded, evicts the least recently used key.\n3. Both operations must run in strictly $O(1)$ average time complexity.\n"
 }

@@ -4,12 +4,31 @@
   "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
   "category": "Geometric Systems & Compute",
   "difficulty": "Hard",
-  "depends_on": ["054-e8-root-lexicographic-snap"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "054-e8-root-lexicographic-snap"
   ],
-  "languages": ["cpp"],
-  "tags": ["flock-read", "vicsek-consensus", "e8-roots", "softmax-free-attention"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "flock-read",
+    "vicsek-consensus",
+    "e8-roots",
+    "softmax-free-attention"
+  ],
+  "spec": "# 061: Flock Read (Vicsek/Kuramoto Neighbour Consensus)\n\n## Problem Statement\n\nThe integer Flock read replaces transformer softmax attention with a hard-ranked Vicsek/Kuramoto alignment rule over the 16 roots of an $E_8$ orbit in $\\mathbb{Z}^8$.\n\nGiven:\n- A list of context nodes $n \\in [0, N)$, each with frame root index $f_n \\in [0, 15]$, payload root index $p_n \\in [0, 15]$, and end position $\\text{last}_n \\in \\mathbb{Z}_{\\ge 0}$,\n- A query with position $q_{\\text{pos}}$, frame root $f_q \\in [0, 15]$, and current state root $v_q \\in [0, 15]$,\n- Neighbour budget $K$ ($1 \\le K \\le 8$) and ternary gate $g \\in \\{-1, 0, +1\\}$,\n\nimplement `flock_read_step`:\n1. **Filter & Rank:** Keep only eligible context nodes that end strictly before the query ($\\text{last}_n < q_{\\text{pos}}$). Rank eligible nodes in ascending lexicographic order of:\n   $$\\big(d_{L_1}(\\text{ROOTS}[f_n], \\text{ROOTS}[f_q]),\\ d_H(\\text{ROOTS}[f_n], \\text{ROOTS}[f_q]),\\ -\\text{last}_n,\\ n\\big)$$\n   where $d_{L_1}(u, v) = \\sum_{d=0}^7 |u_d - v_d|$ and $d_H(u, v) = \\sum_{d=0}^7 \\mathbb{I}[u_d \\neq v_d]$. Keep the best $\\min(K, N_{\\text{elig}})$ nodes.\n2. **Carry (Frame Transport):** Transport each kept node's payload $p_n$ into the query frame $f_q$ using the group transport action:\n   $$c_n = (p_n \\oplus f_n \\oplus f_q) \\ \\& \\ 15$$\n   so that when $f_n = f_q$, $c_n = p_n$.\n3. **Consensus:** Sum the 8D root vectors of all kept transported payloads $\\sum_{n \\in \\text{kept}} \\text{ROOTS}[c_n]$ and snap the sum to the nearest of the 16 roots under $L_1$ distance (ties broken by smallest root index $0..15$):\n   $$m = \\text{snap}_{L_1}\\!\\left(\\sum_{n \\in \\text{kept}} \\text{ROOTS}[c_n]\\right)$$\n4. **Gated Add:** If $g = 0$ or no eligible nodes exist, return $v_q$. Otherwise compute:\n   $$\\text{out} = \\text{snap}_{L_1}\\!\\big(\\text{ROOTS}[v_q] + g \\cdot \\text{ROOTS}[m]\\big)$$\n\n## Mathematical Law / Invariant\n\n- **Causal Masking:** Any node with $\\text{last}_n \\ge q_{\\text{pos}}$ is never read.\n- **Zero-Gate Identity:** When $g = 0$, the output is identically $v_q$ regardless of context.\n- **Unanimous Flock Alignment:** If all kept neighbours transport to the same root $r^*$, then the consensus root is $m = r^*$.\n\n## Function Signature\n\n```cpp\nuint8_t flock_read_step(\n    const std::vector<FlockNode>& context,\n    uint32_t query_pos,\n    uint8_t f_q,\n    uint8_t v_q,\n    size_t K,\n    int8_t gate_trit,\n    uint8_t* out_consensus_root = nullptr\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(N \\log K)$ integer comparisons and additions; zero floating-point operations.\n- **Space:** $O(N)$ eligible candidate indices.\n"
 }

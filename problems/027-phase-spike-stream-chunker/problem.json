@@ -4,12 +4,33 @@
   "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
   "category": "Information Theory & Surprisal",
   "difficulty": "Hard",
-  "depends_on": ["008-ca-counterfactual-demarc", "024-dirichlet-byte-markov"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "008-ca-counterfactual-demarc",
+    "024-dirichlet-byte-markov"
   ],
-  "languages": ["cpp"],
-  "tags": ["chunker", "cellular-automata", "markov", "surprisal", "demarcation"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "chunker",
+    "cellular-automata",
+    "markov",
+    "surprisal",
+    "demarcation"
+  ],
+  "spec": "# 027: Grammar-Free Byte-Markov + CA 184/30 Stream Chunker\n\n## Problem Statement\n\nWhen ingesting unformatted, newline-free byte streams (raw binary protocols, DNA sequences, hex dumps, or minified blobs), syntax delimiters like `\\n\\n` or `{}` are absent.\n\nImplement `chunk_unformatted_byte_stream`, which segments any `std::string_view content` into contiguous `StreamChunk { uint32_t start_byte, end_byte, chunk_idx; }` blocks by combining:\n1. Causal Order-2 Dirichlet byte-Markov surprisal $s_t = -\\log_2 P(b_t \\mid b_{t-1})$ (or $s_t = 4.0$ if `markov == nullptr`), smoothed via an exponential moving average (EMA):\n   $$\\bar{s}_t = 0.92 \\bar{s}_{t-1} + 0.08 s_t, \\quad \\bar{s}_0 = 4.0$$\n2. 64-bit SWAR Cellular Automata Rule 184 / Rule 30 counterfactual match-inversion demarcation count `count_demarcs(window64)` over the 8-byte window `content[pos - 8 .. pos]`.\n\n## Mathematical Law / Invariant\n\nScanning `pos` at 16-byte aligned steps `for (size_t pos = 64; pos < n; pos += 16)`:\n- Let `span_len = pos - start_b`. If `span_len < 96`, `continue` without updating $\\bar{s}_t$.\n- Update $\\bar{s}_t = 0.92 \\bar{s}_{t-1} + 0.08 s_t$ using `prev_b = content[pos - 1]` and `cur_b = content[pos]`.\n- Load 8 bytes `content[pos - 8 .. pos]` via `std::memcpy(&window64, content.data() + pos - 8, 8)` and evaluate `demarcs = count_demarcs(window64)`.\n- Emit a chunk boundary `[start_b, pos)` and advance `start_b = pos, chunk_idx++` whenever either condition holds:\n  1. **Joint Phase Spike:** $s_t > \\bar{s}_t + 1.8 \\;\\land\\; \\text{demarcs} \\ge 28 \\;\\land\\; \\text{span\\_len} \\ge 128$\n  2. **Horizon Cap:** $\\text{span\\_len} \\ge 512$\n- After the loop, if `start_b < n`, emit the trailing chunk `[start_b, n)`.\n\n**Partition Invariant:** The emitted chunks form an exact, gap-free, non-overlapping partition of `[0, content.size())`.\n\n## Function Signature\n\n```cpp\nstruct StreamChunk {\n    uint32_t start_byte;\n    uint32_t end_byte;\n    uint32_t chunk_idx;\n};\n\nuint32_t count_demarcs(uint64_t seed_bits);\nstd::vector<StreamChunk> chunk_unformatted_byte_stream(\n    std::string_view content,\n    const ByteMarkovModel* markov = nullptr\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(N / 16)$ SWAR evaluations (1 evaluation per 16 bytes).\n- **Space:** $O(\\text{number of chunks})$.\n"
 }

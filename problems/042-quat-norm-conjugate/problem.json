@@ -6,10 +6,27 @@
   "difficulty": "Easy",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["quaternions", "s3-manifold", "normalization", "conjugate"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "quaternions",
+    "s3-manifold",
+    "normalization",
+    "conjugate"
+  ],
+  "spec": "# 042: Unit Quaternion Normalization, Conjugate & Inverse on $S^3$\n\n## Problem Statement\n\nA quaternion $q = w + xi + yj + zk \\in \\mathbb{H} \\cong \\mathbb{R}^4$ represents a rotor on the 3-sphere $S^3 = \\{q \\in \\mathbb{H} : \\|q\\|_2 = 1\\}$ when normalized. For unit quaternions on $S^3$, the multiplicative inverse $q^{-1}$ coincides with the quaternion conjugate $\\bar{q} = w - xi - yj - zk$. Near-zero quaternions ($\\|q\\|_2 < 10^{-12}$) must safely fall back to the identity rotor $(1, 0, 0, 0)$ without dividing by zero.\n\n## Mathematical Law / Invariant\n\nFor $q = (w, x, y, z) \\in \\mathbb{H}$:\n1. **Squared Norm & Norm:** $\\|q\\|_2^2 = w^2 + x^2 + y^2 + z^2$, $\\|q\\|_2 = \\sqrt{\\|q\\|_2^2}$.\n2. **Projection onto $S^3$:**\n   $$\\mathrm{normalize}(q) = \\begin{cases} (1, 0, 0, 0) & \\text{if } \\|q\\|_2 < 10^{-12}, \\\\ \\frac{1}{\\|q\\|_2}(w, x, y, z) & \\text{otherwise.} \\end{cases}$$\n3. **Conjugate & Inverse:**\n   $$\\bar{q} = (w, -x, -y, -z), \\qquad q^{-1} = \\begin{cases} (1, 0, 0, 0) & \\text{if } \\|q\\|_2^2 < 10^{-24}, \\\\ \\frac{\\bar{q}}{\\|q\\|_2^2} & \\text{otherwise.} \\end{cases}$$\n   On $S^3$ ($\\|q\\|_2 = 1$), $q^{-1} = \\bar{q}$ and $\\|\\bar{q}\\|_2 = 1$.\n\n## Function Signature\n\n```cpp\nstruct Quat {\n    double w{1.0}, x{0.0}, y{0.0}, z{0.0};\n    static Quat identity();\n    double norm_sq() const;\n    double norm() const;\n    Quat normalize() const;\n    Quat conj() const;\n    Quat inverse() const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per operation.\n- **Space:** $O(1)$ (32 bytes per `Quat`).\n"
 }

@@ -6,10 +6,28 @@
   "difficulty": "Medium",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["atomics", "memory-ordering", "spsc", "lock-free", "ring-buffer"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "atomics",
+    "memory-ordering",
+    "spsc",
+    "lock-free",
+    "ring-buffer"
+  ],
+  "spec": "# 001: SPSC Lock-Free Ring Buffer\n\n## Specification & Contract\n\nImplement a Single-Producer Single-Consumer (SPSC) lock-free bounded FIFO queue in C++20.\n\n### Requirements:\n1. **Thread Safety**: Exactly one producer thread and one consumer thread may access the queue concurrently without locks or mutexes.\n2. **Fixed Capacity**: The capacity $N$ is fixed at construction and guaranteed to be a power of two.\n3. **Operations**:\n   - `bool push(const T& item)`: Inserts `item` at the tail. Returns `false` if the buffer is full.\n   - `bool pop(T& item)`: Extracts an item from the head. Returns `false` if the buffer is empty.\n   - `size_t size() const`: Returns the approximate number of items currently in the buffer.\n   - `bool empty() const` / `bool full() const`.\n4. **Memory Ordering**:\n   - Use atomic indices (`std::atomic<size_t>`) with non-seq-cst semantics (`memory_order_acquire`, `memory_order_release`, `memory_order_relaxed`) to ensure strict cache synchronization and minimal bus traffic.\n"
 }

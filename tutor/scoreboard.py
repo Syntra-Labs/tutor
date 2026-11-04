@@ -223,7 +223,7 @@ def export_static_site_data() -> Tuple[Path, Path]:
     for p in problems:
         prob_dir = Path(p["dir"])
         readme_path = prob_dir / "README.md"
-        readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
+        readme_text = p.get("spec") or (readme_path.read_text(encoding="utf-8") if readme_path.exists() else "")
 
         stub_text = ""
         harness_text = ""
@@ -247,6 +247,7 @@ def export_static_site_data() -> Tuple[Path, Path]:
                 "colspec": p.get("colspec", DEFAULT_COLSPEC),
                 "languages": p.get("languages", ["cpp"]),
                 "tags": p.get("tags", []),
+                "spec": readme_text,
                 "readme": readme_text,
                 "stub": stub_text,
                 "harness": harness_text,

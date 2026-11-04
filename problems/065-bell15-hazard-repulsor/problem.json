@@ -4,12 +4,31 @@
   "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
   "category": "Geometric Systems & Compute",
   "difficulty": "Medium",
-  "depends_on": ["064-lucidity-delta-readout"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "064-lucidity-delta-readout"
   ],
-  "languages": ["cpp"],
-  "tags": ["counterfactual-split", "hazard-repulsor", "bell-margin", "task-placement"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "counterfactual-split",
+    "hazard-repulsor",
+    "bell-margin",
+    "task-placement"
+  ],
+  "spec": "# 065: Bell-15 Counterfactual Task-Split & $+3\\sigma$ Hazard Repulsor\n\n## Problem Statement\n\nWhen placing a coding or proof task onto the manifold (`place_task`), the planner performs two geometric safety checks without ODE integration overhead:\n1. **Bell-15 Counterfactual Task-Split Test:**\n   Given the top routed code blocks `block_hits` (already sorted by `similarity` descending):\n   - If `block_hits.size() >= 2`, let `#0` be `block_hits[0]` and `#1` be `block_hits[1]`.\n   - Compute `sim_gap = std::abs(block_hits[0].similarity - block_hits[1].similarity)`.\n   - Two blocks represent a `distinct_concern` if `parent_id` differs OR `primary_arch` differs.\n   - Flag `counterfactual_split = true` if and only if:\n     $$\\text{distinct\\_concern} \\ \\land \\ \\text{block\\_hits}[1].\\text{similarity} \\ge 0.525 \\ \\land \\ \\text{sim\\_gap} < \\frac{1.0}{15.0}$$\n2. **$+3\\sigma$ Epistemic Hazard Repulsor:**\n   Given a list of `REJECT`-verdict experiment cells and their Hamming distances `hamming_dist` to the task's 8192-bit hypervector:\n   - For each rejected cell, compute similarity $\\text{sim} = 1.0 - \\frac{\\text{hamming}}{8192.0}$ and binomial $z$-score:\n     $$z = \\frac{4096.0 - \\text{hamming}}{\\sqrt{8192.0} \\cdot 0.5} = \\frac{4096.0 - \\text{hamming}}{45.254833995939045}$$\n   - Track the rejected cell with maximum `sim` (`hazard_cell_id`, `hazard_similarity`, `hazard_z_score`).\n3. **Placement Decision String:**\n   - If `lucidity >= 0.65` and `!block_hits.empty()`: `\"INSERT_AT_EXISTING_BLOCK\"`\n   - Else if `has_best_file`: `\"SCAFFOLD_NEW_BLOCK_IN_FILE\"`\n   - Else: `\"SCAFFOLD_NEW_FILE_FOR_STAGE\"`\n\n## Mathematical Law / Invariant\n\n- **Bell-15 Margin:** $\\theta_{\\text{Bell}} = \\frac{1}{15} \\approx 0.0666667$. Runner-up blocks within the same file AND same archetype never trigger `counterfactual_split`.\n- **Standard Normal Scaling:** For an 8192-bit random hypervector ($p = 0.5$), $\\mu = 4096$ and $\\sigma = \\frac{1}{2}\\sqrt{8192} = 32\\sqrt{2} \\approx 45.254834$. A Hamming distance of $3960$ yields $z > +3.0$.\n\n## Function Signature\n\n```cpp\nTaskPlacementResult evaluate_bell15_and_hazard(\n    double lucidity,\n    bool has_best_file,\n    const std::vector<RoutedBlockHit>& block_hits,\n    const std::vector<RejectedCellCandidate>& reject_cells\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(N_{\\text{reject}})$ single pass.\n- **Space:** $O(1)$.\n"
 }

@@ -4,12 +4,32 @@
   "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
   "category": "E8 Lattice & Discrete Routing",
   "difficulty": "Medium",
-  "depends_on": ["053-e8-16root-orbit-bfs"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "053-e8-16root-orbit-bfs"
   ],
-  "languages": ["cpp"],
-  "tags": ["e8-lattice", "quantization", "l1-distance", "hamming-distance", "lexicographic-snap"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "e8-lattice",
+    "quantization",
+    "l1-distance",
+    "hamming-distance",
+    "lexicographic-snap"
+  ],
+  "spec": "# 054: 16-Root $E_8$ Lexicographic Snapper ($L_1 + \\text{Hamming}$)\n\n## Problem Statement\n\nIn `SpiralCoreGeometry`, an arbitrary 8D integer vector $x \\in \\mathbb{Z}^8$ is quantized (\"snapped\") onto one of the 16 roots $r_0, \\dots, r_{15} \\in \\mathcal{O}_{16}$ (optionally scaled by a multiplicity factor $n \\ge 1$) using a purely multiplier-free integer cost function: primary **$L_1$ Manhattan distance**, secondary **coordinate Hamming distance**, and tertiary **smallest root index $r \\in [0, 15]$**.\n\n## Mathematical Law / Invariant\n\nGiven $x \\in \\mathbb{Z}^8$, root $r \\in [0, 15]$, and scale $n \\ge 1$:\n1. **Scaled Cost Metrics:** Let $y_d = n \\cdot \\mathrm{roots}[r][d]$ for $d \\in \\{0, \\dots, 7\\}$:\n   $$d_{L_1}(x, y) = \\sum_{d=0}^7 |x_d - y_d|, \\qquad d_H(x, y) = \\sum_{d=0}^7 [x_d \\neq y_d]$$\n2. **Lexicographic Minimization (`snap_e8_root`):**\n   $$\\mathrm{snap}(x, n) = \\arg\\min_{r \\in \\{0,\\dots,15\\}} \\bigl(d_{L_1}(x, n\\cdot\\mathrm{roots}[r]),\\; d_H(x, n\\cdot\\mathrm{roots}[r]),\\; r\\bigr)$$\n3. **Exact Idempotence Invariant:** For any $r \\in [0, 15]$ and $n \\ge 1$, $\\mathrm{snap}(n \\cdot \\mathrm{roots}[r], n) = r$ with $(d_{L_1}, d_H) = (0, 0)$.\n\n## Function Signature\n\n```cpp\nvoid root_cost(\n    const std::array<std::array<int8_t, 8>, 16>& roots,\n    const int32_t x[8],\n    uint8_t root_idx,\n    uint32_t& l1_dist,\n    uint32_t& hamming\n);\nuint8_t snap_e8_root(\n    const std::array<std::array<int8_t, 8>, 16>& roots,\n    const int32_t x[8],\n    uint32_t scale = 1\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ ($16 \\times 8 = 128$ integer comparisons/subtractions).\n- **Space:** $O(1)$.\n"
 }

@@ -4,12 +4,31 @@
   "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Balanced Ternary & SWAR",
   "difficulty": "Easy",
-  "depends_on": ["009-packed-trit-encoding"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "009-packed-trit-encoding"
   ],
-  "languages": ["cpp"],
-  "tags": ["balanced-ternary", "swar", "bit-manipulation", "monoid"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "balanced-ternary",
+    "swar",
+    "bit-manipulation",
+    "monoid"
+  ],
+  "spec": "# 010: Branchless SWAR Balanced Ternary Multiplication\n\n## Problem Statement\n\nGiven two 64-trit vectors `a` and `b` in dual bit-plane format (`PackedTrit64 { uint64_t pos, neg; }`), compute their element-wise product $c_i = a_i \\cdot b_i \\in \\{-1, 0, +1\\}$ across all 64 coordinates simultaneously without branches or integer multipliers:\n- `out.pos = (a.pos & b.pos) | (a.neg & b.neg)`\n- `out.neg = (a.pos & b.neg) | (a.neg & b.pos)`\n\n## Mathematical Law / Invariant\n\n- **Commutative Monoid with Zero Absorption:** $(\\{-1, 0, +1\\}^{64}, \\cdot)$ is a commutative monoid with identity $+1^{64}$ (`{ ~0ULL, 0ULL }`) and absorbing zero $0^{64}$ (`{ 0ULL, 0ULL }`).\n- **Sign-Rule Closure:** If `a.is_valid()` and `b.is_valid()`, then `out.is_valid()` holds automatically (`(out.pos & out.neg) == 0`), because $(P_a \\land N_a) = 0$ and $(P_b \\land N_b) = 0$ imply `out.pos & out.neg == 0`.\n- **Involution on Support:** Multiplying `a` by $-1^{64}$ (`{ 0ULL, ~0ULL }`) swaps `a.pos` and `a.neg`, and `trit_mul(a, a)` projects onto the support mask `{ a.pos | a.neg, 0ULL }`.\n\n## Function Signature\n\n```cpp\nPackedTrit64 trit_mul(PackedTrit64 a, PackedTrit64 b);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 6 bitwise instructions (`and`, `or`) for 64 parallel trit multiplications (16+ trits/cycle).\n- **Space:** $O(1)$ registers.\n"
 }

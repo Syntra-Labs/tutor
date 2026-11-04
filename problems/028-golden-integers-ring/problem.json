@@ -6,10 +6,28 @@
   "difficulty": "Easy",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["golden-ratio", "ring", "exact-arithmetic", "algebra", "icosians"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "golden-ratio",
+    "ring",
+    "exact-arithmetic",
+    "algebra",
+    "icosians"
+  ],
+  "spec": "# 028: Golden Integer Ring $\\mathbb{Z}[\\phi]$ Addition & Multiplication\n\n## Problem Statement\n\nThe coordinates of the 120 unit icosians and $H_4$ root systems contain the golden ratio $\\phi = \\frac{1 + \\sqrt{5}}{2}$, an irrational algebraic integer satisfying $\\phi^2 = \\phi + 1$.\n\nTo compute with golden coordinates with **zero floating-point rounding**, represent every element of the ring of integers $\\mathbb{Z}[\\phi] = \\{a + b\\phi : a, b \\in \\mathbb{Z}\\}$ as an exact integer pair `ZPhi { int64_t a, b; }`.\n\n## Mathematical Law / Invariant\n\nUsing the defining minimal polynomial identity $\\phi^2 = \\phi + 1$:\n\n1. **Addition & Subtraction:**\n   $$(a + b\\phi) \\pm (c + d\\phi) = (a \\pm c) + (b \\pm d)\\phi$$\n2. **Exact Ring Multiplication:**\n   $$(a + b\\phi)(c + d\\phi) = ac + (ad + bc)\\phi + bd\\phi^2 = (ac + bd) + (ad + bc + bd)\\phi$$\n3. **Golden Ratio Identity:**\n   Let $\\Phi = (0, 1)$. Then $\\Phi \\cdot \\Phi = (1, 1) = 1 + \\phi$, and $\\Phi \\cdot (\\Phi - 1) = (0, 1) \\cdot (-1, 1) = (1, 0) = 1$.\n\n## Function Signature\n\n```cpp\nstruct ZPhi {\n    int64_t a = 0;\n    int64_t b = 0;\n\n    constexpr bool operator==(const ZPhi& o) const = default;\n    constexpr ZPhi operator+(const ZPhi& o) const;\n    constexpr ZPhi operator-(const ZPhi& o) const;\n    constexpr ZPhi operator-() const;\n    constexpr ZPhi operator*(const ZPhi& o) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (4 integer multiplications and 3 additions per product, or 3 multiplications via Karatsuba).\n- **Space:** $O(1)$ (16 bytes per `ZPhi`).\n"
 }

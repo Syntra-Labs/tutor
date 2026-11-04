@@ -4,12 +4,33 @@
   "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Cellular Automata & SWAR",
   "difficulty": "Medium",
-  "depends_on": ["004-ca184-demarcation", "006-ca30-chaos-step"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "004-ca184-demarcation",
+    "006-ca30-chaos-step"
   ],
-  "languages": ["cpp"],
-  "tags": ["cellular-automata", "rule-184", "rule-30", "demarcation", "counterfactual"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "cellular-automata",
+    "rule-184",
+    "rule-30",
+    "demarcation",
+    "counterfactual"
+  ],
+  "spec": "# 008: CA 184 / CA 30 Counterfactual Match-Inversion Demarcator\n\n## Problem Statement\n\nIn grammar-free streaming text segmentation, structural phase boundaries are detected by evolving a 64-bit sliding byte-parity window under three parallel cellular automaton arms:\n1. **Forward Conservative Arm (`fwd_1`):** `step_rule_184(seed_bits)`\n2. **Counterfactual Inverted Arm (`cf_1`):** `step_rule_184(~seed_bits)`\n3. **Chaotic Reference Arm (`r30_1`):** `step_rule_30(seed_bits)`\n\nImplement `count_demarcs(uint64_t seed_bits, bool& particle_conserved_out)`:\n- Verify dual particle conservation:\n  - `std::popcount(fwd_1) == std::popcount(seed_bits)`\n  - `std::popcount(fwd_1) + std::popcount(cf_1) == 64`\n- Identify cell indices $i$ where `fwd_1` is the logical inversion of `r30_1` while `cf_1` equals `r30_1`:\n  - `matches = ~(fwd_1 ^ ~r30_1) & ~(cf_1 ^ r30_1)`\n- Count spatial transitions around the 64-bit ring:\n  - `demarcs = matches ^ std::rotl(matches, 1)`\n  - Return `std::popcount(demarcs)`.\n\n## Mathematical Law / Invariant\n\n- **Dual Particle Conservation:** Under periodic boundary conditions on $\\mathbb{Z}_{64}$, Rule 184 strictly conserves particle count $P(x) = \\text{popcount}(x)$ and hole count $P(\\neg x) = 64 - P(x)$, guaranteeing:\n  $$P(\\text{step}_{184}(x)) + P(\\text{step}_{184}(\\neg x)) = 64 \\quad \\forall x \\in \\{0,1\\}^{64}$$\n- **Even Parity of Ring Demarcations:** On any closed cyclic ring, the number of $0 \\leftrightarrow 1$ transitions in `matches ^ rotl(matches, 1)` is always an even integer in $\\{0, 2, 4, \\dots, 64\\}$.\n\n## Function Signature\n\n```cpp\nuint64_t step_rule_184(uint64_t state);\nuint64_t step_rule_30(uint64_t state);\nuint32_t count_demarcs(uint64_t seed_bits, bool& particle_conserved_out);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (~18 branchless bitwise instructions + 4 `popcnt`).\n- **Space:** $O(1)$ registers.\n"
 }

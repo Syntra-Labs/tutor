@@ -4,12 +4,31 @@
   "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
   "category": "E8 Lattice & Discrete Routing",
   "difficulty": "Hard",
-  "depends_on": ["052-spinor-group-64-closure"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "052-spinor-group-64-closure"
   ],
-  "languages": ["cpp"],
-  "tags": ["e8-lattice", "orbit-graph", "bfs", "holonomy-transport"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "e8-lattice",
+    "orbit-graph",
+    "bfs",
+    "holonomy-transport"
+  ],
+  "spec": "# 053: 16-Root $E_8$ Orbit Generation & Transport BFS Table\n\n## Problem Statement\n\nActing with the 64-element $\\mathcal{C}\\ell(0,6)$ spinor group on the anchor root $r_0 = (2, 2, 0, 0, 0, 0, 0, 0)$ (a scaled $D_8 \\subset E_8$ root with $\\|r_0\\|_1 = 4, \\|r_0\\|_2^2 = 8$) sweeps out a transitive **16-root orbit** $\\mathcal{O}_{16}$ (with stabilizer of order $64 / 16 = 4$). Precomputing the $16 \\times 16$ shortest-path BFS table `bfs[src][dst]` over the 15 bivector generators provides $O(1)$ exact group transport between any two roots in $\\mathcal{O}_{16}$.\n\n## Mathematical Law / Invariant\n\n1. **Orbit Enumeration (`roots[16]`):**\n   Apply all 64 spinor matrices to `anchor = {2, 2, 0, 0, 0, 0, 0, 0}` and collect the 16 unique vectors in a sorted `std::set<std::array<int8_t, 8>>`. Set `roots[0] = anchor` and place the remaining 15 roots in ascending lexicographical order in `roots[1..15]`.\n2. **Norm Invariants:** Every $r \\in \\mathcal{O}_{16}$ satisfies:\n   $$\\|r\\|_1 = \\sum_{d=0}^7 |r_d| = 4, \\qquad \\|r\\|_2^2 = \\sum_{d=0}^7 r_d^2 = 8, \\qquad \\|r\\|_\\infty = 2$$\n3. **Transport BFS Table (`bfs[16][16]`):**\n   For each `start` $\\in [0, 15]$, initialize `paths[start] = 0` (the identity spinor state) and run BFS using the 15 generator states `gen = generators[edge]`. When transitioning from root `from` to `to = find_root(states[gen] * roots[from])` for the first time, record `paths[to] = compose[gen][paths[from]]`.\n   **Transport Invariant:** For all $\\mathrm{src}, \\mathrm{dst} \\in [0, 15]$:\n   $$\\mathrm{action}(\\mathrm{bfs}[\\mathrm{src}][\\mathrm{dst}],\\; \\mathrm{roots}[\\mathrm{src}]) = \\mathrm{roots}[\\mathrm{dst}]$$\n\n## Function Signature\n\n```cpp\nE8Orbit16 build_e8_orbit_16();\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ table construction ($16 \\times 16 \\times 15$ BFS steps).\n- **Space:** $O(1)$ (`bfs` table is $256$ bytes).\n"
 }

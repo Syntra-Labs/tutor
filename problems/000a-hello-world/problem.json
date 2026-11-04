@@ -5,11 +5,27 @@
   "category": "Track 0: Warmup & Sanity Checks",
   "difficulty": "Easy",
   "depends_on": [],
-  "tags": ["warmup", "strings", "sanity-check"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "tags": [
+    "warmup",
+    "strings",
+    "sanity-check"
   ],
-  "languages": ["cpp"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "spec": "# 000a: Hello World & String Greeting\n\n## Problem Statement\n\nA quick warmup problem to verify that the editor and C++20 test judge are working end-to-end.\n\nImplement two functions in `solution.hpp`:\n\n1. `std::string hello_world()`:\n   - Return the exact string `\"Hello, World!\"`.\n2. `std::string greet(std::string_view name)`:\n   - If `name` is empty, return `\"Hello, World!\"`.\n   - Otherwise, return `\"Hello, \" + std::string(name) + \"!\"`.\n"
 }

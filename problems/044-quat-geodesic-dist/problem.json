@@ -4,12 +4,32 @@
   "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
   "category": "Lie Groups & Quaternions",
   "difficulty": "Easy",
-  "depends_on": ["043-quat-hamilton-rotor"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "043-quat-hamilton-rotor"
   ],
-  "languages": ["cpp"],
-  "tags": ["quaternions", "s3-manifold", "geodesic-distance", "double-cover", "bi-invariance"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "quaternions",
+    "s3-manifold",
+    "geodesic-distance",
+    "double-cover",
+    "bi-invariance"
+  ],
+  "spec": "# 044: Geodesic Distance on the Double-Cover $S^3$\n\n## Problem Statement\n\nBecause $S^3 \\cong SU(2)$ is the universal double cover of $SO(3)$, antipodal unit quaternions $q$ and $-q$ represent the exact same 3D rotation. The Riemannian rotation distance on $SO(3) \\cong S^3 / \\{\\pm 1\\}$ between two unit quaternions $p, q \\in S^3$ is given by twice the acute spherical angle between the lines $\\pm p$ and $\\pm q$.\n\n## Mathematical Law / Invariant\n\nFor unit quaternions $p, q \\in S^3$:\n$$p \\cdot q = p_w q_w + p_x q_x + p_y q_y + p_z q_z$$\n$$d_{S^3}(p, q) = 2 \\arccos\\!\\left(\\min(1.0,\\; |p \\cdot q|)\\right) \\in [0, \\pi]$$\n\nInvariants:\n1. **Antipodal Identification:** $d_{S^3}(q, -q) = 0$.\n2. **Orthogonal Rotors:** If $p \\cdot q = 0$ (e.g., $1$ and $i$), then $d_{S^3}(p, q) = \\pi$ (a $180^\\circ$ physical rotation).\n3. **Bi-Invariance on $S^3$:** For any unit rotor $r \\in S^3$:\n   $$d_{S^3}(r \\otimes p,\\; r \\otimes q) = d_{S^3}(p \\otimes r,\\; q \\otimes r) = d_{S^3}(p, q)$$\n\n## Function Signature\n\n```cpp\ndouble Quat::dot(const Quat& q) const;\ndouble Quat::geodesic_dist(const Quat& q) const;\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per query.\n- **Space:** $O(1)$.\n"
 }

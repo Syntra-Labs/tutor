@@ -6,10 +6,28 @@
   "difficulty": "Easy",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["lut", "bipolar", "constexpr", "simd", "hypervector"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "lut",
+    "bipolar",
+    "constexpr",
+    "simd",
+    "hypervector"
+  ],
+  "spec": "# 016: Precomputed `256x8` Bipolar Byte Expansion LUT\n\n## Problem Statement\n\nUnpacking individual bits of a hypervector into signed bipolar integers $\\{-1, +1\\} \\subset \\text{int16\\_t}$ via serial bit-shifts (`((w >> k) & 1) ? 1 : -1`) creates a 64-iteration loop per word. By precomputing a `constexpr` 32-byte-aligned lookup table `BipolarByteLUT` of size $256 \\times 8 \\times \\text{sizeof(int16\\_t)} = 4096$ bytes (fitting inside L1D cache), each byte expands in a single 128-bit load (`vmovdqa`).\n\nImplement:\n1. `BipolarByteLUT`: `constexpr` constructor populating `table[b][k] = ((b >> k) & 1) ? +1 : -1` for $b \\in [0, 255]$ and $k \\in [0, 7]$, with `alignas(32)` on `table`.\n2. `void expand_word_bipolar(uint64_t word, int16_t* out_64)`:\n   - Expand all 8 bytes of `word` (little-endian bit order $0 \\dots 63$) into `out_64[0..63]` using `BYTE_BIPOLAR_LUT.table[static_cast<uint8_t>(word >> (8 * byte_idx))]`.\n\n## Mathematical Law / Invariant\n\n- **Isomorphism $(\\{0,1\\}, \\oplus) \\cong (\\{+1,-1\\}, \\times)$:** Under the map $\\phi(b) = 2b - 1 \\in \\{-1, +1\\}$:\n  $$\\phi(x \\oplus 1) = -\\phi(x), \\quad \\sum_{k=0}^{7} \\text{table}[b][k] = 2\\,\\operatorname{popcount}(b) - 8$$\n- **Antipodal Byte Symmetry:** For every byte $b \\in [0, 255]$ and bit $k \\in [0, 7]$:\n  $$\\text{table}[b][k] + \\text{table}[255 - b][k] = 0$$\n\n## Function Signature\n\n```cpp\nstruct BipolarByteLUT {\n    alignas(32) int16_t table[256][8]{};\n    constexpr BipolarByteLUT();\n};\n\nstatic constexpr BipolarByteLUT BYTE_BIPOLAR_LUT{};\n\nvoid expand_word_bipolar(uint64_t word, int16_t* out_64);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 8 L1D cache-hit 16-byte loads/stores per 64-bit word.\n- **Space:** 4,096 bytes static `constexpr` table in `.rodata`.\n"
 }

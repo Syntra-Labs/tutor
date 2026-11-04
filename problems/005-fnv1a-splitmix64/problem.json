@@ -6,10 +6,28 @@
   "difficulty": "Easy",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["hashing", "fnv1a", "splitmix64", "bijection", "avalanche"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "hashing",
+    "fnv1a",
+    "splitmix64",
+    "bijection",
+    "avalanche"
+  ],
+  "spec": "# 005: FNV-1a Hash & SplitMix64 Bijective Finalizer\n\n## Problem Statement\n\nDeterministic hyperdimensional substrates require mapping arbitrary byte spans into 64-bit seeds (`fnv1a_64`) and expanding those seeds into uncorrelated 64-bit words via a bijective mixer (`splitmix64`).\n\nImplement:\n1. `uint64_t fnv1a_64(const void* data, size_t len, uint64_t basis = 14695981039346656037ULL)`\n   - For each byte $b_i \\in \\text{data}$: XOR into the hash accumulator, then multiply by the 64-bit FNV prime `1099511628211ULL` (`0x100000001B3ULL`).\n2. `uint64_t splitmix64(uint64_t& state)`\n   - Advance `state += 0x9E3779B97F4A7C15ULL`, then apply the Stafford Mix13 bijective finalizer:\n     - `z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL`\n     - `z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL`\n     - `return z ^ (z >> 31)`\n\n## Mathematical Law / Invariant\n\n- **Bijectivity on $\\mathbb{Z}_{2^{64}}$:** Every step of `splitmix64`'s output mixing function is invertible: $z \\mapsto z \\oplus (z \\gg k)$ is a triangular GF(2) automorphism, and multiplication by an odd constant is an automorphism of the ring $(\\mathbb{Z}/2^{64}\\mathbb{Z}, +)$ since $\\gcd(\\text{odd}, 2^{64}) = 1$. Therefore, $2^{64}$ distinct states yield $2^{64}$ distinct outputs with zero collisions.\n- **Avalanche Criterion:** Flipping a single bit of the input seed flips approximately $32$ of the $64$ output bits on average.\n\n## Function Signature\n\n```cpp\nuint64_t fnv1a_64(const void* data, size_t len, uint64_t basis = 14695981039346656037ULL);\nuint64_t fnv1a_str(std::string_view s, uint64_t basis = 14695981039346656037ULL);\nuint64_t splitmix64(uint64_t& state);\n```\n\n## Complexity Target\n\n- **Time:** $O(\\text{len})$ for `fnv1a_64` (~1.5 cycles/byte); $O(1)$ (6 instructions) for `splitmix64`.\n- **Space:** $O(1)$ registers only.\n"
 }

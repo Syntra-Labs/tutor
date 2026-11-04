@@ -170,7 +170,7 @@ def _resolve_target_problem_id(explicit_id):
     if explicit_id:
         return explicit_id
     cwd = Path.cwd()
-    if (cwd / "README.md").exists() and (cwd / "problem.json").exists():
+    if (cwd / "problem.json").exists():
         return cwd.name
     config = get_config()
     ws_root = Path(config["workspace_dir"])

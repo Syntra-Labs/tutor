@@ -4,12 +4,32 @@
   "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
   "category": "Exact Algebraic Rings & Number Theory",
   "difficulty": "Easy",
-  "depends_on": ["028-golden-integers-ring"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "028-golden-integers-ring"
   ],
-  "languages": ["cpp"],
-  "tags": ["galois-conjugate", "algebraic-norm", "units", "golden-ratio", "ring"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "galois-conjugate",
+    "algebraic-norm",
+    "units",
+    "golden-ratio",
+    "ring"
+  ],
+  "spec": "# 029: $\\mathbb{Z}[\\phi]$ Galois Conjugate, Norm & Unit Inversion\n\n## Problem Statement\n\nThe polynomial $x^2 - x - 1 = 0$ has two roots: $\\phi = \\frac{1+\\sqrt{5}}{2}$ and $\\bar{\\phi} = 1 - \\phi = -\\phi^{-1} = \\frac{1-\\sqrt{5}}{2}$. Swapping $\\phi \\mapsto 1 - \\phi$ defines the non-trivial Galois automorphism (conjugation) of the quadratic field $\\mathbb{Q}(\\sqrt{5})$ restricted to $\\mathbb{Z}[\\phi]$.\n\nImplement `conj()`, `norm()`, and exact unit inversion `inv()` on `ZPhi`.\n\n## Mathematical Law / Invariant\n\n1. **Galois Conjugate:**\n   $$(a + b\\phi)^\\star = a + b(1 - \\phi) = (a + b) - b\\phi \\implies \\text{conj}(a, b) = (a + b, -b)$$\n   Involution & ring homomorphism: $(x^\\star)^\\star = x$, $(x + y)^\\star = x^\\star + y^\\star$, and $(x \\cdot y)^\\star = x^\\star \\cdot y^\\star$.\n2. **Algebraic Norm:**\n   $$N(a + b\\phi) = (a + b\\phi)(a + b\\phi)^\\star = a^2 + ab - b^2 \\in \\mathbb{Z}$$\n   **Multiplicativity Law:** $N(x \\cdot y) = N(x) \\cdot N(y)$ for all $x, y \\in \\mathbb{Z}[\\phi]$.\n3. **Unit Group Characterization ($\\mathbb{Z}[\\phi]^\\times$):**\n   An element $x \\in \\mathbb{Z}[\\phi]$ has a multiplicative inverse in $\\mathbb{Z}[\\phi]$ if and only if $N(x) = \\pm 1$:\n   $$x^{-1} = \\frac{x^\\star}{N(x)} = \\begin{cases} x^\\star & \\text{if } N(x) = +1 \\\\ -x^\\star & \\text{if } N(x) = -1 \\\\ \\text{std::nullopt} & \\text{if } |N(x)| \\neq 1 \\end{cases}$$\n\n## Function Signature\n\n```cpp\nstruct ZPhi {\n    int64_t a = 0;\n    int64_t b = 0;\n\n    constexpr bool operator==(const ZPhi& o) const = default;\n    constexpr ZPhi operator+(const ZPhi& o) const;\n    constexpr ZPhi operator-(const ZPhi& o) const;\n    constexpr ZPhi operator-() const;\n    constexpr ZPhi operator*(const ZPhi& o) const;\n\n    constexpr ZPhi conj() const;\n    constexpr int64_t norm() const;\n    constexpr std::optional<ZPhi> inv() const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ integer arithmetic per operation.\n- **Space:** $O(1)$.\n"
 }

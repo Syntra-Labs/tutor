@@ -6,10 +6,27 @@
   "difficulty": "Easy",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["recursive-descent", "symbolic-ast", "expression-parser", "evaluator"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "recursive-descent",
+    "symbolic-ast",
+    "expression-parser",
+    "evaluator"
+  ],
+  "spec": "# 067: Recursive Descent Symbolic Expression Parser & Evaluator\n\n## Problem Statement\n\nFoundational to symbolic engines (`lawful/symbolic.hpp`) is parsing infix mathematical expressions into a binary Abstract Syntax Tree (`Tree`) and evaluating it recursively while respecting operator precedence and associativity.\n\nImplement a recursive-descent parser and evaluator over infix strings containing floating-point/integer numbers, whitespace, parentheses `( ... )`, and binary operators `+`, `-`, `*`, `/`, `^`:\n1. **Grammar & Precedence:**\n   - **Expression (`+`, `-`):** Left-associative addition and subtraction (`parseExpression`):\n     $$\\text{Expr} \\to \\text{Term} \\ ((\\text{'+'} \\mid \\text{'-'}) \\ \\text{Term})^*$$\n   - **Term (`*`, `/`):** Left-associative multiplication and division (`parseTerm`):\n     $$\\text{Term} \\to \\text{Power} \\ ((\\text{'*'} \\mid \\text{'/'}) \\ \\text{Power})^*$$\n   - **Power (`^`):** Right-associative exponentiation (`parseFactor`):\n     $$\\text{Power} \\to \\text{Primary} \\ (\\text{'\\^'} \\ \\text{Power})?$$\n   - **Primary:** Unsigned/signed numeric literal (e.g. `42`, `3.5`) or parenthesized `( Expr )`.\n2. **AST Representation & Evaluation:**\n   - Construct a `sym::Tree` where internal nodes store the operator symbol (`\"+\"`, `\"-\"`, `\"*\"`, `\"/\"`, `\"^\"`) in `data` with `left` and `right` child pointers, and leaf nodes store the number string in `data`.\n   - Implement `double evalExpression(const Tree* root)` to recursively evaluate the AST.\n\n## Mathematical Law / Invariant\n\n- **Precedence Law:** `eval(\"2 + 3 * 4\") == 14.0`, whereas `eval(\"(2 + 3) * 4\") == 20.0`.\n- **Left-Associativity of `-` and `/`:** `eval(\"10 - 3 - 2\") == 5.0` and `eval(\"24 / 6 / 2\") == 2.0`.\n- **Right-Associativity of `^`:** `eval(\"2 ^ 3 ^ 2\") == 512.0` ($2^{(3^2)} = 2^9 = 512$, not $(2^3)^2 = 64$).\n\n## Function Signature\n\n```cpp\nnamespace sym {\n    void parseExpression(Tree& expression, int& p, const std::string& str);\n    double evalExpression(const Tree* expression);\n    void deallocateTree(Tree& root);\n}\n```\n\n## Complexity Target\n\n- **Time:** $O(N)$ single-pass recursive descent in expression length $N$.\n- **Space:** $O(T)$ AST nodes.\n"
 }

@@ -6,10 +6,29 @@
   "difficulty": "Medium",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "PID Isolation", "asc": false},
-    {"hdr": "Mount Jail", "asc": false}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "PID Isolation",
+      "asc": false
+    },
+    {
+      "hdr": "Mount Jail",
+      "asc": false
+    }
   ],
-  "languages": ["sh"],
-  "tags": ["containers", "namespaces", "chroot", "linux-kernel", "pid1", "procfs"]
+  "languages": [
+    "sh"
+  ],
+  "tags": [
+    "containers",
+    "namespaces",
+    "chroot",
+    "linux-kernel",
+    "pid1",
+    "procfs"
+  ],
+  "spec": "# Linux Containers from Scratch: Process & Mount Namespaces\n\n## 1. Mathematical & Systems Formalism\n\nModern Linux containers (Docker, containerd, runc) are not hardware virtual machines. A container is a standard Linux process governed by two fundamental kernel primitives:\n\n1. **Namespaces** ($\\mathcal{N}$): Partitioning of global system resources. When a process belongs to a namespace, changes to that resource are only visible to members of that namespace:\n   $$\\mathcal{N}_{\\text{pid}} \\implies \\text{Isolated PID tree where the child is PID } 1$$\n   $$\\mathcal{N}_{\\text{mnt}} \\implies \\text{Isolated virtual file system mount table}$$\n   $$\\mathcal{N}_{\\text{uts}} \\implies \\text{Isolated hostname/domain identification}$$\n\n2. **Root Filesystem Pivot / Chroot** ($\\mathcal{R}$):\n   $$\\mathcal{R}: \\text{Path} \\to \\text{Jail Root } \\Omega$$\n   Restricts pathname resolution so that path traversal starting with `/` never ascends beyond directory $\\Omega$.\n\nInside a properly isolated container:\n* The root process must observe itself as **PID 1** (`/proc/1/cmdline`).\n* Host processes must be invisible from inside the container `/proc` tree.\n* Filesystem paths outside the jail boundary must be inaccessible.\n\n---\n\n## 2. Specification\n\nImplement a POSIX shell script in `solution.sh` defining the function:\n\n```sh\nrun_isolated() {\n    JAIL_DIR=\"$1\"\n    shift\n    COMMAND=\"$@\"\n    ...\n}\n```\n\n### Requirements:\n1. **Directory Preparation**: Ensure `$JAIL_DIR/proc`, `$JAIL_DIR/bin`, `$JAIL_DIR/lib`, etc., exist or are mountable.\n2. **Mount Namespace**: Mount a private instance of `proc` inside `$JAIL_DIR/proc` so that processes inside the container read an isolated `/proc` without polluting the host's `/proc`.\n3. **PID Namespace**: Execute the target command inside a new PID namespace where the child process runs as PID 1 (`$$ == 1`).\n4. **Filesystem Confinement**: Ensure the process cannot break out of `$JAIL_DIR` (using `chroot`).\n5. **Exit Code Propagation**: Propagate the exact exit code of `$COMMAND` back to the caller.\n\n---\n\n## 3. Environment & Testing\n\nYou have access to a real, live Linux kernel running inside your browser via the **Live Linux VM Terminal** split on the right. You can test commands interactively in the VM:\n\n```sh\n# Inspect namespaces in current shell:\nls -la /proc/$$/ns\n\n# Test chroot and private proc mounts:\nchroot /my_jail /bin/sh\n```\n"
 }

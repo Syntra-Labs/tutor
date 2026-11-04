@@ -4,12 +4,30 @@
   "track": "Track 0: Warmup & Sanity Checks",
   "category": "Track 0: Warmup & Sanity Checks",
   "difficulty": "Easy",
-  "depends_on": ["000a-hello-world"],
-  "tags": ["warmup", "arithmetic", "integers"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "000a-hello-world"
   ],
-  "languages": ["cpp"]
+  "tags": [
+    "warmup",
+    "arithmetic",
+    "integers"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "spec": "# 000b: Simple Integer Arithmetic & Polynomial Eval\n\n## Problem Statement\n\nImplement three basic integer arithmetic functions in `solution.hpp`:\n\n1. `int64_t add_i64(int64_t a, int64_t b)`:\n   - Return $a + b$.\n2. `int64_t eval_quadratic(int64_t a, int64_t b, int64_t c, int64_t x)`:\n   - Evaluate the quadratic polynomial $f(x) = a x^2 + b x + c$.\n3. `int64_t sum_first_n(int64_t n)`:\n   - For $n \\ge 0$, return the sum $\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}$.\n   - If $n \\le 0$, return $0$.\n"
 }

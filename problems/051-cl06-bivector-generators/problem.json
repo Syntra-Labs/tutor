@@ -4,12 +4,31 @@
   "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
   "category": "Octonions & Clifford Algebra",
   "difficulty": "Medium",
-  "depends_on": ["050-octonion-fano-product"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "050-octonion-fano-product"
   ],
-  "languages": ["cpp"],
-  "tags": ["clifford-algebra", "bivectors", "octonions", "signed-matrices"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "clifford-algebra",
+    "bivectors",
+    "octonions",
+    "signed-matrices"
+  ],
+  "spec": "# 051: Clifford Algebra $\\mathcal{C}\\ell(0,6)$ Generators & 15 Bivectors\n\n## Problem Statement\n\nAlthough octonion multiplication is non-associative, the **left-multiplication maps** $L_a : x \\mapsto e_a x$ are linear operators on $\\mathbb{R}^8$ (represented by $8 \\times 8$ signed permutation matrices), and matrix composition is strictly associative! Because the octonions are an alternative algebra, the first six imaginary left-multiplications $G_0, \\dots, G_5$ (corresponding to $e_1, \\dots, e_6$) generate the real representation of the Clifford algebra $\\mathcal{C}\\ell(0, 6) \\cong \\mathrm{Mat}_8(\\mathbb{R})$, and their pairwise products form the $\\binom{6}{2} = 15$ bivector operators corresponding to the 15 edges of $K_6$.\n\n## Mathematical Law / Invariant\n\n1. **Left-Multiplication Generators ($G_i$ for $i \\in \\{0, \\dots, 5\\}$, basis $e_{i+1}$):**\n   For each column $c \\in \\{0, \\dots, 7\\}$, let $(\\mathrm{sgn}, \\mathrm{idx}) = \\mathrm{octonion\\_basis\\_product}(i + 1, c)$. Then:\n   $$(G_i)_{\\mathrm{idx}, c} = \\mathrm{sgn}$$\n2. **Clifford Relations ($\\mathcal{C}\\ell(0,6)$):**\n   $$G_i^2 = -I_8, \\qquad G_i G_j = -G_j G_i \\quad (i \\neq j)$$\n3. **15 Bivector Operators ($B_{ij} = G_i G_j$ for $0 \\le i < j < 6$):**\n   Listed in lexicographical order of $(i, j)$:\n   $$B_{ij}^2 = (G_i G_j)(G_i G_j) = -G_i^2 G_j^2 = -I_8, \\qquad B_{ij} B_{jk} = G_i G_j^2 G_k = -G_i G_k = -B_{ik}$$\n\n## Function Signature\n\n```cpp\nusing Mat8 = std::array<std::array<int8_t, 8>, 8>;\nMat8 mat_identity();\nMat8 mat_mul(const Mat8& A, const Mat8& B);\nstd::array<Mat8, 6> build_cl06_generators();\nstd::array<Mat8, 15> build_cl06_bivectors();\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ fixed $8 \\times 8$ integer matrix operations.\n- **Space:** $O(1)$ ($64$ bytes per `Mat8`).\n"
 }

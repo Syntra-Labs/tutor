@@ -87,13 +87,18 @@ datastores := {
 # Rationale: Passive Markdown files drift, rot, and cannot actively validate state.
 # All documentation, roadmaps, and audits must be converted into executable code,
 # structured JSON schemas, or tracked GitHub Issues/Milestones.
+# The root README.md is the sole permitted entrypoint for repository discovery.
 # ------------------------------------------------------------------------------
 violations contains msg if {
     some file in input.all_files
     endswith(file, ".md")
+    not is_root_manifest(file)
     target := categorize_markdown_migration(file)
     msg := sprintf("[ARCH-001 Markdown Prohibition]: Passive file '%v' is forbidden. Migration target: %v.", [file, target])
 }
+
+is_root_manifest(file) if file == "README.md"
+is_root_manifest(file) if file == "./README.md"
 
 # Classifies existing legacy markdown files into their assigned migration destinations
 categorize_markdown_migration(file) := "Convert to structured policy or GitHub Project Milestone" if {

@@ -6,10 +6,27 @@
   "difficulty": "Medium",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["cellular-automata", "rule-184", "swar", "stream-chunking"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "cellular-automata",
+    "rule-184",
+    "swar",
+    "stream-chunking"
+  ],
+  "spec": "# 004: Cellular Automaton Rule 184 Boundary Demarcation\n\n## Specification & Contract\n\nCellular Automaton Rule 184 is a deterministic 1D traffic flow model that conserves particle count. In unformatted streaming code, Rule 184 acts as a natural boundary demarcator without requiring a programming language grammar.\n\n### Transition Rule:\nFor cell state $x_i \\in \\{0, 1\\}$ with neighbors $x_{i-1}, x_{i+1}$:\n$$x_i^{t+1} = (x_{i-1} \\land \\neg x_i) \\lor (x_i \\land x_{i+1})$$\n\n### Requirements:\nImplement a 64-bit SWAR (SIMD Within A Register) Rule 184 step function:\n```cpp\nuint64_t step_rule184(uint64_t state, uint64_t left_in, uint64_t right_in);\n```\n- Conserves total set bits (particles) across transitions with periodic or streamed boundaries.\n- Returns the demarcated state after $T$ steps.\n"
 }

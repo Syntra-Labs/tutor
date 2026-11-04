@@ -4,12 +4,31 @@
   "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
   "category": "Geometric Systems & Compute",
   "difficulty": "Easy",
-  "depends_on": ["059-e8-shortlist-admission"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "059-e8-shortlist-admission"
   ],
-  "languages": ["cpp"],
-  "tags": ["rank-margin", "hinge-loss", "integer-learning", "no-softmax"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "rank-margin",
+    "hinge-loss",
+    "integer-learning",
+    "no-softmax"
+  ],
+  "spec": "# 063: Integer Rank-Margin Hinge Loss (Objectives A & R)\n\n## Problem Statement\n\nUnder the no-softmax learning law (D23) and zero-multiplier serving contract (D11), discrete geometric models train on an exact integer rank-margin hinge loss over token $L_1$ distances $d$ and cell address distances $\\text{addr}$.\n\nGiven:\n- Target token $L_1$ distance $d_{\\text{target}}$ and best wrong rival token $L_1$ distance $d_{\\text{rival}}$,\n- Target cell address distance $\\text{addr}_{\\text{target}}$ and best wrong occupied rival cell address distance $\\text{addr}_{\\text{rival\\_cell}}$,\n- Array of cell address distances `cell_addr_dist[256]`, boolean cell occupancy mask `cell_occupied[256]`, target cell index `target_cell`, and kept shortlist budget $K$:\n\nCompute:\n1. **Token Margin Shortfall ($w = 32$):**\n   $$T = \\max(0,\\ 32 + d_{\\text{target}} - d_{\\text{rival}})$$\n2. **Address Margin Shortfall:**\n   $$A = \\max(0,\\ 8 + \\text{addr}_{\\text{target}} - \\text{addr}_{\\text{rival\\_cell}})$$\n3. **Objective A Numerator (using bit shifts only):**\n   $$\\text{loss\\_A\\_num} = 8T + 32A = (T \\ll 3) + (A \\ll 5)$$\n4. **Occupied Cell Rank $r$ and Objective R Shortfall:**\n   Let $r$ be $1$ plus the number of occupied cells $c \\in [0, 255]$ ($c \\neq \\text{target\\_cell}$ and `cell_occupied[c] == true`) that strictly precede `target_cell` under the lexicographic order $(\\text{cell\\_addr\\_dist}[c],\\ c)$. Then:\n   $$R = \\max(0,\\ r - K)$$\n   and Objective R numerator is:\n   $$\\text{loss\\_R\\_num} = (T \\ll 3) + (R \\ll 5)$$\n\n## Mathematical Law / Invariant\n\n- **Zero-Loss Margin:** When $d_{\\text{target}} \\le d_{\\text{rival}} - 32$ and $\\text{addr}_{\\text{target}} \\le \\text{addr}_{\\text{rival\\_cell}} - 8$, both $T = 0$ and $A = 0$, so $\\text{loss\\_A\\_num} = 0$.\n- **Admission Equivalence of Objective R:** $R = 0$ if and only if the target cell is among the first $K$ occupied cells in `(cell_addr_dist[c], c)` order ($r \\le K$).\n- **Multiplier-Free Arithmetic:** All loss combinations use only shifts (`<< 3`, `<< 5`), additions, subtractions, and comparisons.\n\n## Function Signature\n\n```cpp\nRankMarginResult evaluate_rank_margin_hinge(\n    int32_t d_target,\n    int32_t d_best_rival,\n    int32_t addr_target,\n    int32_t addr_best_rival_cell,\n    const std::array<int32_t, 256>& cell_addr_dist,\n    const std::array<bool, 256>& cell_occupied,\n    uint8_t target_cell,\n    int32_t K\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(256)$ integer comparisons and shifts; zero multiplications or floating-point instructions.\n- **Space:** $O(1)$.\n"
 }

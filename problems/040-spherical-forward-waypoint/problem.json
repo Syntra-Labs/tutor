@@ -4,12 +4,32 @@
   "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
   "category": "Spherical Geometry",
   "difficulty": "Medium",
-  "depends_on": ["039-spherical-haversine"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "039-spherical-haversine"
   ],
-  "languages": ["cpp"],
-  "tags": ["sphere", "geodesic", "rodrigues", "tangent-bundle", "turtle-geometry"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "sphere",
+    "geodesic",
+    "rodrigues",
+    "tangent-bundle",
+    "turtle-geometry"
+  ],
+  "spec": "# 040: Spherical Forward Geodesic Waypoint & Bearing\n\n## Problem Statement\n\nIn intrinsic turtle geometry on the unit sphere $S^2$ (as used in `sphere-route`), a state in the unit tangent bundle $UT(S^2)$ consists of a unit position vector $\\mathbf{p} \\in S^2$ and a unit tangent heading vector $\\mathbf{t} \\in T_{\\mathbf{p}}S^2$ satisfying $\\mathbf{p} \\cdot \\mathbf{t} = 0$. Moving forward advances $(\\mathbf{p}, \\mathbf{t})$ along the great circle spanned by $\\mathbf{p}$ and $\\mathbf{t}$, while turning rotates $\\mathbf{t}$ in the tangent plane around the surface normal $\\mathbf{p}$ via Rodrigues' formula.\n\n## Mathematical Law / Invariant\n\nStarting at the North Pole $\\mathbf{p}_0 = (0, 0, 1)$ with heading $\\mathbf{t}_0 = (1, 0, 0)$:\n1. **`forward(deg)`** ($\\theta = \\text{deg} \\cdot \\frac{\\pi}{180}$):\n   $$\\mathbf{p}' = \\mathbf{p} \\cos\\theta + \\mathbf{t} \\sin\\theta, \\qquad \\mathbf{t}' = -\\mathbf{p} \\sin\\theta + \\mathbf{t} \\cos\\theta$$\n   followed by Gram-Schmidt re-orthonormalization ($\\hat{\\mathbf{p}} = \\mathbf{p}'/\\|\\mathbf{p}'\\|$, $\\hat{\\mathbf{t}} = (\\mathbf{t}' - (\\mathbf{t}'\\cdot\\hat{\\mathbf{p}})\\hat{\\mathbf{p}})/\\|\\dots\\|$).\n2. **`turn(deg)`** ($\\alpha = \\text{deg} \\cdot \\frac{\\pi}{180}$, positive = left turn around outward normal $\\mathbf{p}$):\n   $$\\mathbf{t}' = \\mathbf{t} \\cos\\alpha + (\\mathbf{p} \\times \\mathbf{t}) \\sin\\alpha$$\n3. ** tangent-bundle invariant:** $\\|\\mathbf{p}\\|_2 = 1$, $\\|\\mathbf{t}\\|_2 = 1$, and $\\mathbf{p} \\cdot \\mathbf{t} = 0$ at every step. Executing `[Forward(90), Turn(90)]` three times traces the octant triangle and returns to $\\mathbf{p}_0 = (0,0,1), \\mathbf{t}_0 = (1,0,0)$.\n\n## Function Signature\n\n```cpp\nvoid step_forward(SphericalTurtle& state, double deg);\nvoid step_turn(SphericalTurtle& state, double deg);\nSphericalTurtle run_spherical_path(const std::vector<Command>& commands);\n```\n\n## Complexity Target\n\n- **Time:** $O(N)$ for $N$ commands.\n- **Space:** $O(1)$ auxiliary state.\n"
 }

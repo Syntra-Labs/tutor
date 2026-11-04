@@ -4,12 +4,32 @@
   "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
   "category": "Cellular Automata & SWAR",
   "difficulty": "Easy",
-  "depends_on": ["004-ca184-demarcation"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "004-ca184-demarcation"
   ],
-  "languages": ["cpp"],
-  "tags": ["cellular-automata", "rule-30", "swar", "bit-manipulation", "chaos"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "cellular-automata",
+    "rule-30",
+    "swar",
+    "bit-manipulation",
+    "chaos"
+  ],
+  "spec": "# 006: Cellular Automaton Rule 30 Step (64-Bit SWAR)\n\n## Problem Statement\n\nStephen Wolfram's elementary Cellular Automaton **Rule 30** exhibits Class-3 aperiodic chaos from single-bit initial conditions and serves as the chaotic reference arm in counterfactual stream demarcation.\n\nImplement a 64-bit SWAR (SIMD Within A Register) periodic ring step for Rule 30:\n- Left neighbor register: `l = std::rotl(state, 1)`\n- Right neighbor register: `r = std::rotr(state, 1)`\n- Parallel 64-cell update: `l ^ (state | r)`\n\n## Mathematical Law / Invariant\n\n- **Local Transition Law:** For cell $i$ on a 64-bit cyclic ring ($\\mathbb{Z}_{64}$):\n  $$x_i^{t+1} = l_i^t \\oplus (c_i^t \\lor r_i^t)$$\n  Truth table over $(l, c, r) \\in \\{111, 110, 101, 100, 011, 010, 001, 000\\}$: outputs $00011110_2 = 30_{10}$.\n- **Cyclic Shift Equivariance:** For any shift $k \\in [0, 63]$:\n  $$\\text{step\\_rule\\_30}(\\text{rotl}(x, k)) = \\text{rotl}(\\text{step\\_rule\\_30}(x), k)$$\n- **Non-Conservative Chaos:** Unlike Rule 184, Rule 30 does not conserve `std::popcount(state)`.\n\n## Function Signature\n\n```cpp\nuint64_t step_rule_30(uint64_t state);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 4 CPU instructions (`rol`, `ror`, `or`, `xor`) updating all 64 cells simultaneously.\n- **Space:** $O(1)$ registers.\n"
 }

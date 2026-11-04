@@ -4,12 +4,31 @@
   "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
   "category": "Hopf Fibration & Fibre Bundles",
   "difficulty": "Medium",
-  "depends_on": ["043-quat-hamilton-rotor"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "043-quat-hamilton-rotor"
   ],
-  "languages": ["cpp"],
-  "tags": ["hopf-fibration", "s3-to-s2", "fibre-bundle", "u1-gauge-invariance"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "hopf-fibration",
+    "s3-to-s2",
+    "fibre-bundle",
+    "u1-gauge-invariance"
+  ],
+  "spec": "# 046: Hopf Fibration Projection ($S^3 \\to S^2$) & Fibre Invariance\n\n## Problem Statement\n\nThe **Hopf fibration** $S^1 \\hookrightarrow S^3 \\xrightarrow{h} S^2$ maps a unit quaternion $q = (w, x, y, z) \\in S^3$ onto a 3D unit vector on the 2-sphere $S^2$ via $q \\mapsto q k \\bar{q}$. Because any $U(1)$ phase rotor $e_\\psi = (\\cos\\psi, 0, 0, \\sin\\psi) = \\cos\\psi + k\\sin\\psi$ commutes with $k$, right-multiplying $q$ by $e_\\psi$ moves $q$ along a circular $S^1$ fibre in $S^3$ while leaving its shadow $h(q) \\in S^2$ strictly invariant.\n\n## Mathematical Law / Invariant\n\nFor $q = (w, x, y, z) \\in S^3$:\n$$h(q) = \\begin{pmatrix} 2(xz + wy) \\\\ 2(yz - wx) \\\\ w^2 + z^2 - x^2 - y^2 \\end{pmatrix} \\in S^2$$\n\nInvariants:\n1. **Unit-Sphere Landing Identity:**\n   $$\\|h(q)\\|_2^2 = 4(w^2+z^2)(x^2+y^2) + (w^2+z^2 - x^2-y^2)^2 = (w^2+x^2+y^2+z^2)^2 = \\|q\\|_2^4$$\n   Thus $\\|q\\|_2 = 1 \\implies \\|h(q)\\|_2 = 1$.\n2. **Exact $U(1)$ Fibre Gauge Invariance:** For $e_\\psi = (\\cos\\psi, 0, 0, \\sin\\psi)$ and any $\\psi \\in \\mathbb{R}$:\n   $$h(q \\otimes e_\\psi) = h(q)$$\n\n## Function Signature\n\n```cpp\nVec3 hopf_project(const Quat& q);\nQuat hopf_phase_rotor(double psi);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (quadratic polynomial in $(w, x, y, z)$, zero trig/sqrt calls for projection).\n- **Space:** $O(1)$.\n"
 }

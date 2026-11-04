@@ -4,12 +4,32 @@
   "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
   "category": "Hyperdimensional Computing (VSA)",
   "difficulty": "Easy",
-  "depends_on": ["013-hypervec-seed-zscore"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "013-hypervec-seed-zscore"
   ],
-  "languages": ["cpp"],
-  "tags": ["vsa", "xor-binding", "isometry", "hypervector", "unbinding"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "vsa",
+    "xor-binding",
+    "isometry",
+    "hypervector",
+    "unbinding"
+  ],
+  "spec": "# 014: VSA XOR Binding & Self-Inverse Unbinding\n\n## Problem Statement\n\nIn binary Vector Symbolic Architectures (VSA / BSC), the **binding** operator $\\otimes$ associates a *role* (key) hypervector $R$ with a *filler* (value) hypervector $F$ via bitwise XOR across all 8,192 bits.\n\nImplement:\n1. `Hypervec8192 Hypervec8192::bind(const Hypervec8192& other) const`:\n   - Compute `out.words[i] = words[i] ^ other.words[i]` for $i \\in [0, 127]$.\n2. `size_t unbind_and_match(const Hypervec8192& trace, const Hypervec8192& role, std::span<const Hypervec8192> candidates)`:\n   - Unbind `role` from `trace` via `Hypervec8192 query = trace.bind(role)` (since XOR is its own inverse), and return the index $k$ in `candidates` that minimizes `query.hamming(candidates[k])`.\n\n## Mathematical Law / Invariant\n\n- **Abelian Group & Self-Inverse ($x \\oplus x = 0$):** $(\\{0,1\\}^{8192}, \\oplus)$ is a Boolean group of exponent 2:\n  $$(R \\oplus F) \\oplus R = F$$\n- **Hamming Distance Isometry:** Binding by any context vector $C$ preserves exact pairwise Hamming distances:\n  $$d_H(A \\oplus C, B \\oplus C) = d_H(A, B)$$\n- **Dissimilarity to Operands:** For random $A, B \\in \\{0,1\\}^{8192}$, the bound vector $A \\oplus B$ is quasi-orthogonal to both $A$ and $B$ ($|z(A \\oplus B, A)| < 3.5$).\n\n## Function Signature\n\n```cpp\nstruct Hypervec8192 {\n    static constexpr size_t HV_BITS = 8192;\n    static constexpr size_t HV_WORDS = 128;\n    std::array<uint64_t, HV_WORDS> words{};\n\n    static Hypervec8192 from_seed(uint64_t seed);\n    Hypervec8192 bind(const Hypervec8192& other) const;\n    uint32_t hamming(const Hypervec8192& other) const;\n    double z_score(const Hypervec8192& other) const;\n};\n\nsize_t unbind_and_match(\n    const Hypervec8192& trace,\n    const Hypervec8192& role,\n    std::span<const Hypervec8192> candidates\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(128)$ words for `bind` (16 AVX-512 `vpxorq` or 32 AVX2 `vpxor` instructions); $O(K \\times 128)$ for candidate lookup.\n- **Space:** $O(1)$ auxiliary space.\n"
 }

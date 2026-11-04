@@ -4,12 +4,31 @@
   "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
   "category": "Information Theory & Surprisal",
   "difficulty": "Easy",
-  "depends_on": ["021-charclass-topology-lut"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "021-charclass-topology-lut"
   ],
-  "languages": ["cpp"],
-  "tags": ["entropy", "shannon", "quantization", "information-theory"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "entropy",
+    "shannon",
+    "quantization",
+    "information-theory"
+  ],
+  "spec": "# 022: Empirical Byte Shannon Entropy & Q8 Quantizer\n\n## Problem Statement\n\nGiven a byte span, compute its empirical Shannon entropy $H \\in [0, 8]$ in bits per byte and quantize it into an 8-bit unsigned header field `entropy_q8` for the `HaloHeader` routing metadata.\n\nFor spans with `text.size() > 1024`, sample bytes at stride `step = text.size() / 1024` (`step = 1` when `text.size() <= 1024`).\n\n## Mathematical Law / Invariant\n\nLet $c_b$ be the count of byte value $b \\in \\{0, \\dots, 255\\}$ among $M$ sampled bytes, and $p_b = \\frac{c_b}{M}$:\n\n$$H(X) = -\\sum_{\\substack{b=0 \\\\ c_b > 0}}^{255} p_b \\log_2 p_b \\in [0.0, 8.0]$$\n\nThe Q8 fixed-point encoding maps $[0, 8]$ bits/byte into $[0, 255]$:\n\n$$\\text{entropy\\_q8} = \\text{clamp}\\!\\left(\\lfloor 32.0 \\cdot H(X) \\rfloor, 0, 255\\right)$$\n\n- **Zero-entropy lower bound:** A constant byte stream (`\"aaaaaaaa\"`) has $H = 0.0$ and `entropy_q8 == 0`.\n- **Dyadic equiprobable law:** An equiprobable stream over $2^k$ distinct byte symbols has exact entropy $H = k$ bits/byte (e.g., 256 distinct bytes once each yields $H = 8.0$ and `entropy_q8 == 255`).\n\n## Function Signature\n\n```cpp\ndouble compute_shannon_entropy(std::string_view text);\nuint8_t quantize_entropy_q8(double entropy_bits);\nuint8_t compute_entropy_q8(std::string_view text);\n```\n\n## Complexity Target\n\n- **Time:** $O(\\min(N, 1024) + 256)$.\n- **Space:** $O(256)$ stack histogram (`std::array<uint32_t, 256>`).\n"
 }

@@ -1438,7 +1438,7 @@ function loadProblem(idx) {
     <span><b>${prob.track}</b></span>
     <span>| ${deps}</span>
   `;
-  document.getElementById("prob-readme").innerHTML = renderMarkdownWithLatex(prob.readme || "");
+  document.getElementById("prob-readme").innerHTML = renderMarkdownWithLatex(prob.spec || prob.readme || "");
 
   const savedCode = localStorage.getItem(savedCodeKey(prob.id));
   const initialCode = savedCode !== null ? savedCode : (prob.stub || "");
@@ -1763,7 +1763,7 @@ async function executeVMSolution(codeStr, prob, isSubmission = false) {
       }
     }
 
-    const needsGit = prob.id === "076-git-object-plumbing" || (prob.readme || "").includes("git ");
+    const needsGit = prob.id === "076-git-object-plumbing" || (prob.spec || prob.readme || "").includes("git ");
     if (needsGit && !v86GitInstalled) {
       statusEl.textContent = "Installing Git binaries in guest Linux...";
       logEl.textContent += "[*] Fetching and installing Git runtime into guest VM...\n";

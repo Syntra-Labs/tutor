@@ -4,12 +4,31 @@
   "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
   "category": "Neurosymbolic & Formal Verification",
   "difficulty": "Medium",
-  "depends_on": ["067-symbolic-ast-evaluator"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "067-symbolic-ast-evaluator"
   ],
-  "languages": ["cpp"],
-  "tags": ["alpha-renaming", "lean4-ir", "canonicalization", "theorem-proving"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "alpha-renaming",
+    "lean4-ir",
+    "canonicalization",
+    "theorem-proving"
+  ],
+  "spec": "# 068: Reversible Alpha & Premise IR Canonicalizer\n\n## Problem Statement\n\nTo make theorem proving invariant to surface variable names (`x`, `y`, `n`, `h_assoc`) and open-vocabulary lemma names, the IR Canonicalizer (`src/ir/canonicalizer.py`) normalizes Lean 4 declarations and proof states into a canonical turnstile IR while recording a reversible bijection $\\sigma$.\n\nImplement:\n1. **`std::string to_turnstile_state(const std::string& goal_str)`:**\n   - Normalize horizontal whitespace (`[ \\t]+` $\\to$ `\" \"`) and strip empty lines.\n   - If `\"\u22a2\"` is already present, return the normalized string.\n   - Otherwise, strip any trailing `\":= by\"` or `\":=\"`, extract all binder groups `(names : Type)`, `{names : Type}`, `[names : Type]` in order into context lines `\"names : Type\"`, and extract the target after the final `\":\"` as `\"\u22a2 Target\"`.\n2. **`CanonicalGoal canonicalize_goal_and_tactic(const std::string& goal_str, const std::string& tactic_str)`:**\n   - Convert `goal_str` via `to_turnstile_state`.\n   - Scan context lines `names : Type` before `\"\u22a2\"` in declaration order. For each identifier token (not in `LEAN_KEYWORDS` and not yet in $\\sigma$):\n     - Classify as a **hypothesis** (`h0, h1, ...`) if its name starts with `'h'` followed by nothing, digits, `'_'`, or `'\\''`, OR if its `Type` contains any relational/logical symbol (`\"=\"`, `\"<\"`, `\">\"`, `\"\u2264\"`, `\"\u2265\"`, `\"\u2260\"`, `\"\u2227\"`, `\"\u2228\"`, `\"\u2194\"`, `\"\u00ac\"`), OR if its `Type` was previously declared with type `\"Prop\"`.\n     - Otherwise classify as a **variable** (`v0, v1, ...`). Record `sigma[surface] = canon`.\n   - Scan `tactic_str` for identifier tokens not in `LEAN_KEYWORDS`, not in $\\sigma$, and not already canonical (`v\\d+`, `h\\d+`, `p\\d+`). Assign external premise IDs `p0, p1, ...` in order of first appearance in `tactic_str`.\n   - Replace all whole-word identifier occurrences in the turnstile goal and tactic string using $\\sigma$.\n3. **`std::string invert_sigma(const std::string& canon_tactic, const std::unordered_map<std::string, std::string>& sigma)`:**\n   - Apply $\\sigma^{-1}$ (`canon -> surface`) to restore the exact original surface identifiers.\n\n## Mathematical Law / Invariant\n\n- **Alpha-Invariance:** Two isomorphic theorems differing only in bound variable/hypothesis names (`theorem t1 (a b : Nat) (hab : a = b) : b = a` vs `theorem t2 (x y : Nat) (hxy : x = y) : y = x`) produce the **exact same** `canon_goal`:\n  `v0 v1 : Nat\\nh0 : v0 = v1\\n\u22a2 v1 = v0`.\n- **Lossless Round-Trip Inversion:** For any surface tactic $T$, `invert_sigma(canonicalize(G, T).canon_tactic, sigma) == T`.\n\n## Function Signature\n\n```cpp\nstd::string to_turnstile_state(const std::string& goal_str);\nCanonicalGoal canonicalize_goal_and_tactic(const std::string& goal_str, const std::string& tactic_str = \"\");\nstd::string invert_sigma(const std::string& canon_text, const std::unordered_map<std::string, std::string>& sigma);\n```\n\n## Complexity Target\n\n- **Time:** $O(|G| + |T|)$ linear scan in string length.\n- **Space:** $O(|\\sigma|)$ hash map entries.\n"
 }

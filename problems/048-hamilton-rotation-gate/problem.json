@@ -4,12 +4,32 @@
   "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
   "category": "Geometric Neural Gates",
   "difficulty": "Medium",
-  "depends_on": ["043-quat-hamilton-rotor"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "043-quat-hamilton-rotor"
   ],
-  "languages": ["cpp"],
-  "tags": ["hamilton-gate", "quaternions", "autodiff", "adjoint", "norm-preserving"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "hamilton-gate",
+    "quaternions",
+    "autodiff",
+    "adjoint",
+    "norm-preserving"
+  ],
+  "spec": "# 048: Hamilton Rotation Gate Forward & Exact Adjoint Backward\n\n## Problem Statement\n\nThe **Hamilton Rotation Gate** replaces squashing feed-forward gates (such as sigmoid/SwiGLU) with a norm-preserving 4D quaternion rotation. Given a 4D gate block $g$ and a 4D value (\"up\") block $u$, it normalizes $g$ with a $10^{-12}$ guard core and rotates $u$ via the left Hamilton product $q \\otimes u$. Both forward and backward passes are algebraic and free of exponentials or transcendental functions.\n\n## Mathematical Law / Invariant\n\nGiven gate $g = (g_0, g_1, g_2, g_3)$ and value $u = (u_0, u_1, u_2, u_3)$:\n1. **Forward Pass:**\n   $$r = \\sqrt{\\|g\\|_2^2 + 10^{-12}}, \\qquad q = \\frac{g}{r}, \\qquad \\mathrm{out} = q \\otimes u$$\n2. **Exact Backward Adjoint:** Given upstream gradient $d = \\partial\\mathcal{L}/\\partial\\mathrm{out}$:\n   $$\\partial u = \\bar{q} \\otimes d, \\qquad \\partial q = d \\otimes \\bar{u}, \\qquad \\partial g = \\frac{\\partial q - q(q \\cdot \\partial q)}{r}$$\n3. **Invariants:**\n   - **Norm Preservation:** $\\|\\mathrm{out}\\|_2 = \\|q\\|_2 \\|u\\|_2 = \\frac{\\|g\\|_2}{\\sqrt{\\|g\\|_2^2 + 10^{-12}}} \\|u\\|_2$.\n   - **Tangent Projection:** For any $\\epsilon \\to 0$, $\\partial g$ matches central finite differences to $O(\\epsilon^2)$, and in the limit $\\|q\\|_2 \\to 1$, $q \\cdot \\partial g \\to 0$.\n\n## Function Signature\n\n```cpp\nQuat hamilton_gate_forward(const Quat& g, const Quat& u);\nHamiltonGateGrads hamilton_gate_backward(const Quat& g, const Quat& u, const Quat& d_out);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per 4-block.\n- **Space:** $O(1)$.\n"
 }

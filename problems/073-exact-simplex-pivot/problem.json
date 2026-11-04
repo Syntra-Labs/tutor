@@ -4,12 +4,31 @@
   "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
   "category": "Neurosymbolic & Formal Verification",
   "difficulty": "Hard",
-  "depends_on": ["033-dyadic-round-to-even"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "033-dyadic-round-to-even"
   ],
-  "languages": ["cpp"],
-  "tags": ["simplex-tableau", "blands-rule", "exact-rational", "duality-certificate"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "simplex-tableau",
+    "blands-rule",
+    "exact-rational",
+    "duality-certificate"
+  ],
+  "spec": "# 073: Exact Rational Simplex Basis Pivot & Certificate Verifier\n\n## Problem Statement\n\nFloating-point LP solvers suffer from round-off drift and basis cycling on degenerate polytopes. The exact legal-construction solver (`docs/labs/legal-construction-exact-solve/solver/src/lp.rs`) runs primal simplex with **Bland's anti-cycling rule** over exact reduced rationals $\\mathbb{Q}$ (`Rational{num, den}`) with **zero floating-point operations**.\n\nGiven an exact `Rational` type (`int64_t num, den` kept reduced by $\\gcd$ with $\\text{den} > 0$) and a `SimplexTableau`:\n1. **`void SimplexTableau::pivot(size_t r, size_t j)`:**\n   - Divide row `r` (`t[r]` and `rhs[r]`) by the pivot element $p = t[r][j]$.\n   - For every other row $i \\neq r$ with $f = t[i][j] \\neq 0$, subtract $f \\cdot \\text{row}_r$ from row $i$ (`t[i]` and `rhs[i]`).\n   - For the reduced-cost vector `d`, let $f_d = d[j]$; subtract $f_d \\cdot \\text{row}_r$ from `d`.\n   - Set `basis[r] = j`.\n2. **`bool SimplexTableau::step_blands_rule(size_t allowed_cols)`:**\n   - **Entering column $j$:** Select the **smallest** column index $j \\in [0, \\text{allowed\\_cols})$ with strictly negative reduced cost $d[j] < 0$. If none exists, the current basis is optimal (return `false` = no pivot needed).\n   - **Leaving row $r$:** Among all rows $i \\in [0, m)$ with $t[i][j] > 0$, minimize the ratio $\\frac{\\text{rhs}[i]}{t[i][j]}$, breaking ties by choosing the row $i$ with the **smallest basic variable index** `basis[i]` (Bland's rule).\n   - Perform `pivot(r, j)` and return `true`.\n3. **`bool verify_lp_certificate(A, b, c, x_primal, y_dual)`:**\n   - Verify exact primal-dual optimality for $\\min c^T x \\text{ s.t. } Ax \\le b, x \\ge 0$ and its dual $\\max b^T y \\text{ s.t. } A^T y \\le c, y \\le 0$ (or for equality form $Ax = b, x \\ge 0$ and $A^T y \\le c$):\n     - Here we use standard equality form $\\min c^T x \\text{ s.t. } Ax = b, x \\ge 0$:\n       1. **Primal feasibility:** $x_j \\ge 0 \\ \\forall j$ and $\\sum_j A_{ij} x_j = b_i \\ \\forall i$.\n       2. **Dual feasibility:** $\\sum_i A_{ij} y_i \\le c_j \\ \\forall j$.\n       3. **Strong duality (zero duality gap):** $\\sum_j c_j x_j = \\sum_i b_i y_i$.\n\n## Mathematical Law / Invariant\n\n- **Bland's Anti-Cycling Theorem:** Choosing the smallest entering index $j$ with $d_j < 0$ and breaking leaving-row ratio ties by smallest `basis[i]` guarantees finite termination without cycling on degenerate pivots.\n- **Strong Duality Certificate:** Any pair $(x^*, y^*)$ satisfying $Ax^* = b, x^* \\ge 0$, $A^T y^* \\le c$, and $c^T x^* = b^T y^*$ is a machine-checkable proof of global optimality.\n\n## Function Signature\n\n```cpp\nvoid SimplexTableau::pivot(size_t r, size_t j);\nbool SimplexTableau::step_blands_rule(size_t allowed_cols);\nbool verify_lp_certificate(\n    const std::vector<std::vector<Rational>>& A,\n    const std::vector<Rational>& b,\n    const std::vector<Rational>& c,\n    const std::vector<Rational>& x_primal,\n    const std::vector<Rational>& y_dual\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(m \\cdot n)$ exact rational operations per pivot; $O(m \\cdot n)$ for certificate verification.\n- **Space:** $O(m \\cdot n)$ tableau entries.\n"
 }

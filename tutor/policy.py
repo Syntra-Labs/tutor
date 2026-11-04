@@ -29,20 +29,21 @@ def scan_markdown_prohibitions(repo_root: Path = REPO_ROOT) -> List[Dict[str, st
     """
     Scans the repository for passive Markdown documents, flagging them
     and assigning migration targets according to ARCH-001 in `policy/architecture.rego`.
+    Permits only the root README.md manifest.
     """
     flagged: List[Dict[str, str]] = []
     for p in sorted(repo_root.rglob("*.md")):
         if ".git" in p.parts:
             continue
         rel = str(p.relative_to(repo_root))
+        if rel in ("README.md", "./README.md"):
+            continue
         if rel == "ROADMAP_MATH_AND_ML.md":
             target = "Convert to GitHub Project Milestone or Structured Schema"
         elif rel.endswith("PROBLEM_MANAGEMENT_SCALING_AUDIT.md"):
             target = "Convert to GitHub Architecture Issue"
         elif "problems/" in rel:
             target = "Embed 'spec' text directly inside problem.json ('description' field)"
-        elif rel == "README.md":
-            target = "Convert to minimal repo manifest or GitHub About description"
         else:
             target = "Convert to structured JSON/Rego policy or GitHub Issue"
 
@@ -107,17 +108,17 @@ def evaluate_policy_native(input_data: Dict[str, Any]) -> Tuple[bool, List[str]]
     catalog_problems = input_data.get("catalog_problems", [])
     violations: List[str] = []
 
-    # ARCH-001: Zero Markdown Prohibition
+    # ARCH-001: Zero Markdown Prohibition (permits only root README.md)
     for file in all_files:
         if file.endswith(".md"):
+            if file in ("README.md", "./README.md"):
+                continue
             if file.endswith("ROADMAP_MATH_AND_ML.md"):
                 target = "Convert to GitHub Project Milestone or Structured Schema"
             elif file.endswith("PROBLEM_MANAGEMENT_SCALING_AUDIT.md"):
                 target = "Convert to GitHub Architecture Issue"
             elif "problems/" in file:
                 target = "Embed 'spec' text directly inside problem.json ('description' field)"
-            elif file == "README.md":
-                target = "Convert to minimal repo manifest or GitHub About description"
             else:
                 target = "Convert to structured JSON/Rego policy or GitHub Issue"
             violations.append(

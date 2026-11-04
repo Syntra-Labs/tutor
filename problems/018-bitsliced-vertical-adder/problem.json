@@ -4,12 +4,32 @@
   "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
   "category": "Hyperdimensional Computing (VSA)",
   "difficulty": "Hard",
-  "depends_on": ["017-bipolar-accumulator"],
-  "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+  "depends_on": [
+    "017-bipolar-accumulator"
   ],
-  "languages": ["cpp"],
-  "tags": ["bit-slicing", "carry-save-adder", "swar", "hypervector", "vsa"]
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "bit-slicing",
+    "carry-save-adder",
+    "swar",
+    "hypervector",
+    "vsa"
+  ],
+  "spec": "# 018: 8-Register Bit-Sliced Carry-Save Hypervector Encoder\n\n## Problem Statement\n\nWhen bundling $n \\le 64$ weighted seed hypervectors (with positive integer weights $w_i \\in [1, 15]$ and total weight $W_{\\text{tot}} = \\sum_i w_i \\le 255$), we can eliminate the 16 KB `BipolarAccumulator` array entirely by maintaining **64 parallel 8-bit counters vertically across 8 general-purpose `uint64_t` registers (`b0..b7`)**.\n\nImplement `Hypervec8192 encode_seeds_bitsliced(const std::pair<uint64_t, int16_t>* seeds, const size_t* order, size_t n)`:\n1. If `n == 0`, return an all-zero `Hypervec8192`.\n2. Clamp each seed's weight to $w_i = \\text{clamp}(\\text{weight}, 1, 15)$ and sum $W_{\\text{tot}} = \\sum_{i=0}^{n-1} w_i$.\n3. Compute the unsigned majority thresholds:\n   - Even bits ($0\\text{x}5555555555555555$): $t_{\\text{even}} = \\lfloor W_{\\text{tot}} / 2 \\rfloor + 1$, pre-bias $\\text{init}_{\\text{even}} = 128 - t_{\\text{even}}$.\n   - Odd bits ($0\\text{xAAAAAAAAAAAAAAAA}$): $t_{\\text{odd}} = \\lfloor (W_{\\text{tot}} + 1) / 2 \\rfloor$, pre-bias $\\text{init}_{\\text{odd}} = 128 - t_{\\text{odd}}$.\n4. Pre-load initial bit-planes `ib[0..7]` from `init_even` (on `0x5555555555555555ULL`) and `init_odd` (on `0xAAAAAAAAAAAAAAAAULL`).\n5. For each word $w \\in [0, 127]$:\n   - Initialize `b0..b7 = ib[0..7]`.\n   - For each seed $i \\in [0, n-1]$, generate `uint64_t word = splitmix64(states[i])` and ripple-add `word * w_i` (via 4 bit-masks `mask0..mask3` for the 4 bits of $w_i \\in [1, 15]$) into `(b0..b7)`.\n   - Write `out.words[w] = b7` (the MSB register directly holds the majority-voted 64-bit word!).\n\n## Mathematical Law / Invariant\n\n- **Unsigned-to-Bipolar Threshold Equivalence:** Let $U_j = \\sum_{i:\\,\\text{bit}_j=1} w_i$ be the unsigned weight sum at bit $j$. Since the bipolar sum is $S_j = 2U_j - W_{\\text{tot}}$:\n  $$S_j > 0 \\iff U_j \\ge \\lfloor W_{\\text{tot}}/2 \\rfloor + 1 = t_{\\text{even}}, \\qquad S_j \\ge 0 \\iff U_j \\ge \\lfloor (W_{\\text{tot}}+1)/2 \\rfloor = t_{\\text{odd}}$$\n- **Pre-Biased MSB Readout:** Initializing the 8-bit vertical counter to $128 - t_j$ shifts the threshold to $128 = 2^7$:\n  $$U_j \\ge t_j \\iff U_j + (128 - t_j) \\ge 128 \\iff b_7[j] = 1$$\n  Hence `out.words[w]` is bit-for-bit identical to expanding every seed and projecting via `BipolarAccumulator`!\n\n## Function Signature\n\n```cpp\nHypervec8192 encode_seeds_bitsliced(\n    const std::pair<uint64_t, int16_t>* seeds,\n    const size_t* order,\n    size_t n\n);\n```\n\n## Complexity Target\n\n- **Time:** $O(128 \\times n)$ \u2014 21 bitwise register ops per seed-word, zero L1D memory traffic inside the inner loop.\n- **Space:** $O(1)$ \u2014 8 CPU general-purpose registers (`b0..b7`).\n"
 }

@@ -6,10 +6,27 @@
   "difficulty": "Easy",
   "depends_on": [],
   "colspec": [
-    {"hdr": "Score", "asc": false},
-    {"hdr": "Cycles/Op", "asc": true},
-    {"hdr": "Bytes", "asc": true}
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
   ],
-  "languages": ["cpp"],
-  "tags": ["bit-manipulation", "popcount", "hypervector", "simd"]
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "bit-manipulation",
+    "popcount",
+    "hypervector",
+    "simd"
+  ],
+  "spec": "# 002: 8192-bit Hypervector Hamming Distance\n\n## Specification & Contract\n\nIn dense binary hyperdimensional computing (HDC) and geometric substrates, representations are vectors of 8192 bits packed into $128 \\times \\text{uint64\\_t}$ words.\n\nImplement:\n1. `size_t hamming_distance(const Hypervec8192& a, const Hypervec8192& b)`:\n   - Count the number of differing bits across the two 8192-bit vectors (XOR + popcount).\n2. `double cosine_similarity(const Hypervec8192& a, const Hypervec8192& b)`:\n   - Normalized geometric similarity: $1.0 - \\frac{2 \\cdot \\text{hamming\\_distance}}{8192}$.\n   - Identical vectors return $1.0$. Orthogonal vectors return $0.0$. Inverse vectors return $-1.0$.\n"
 }
