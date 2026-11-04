@@ -688,15 +688,38 @@ body.is-resizing-v, body.is-resizing-v * {
   -webkit-user-select: none;
 }
 
-.cursor {
+#nvim-grid .cursor {
   background: #000000 !important;
   color: #ffffff !important;
 }
-.cursor-bar {
+#nvim-grid .cursor-bar {
   box-shadow: inset 2px 0 0 0 #000000 !important;
 }
-.cursor-underline {
+#nvim-grid .cursor-underline {
   box-shadow: inset 0 -2px 0 0 #000000 !important;
+}
+
+/* --- Live Linux VM Terminal Minimal Solid White Cursor --- */
+#vm-screen-container .cursor,
+.vm-screen-wrapper .cursor,
+#vm-screen-container div.cursor {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  display: inline-block !important;
+  width: 8px !important;
+  min-height: 14px !important;
+  vertical-align: text-bottom !important;
+  opacity: 1 !important;
+  animation: none !important;
+  -webkit-animation: none !important;
+}
+
+#vm-screen-container .blinking-cursor,
+.vm-screen-wrapper .blinking-cursor {
+  animation: none !important;
+  -webkit-animation: none !important;
+  opacity: 1 !important;
 }
 
 .nvim-statusline {
