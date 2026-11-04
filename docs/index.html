@@ -167,6 +167,86 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   display: none !important;
 }
 
+/* --- Sovereign Learner Profile Modal (Issue #7) --- */
+.profile-pill {
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all .12s;
+}
+.profile-pill:hover {
+  border-color: #000000;
+  background: #ffffff;
+}
+.profile-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.profile-modal-backdrop.hidden {
+  display: none !important;
+}
+.profile-modal {
+  width: 480px;
+  max-width: 92vw;
+  background: #ffffff;
+  border: 1px solid #000000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--mono);
+  border-radius: 2px;
+}
+.profile-modal-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-subtle);
+}
+.profile-modal-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.profile-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--fg);
+}
+.profile-did-box {
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  padding: 6px 8px;
+  font-size: 10.5px;
+  word-break: break-all;
+  user-select: all;
+  border-radius: 2px;
+  color: var(--fg-dim);
+}
+.profile-actions-section {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
 /* Problem Selector Bar */
 .problem-bar {
   display: flex;
@@ -981,6 +1061,7 @@ body.is-resizing-v, body.is-resizing-v * {
       <div class="brand-group">
         <span class="brand-pill">SYNTRA // TUTOR</span>
         <span id="top-progress">0 / 76 SOLVED</span>
+        <button class="profile-pill" id="profile-pill-btn" onclick="window.openProfileModal()" title="Sovereign Learner Identity & Preferences (Issue #7)">👤 <span id="top-handle-label">you</span></button>
       </div>
       <div class="nav-tabs">
         <button class="tab-btn active" id="tab-btn-spec" onclick="switchTab('spec')">Description</button>
@@ -1176,6 +1257,67 @@ body.is-resizing-v, body.is-resizing-v * {
 
 </div>
 
+<!-- SOVEREIGN LEARNER PROFILE & PERSISTENCE MODAL (ISSUE #7) -->
+<div class="profile-modal-backdrop hidden" id="profile-modal-backdrop" onclick="window.closeProfileModal(event)">
+  <div class="profile-modal" id="profile-modal" onclick="event.stopPropagation()">
+    <div class="profile-modal-header">
+      <div style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;">
+        <span>👤 Sovereign Learner Profile</span>
+        <span class="meta-badge" style="font-size:9.5px; padding:1px 5px;">LOCAL-FIRST</span>
+      </div>
+      <button class="small-btn" onclick="window.closeProfileModal()">✕</button>
+    </div>
+    
+    <div class="profile-modal-body">
+      <div class="profile-field">
+        <label>Learner DID (Cryptographic Identity)</label>
+        <div class="profile-did-box" id="profile-did-val">did:key:...</div>
+        <div style="font-size:10.5px; color:var(--fg-dim); margin-top:3px;">Generated locally via Web Crypto API. No account or password required.</div>
+      </div>
+
+      <div class="profile-field">
+        <label for="profile-handle-input">Learner Handle</label>
+        <input type="text" id="profile-handle-input" style="font-family:var(--mono); font-size:12px; padding:5px 8px; border:1px solid var(--line); width:100%; border-radius:2px;" placeholder="e.g. learner-1" />
+      </div>
+
+      <div class="profile-field">
+        <label>Learning Goals &amp; Specializations (Issue #8)</label>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <select id="profile-target-track" style="font-family:var(--mono); font-size:11.5px; padding:4px 6px; border:1px solid var(--line); flex:1;">
+            <option value="">All Tracks</option>
+            <option value="Track 0">Track 0: Systems Fundamentals</option>
+            <option value="Track 1">Track 1: High-Performance Hashing</option>
+            <option value="Track 2">Track 2: Memory Allocators</option>
+            <option value="Track 3">Track 3: Lock-Free Concurrency</option>
+            <option value="Track 4">Track 4: Cache-Oblivious Structures</option>
+            <option value="Track 5">Track 5: Parsing &amp; Micro-Engines</option>
+            <option value="Track 6">Track 6: Networking Primitives</option>
+            <option value="Track 7">Track 7: Numeric &amp; Cryptography</option>
+            <option value="Track 8">Track 8: Advanced Kernel Systems</option>
+            <option value="Track 9">Track 9: Linux VM &amp; Containers</option>
+          </select>
+          <select id="profile-target-diff" style="font-family:var(--mono); font-size:11.5px; padding:4px 6px; border:1px solid var(--line); width:110px;">
+            <option value="all">Any Difficulty</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="profile-actions-section">
+        <div style="font-weight:600; font-size:11.5px; margin-bottom:6px;">Data Portability &amp; Verified Deletion</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="small-btn" onclick="window.exportLearnerProfile()">💾 Export Profile (JSON)</button>
+          <button class="small-btn" onclick="document.getElementById('profile-import-file').click()">📂 Import Profile (JSON)</button>
+          <input type="file" id="profile-import-file" style="display:none;" accept=".json" onchange="window.importLearnerProfile(event)" />
+          <button class="small-btn" style="color:#d73a4a; border-color:#d73a4a;" onclick="window.purgeLearnerProfile()">🗑️ Purge &amp; Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 "use strict";
 import { encode } from "./msgpack.js";
@@ -1188,6 +1330,168 @@ let leaderboard = { problems: {}, global_rankings: [] };
 let currentIdx = 0;
 let solvedSet = new Set(JSON.parse(localStorage.getItem("tutor_solved_v1") || "[]"));
 let isJudging = false;
+
+/* ========================================================================= */
+/* SOVEREIGN LEARNER IDENTITY & PROFILE PERSISTENCE (ISSUE #7)               */
+/* ========================================================================= */
+const PROFILE_STORAGE_KEY = "syntra_learner_profile";
+let currentProfile = null;
+
+function generateEntropyDid() {
+  const bytes = new Uint8Array(20);
+  window.crypto.getRandomValues(bytes);
+  let hex = "";
+  for (let b of bytes) hex += b.toString(16).padStart(2, "0");
+  return `did:key:z${hex}`;
+}
+
+function loadOrCreateProfile() {
+  const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+  if (raw) {
+    try {
+      currentProfile = JSON.parse(raw);
+    } catch (_) {}
+  }
+
+  const legacyHandle = (document.getElementById("gh-username")?.value || "").trim();
+
+  if (!currentProfile || !currentProfile.did) {
+    const handle = legacyHandle && legacyHandle !== "you" ? legacyHandle : `learner-${Math.random().toString(36).slice(2, 7)}`;
+    currentProfile = {
+      version: 1,
+      did: generateEntropyDid(),
+      handle: handle,
+      created_at: new Date().toISOString(),
+      preferences: {
+        target_track: "",
+        target_difficulty: "all",
+        specializations: [],
+      },
+      progress: {
+        solved: Array.from(solvedSet),
+        scores: {},
+      },
+    };
+    saveProfile();
+  }
+
+  if (currentProfile.progress && Array.isArray(currentProfile.progress.solved)) {
+    currentProfile.progress.solved.forEach(id => solvedSet.add(id));
+  }
+
+  syncProfileUI();
+}
+
+function saveProfile() {
+  if (!currentProfile) return;
+  if (!currentProfile.progress) currentProfile.progress = { solved: [], scores: {} };
+  currentProfile.progress.solved = Array.from(solvedSet);
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(currentProfile));
+  localStorage.setItem("tutor_solved_v1", JSON.stringify(Array.from(solvedSet)));
+  syncProfileUI();
+}
+
+function syncProfileUI() {
+  if (!currentProfile) return;
+  const label = document.getElementById("top-handle-label");
+  if (label) label.textContent = currentProfile.handle || "you";
+  const ghInput = document.getElementById("gh-username");
+  if (ghInput && currentProfile.handle && document.activeElement !== ghInput) {
+    ghInput.value = currentProfile.handle;
+  }
+  const didBox = document.getElementById("profile-did-val");
+  if (didBox) didBox.textContent = currentProfile.did || "";
+  const handleInput = document.getElementById("profile-handle-input");
+  if (handleInput && document.activeElement !== handleInput) {
+    handleInput.value = currentProfile.handle || "";
+  }
+  const trackSelect = document.getElementById("profile-target-track");
+  if (trackSelect && currentProfile.preferences) {
+    trackSelect.value = currentProfile.preferences.target_track || "";
+  }
+  const diffSelect = document.getElementById("profile-target-diff");
+  if (diffSelect && currentProfile.preferences) {
+    diffSelect.value = currentProfile.preferences.target_difficulty || "all";
+  }
+}
+
+function openProfileModal() {
+  syncProfileUI();
+  document.getElementById("profile-modal-backdrop")?.classList.remove("hidden");
+}
+window.openProfileModal = openProfileModal;
+
+function closeProfileModal() {
+  if (currentProfile) {
+    const handleInput = document.getElementById("profile-handle-input");
+    if (handleInput && handleInput.value.trim()) {
+      currentProfile.handle = handleInput.value.trim();
+    }
+    const trackSelect = document.getElementById("profile-target-track");
+    if (trackSelect) {
+      if (!currentProfile.preferences) currentProfile.preferences = {};
+      currentProfile.preferences.target_track = trackSelect.value;
+    }
+    const diffSelect = document.getElementById("profile-target-diff");
+    if (diffSelect) {
+      if (!currentProfile.preferences) currentProfile.preferences = {};
+      currentProfile.preferences.target_difficulty = diffSelect.value;
+    }
+    saveProfile();
+  }
+  document.getElementById("profile-modal-backdrop")?.classList.add("hidden");
+}
+window.closeProfileModal = closeProfileModal;
+
+function exportLearnerProfile() {
+  saveProfile();
+  const blob = new Blob([JSON.stringify(currentProfile, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `syntra-profile-${currentProfile.handle || "learner"}.json`;
+  a.click();
+}
+window.exportLearnerProfile = exportLearnerProfile;
+
+function importLearnerProfile(ev) {
+  const file = ev.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.did || !imported.handle) {
+        alert("Invalid profile schema: missing DID or handle");
+        return;
+      }
+      currentProfile = imported;
+      if (Array.isArray(imported.progress?.solved)) {
+        imported.progress.solved.forEach(id => solvedSet.add(id));
+      }
+      saveProfile();
+      renderDag();
+      closeProfileModal();
+      alert(`✓ Profile imported successfully for @${imported.handle}`);
+    } catch (err) {
+      alert("Failed to parse profile JSON: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+window.importLearnerProfile = importLearnerProfile;
+
+function purgeLearnerProfile() {
+  if (!confirm("Are you sure you want to purge your sovereign identity and all local progress? This cannot be undone.")) {
+    return;
+  }
+  localStorage.removeItem(PROFILE_STORAGE_KEY);
+  localStorage.removeItem("tutor_solved_v1");
+  localStorage.removeItem("autolab_submissions");
+  solvedSet.clear();
+  location.reload();
+}
+window.purgeLearnerProfile = purgeLearnerProfile;
+window.getLearnerProfile = () => currentProfile;
 
 window.switchTab = switchTab;
 window.loadProblemById = loadProblemById;
@@ -1351,12 +1655,19 @@ async function initStudio() {
   // Cleanly merge user submissions over official leaderboard
   syncUserSubmissionsToLeaderboard();
 
+  // Initialize sovereign learner profile & persistence (Issue #7)
+  loadOrCreateProfile();
+
   const savedUser = localStorage.getItem("tutor_gh_user") || "";
   const userEl = document.getElementById("gh-username");
-  if (savedUser) userEl.value = savedUser;
+  if (savedUser && !currentProfile?.handle) userEl.value = savedUser;
   userEl.addEventListener("change", () => {
     const newHandle = userEl.value.trim() || "you";
     localStorage.setItem("tutor_gh_user", newHandle);
+    if (currentProfile) {
+      currentProfile.handle = newHandle;
+      saveProfile();
+    }
     const currentSubs = getUserSubmissions();
     let changed = false;
     for (const pid of Object.keys(currentSubs)) {
@@ -2251,7 +2562,7 @@ function applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testC
 
     if (isSubmission) {
       solvedSet.add(prob.id);
-      localStorage.setItem("tutor_solved_v1", JSON.stringify([...solvedSet]));
+      saveProfile();
       populateSelectors();
 
       saveUserSubmission(user, prob.id, {

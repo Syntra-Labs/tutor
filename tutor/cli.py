@@ -673,6 +673,58 @@ def cmd_lint(args):
         return 1
 
 
+def cmd_identity(args):
+    """Manage sovereign learner identity and profile persistence (Issue #7)."""
+    from tutor.identity import (
+        get_or_create_profile,
+        set_handle,
+        set_preferences,
+        export_profile,
+        import_profile,
+        purge_profile,
+        PROFILE_FILE,
+    )
+
+    if args.purge:
+        purge_profile()
+        print(f"{GREEN}✓ Sovereign identity and local profile purged successfully.{RESET}")
+        return 0
+
+    if args.import_file:
+        imported = import_profile(Path(args.import_file))
+        print(f"{GREEN}✓ Imported profile for @{imported.get('handle')}{RESET}")
+        print(f"  • DID: {CYAN}{imported.get('did')}{RESET}")
+        return 0
+
+    if args.export_file:
+        out = export_profile(Path(args.export_file))
+        print(f"{GREEN}✓ Exported profile to {out}{RESET}")
+        return 0
+
+    if args.set_handle:
+        profile = set_handle(args.set_handle)
+        print(f"{GREEN}✓ Handle updated to @{profile['handle']}{RESET}")
+        return 0
+
+    if args.track or args.diff:
+        profile = set_preferences(target_track=args.track, target_difficulty=args.diff)
+        print(f"{GREEN}✓ Preferences updated.{RESET}")
+        return 0
+
+    profile = get_or_create_profile()
+    print(f"\n{BOLD}{CYAN}=== Syntra Tutor Sovereign Learner Profile (Issue #7) ==={RESET}")
+    print(f"  • {BOLD}Handle{RESET}         : @{profile.get('handle', 'anonymous')}")
+    print(f"  • {BOLD}DID Identifier{RESET} : {profile.get('did', 'none')}")
+    print(f"  • {BOLD}Profile File{RESET}   : {PROFILE_FILE}")
+    print(f"  • {BOLD}Created At{RESET}     : {profile.get('created_at', 'unknown')}")
+    solved_count = len(profile.get("progress", {}).get("solved", []))
+    print(f"  • {BOLD}Solved Count{RESET}   : {GREEN}{solved_count}{RESET} / 78 problems")
+    pref = profile.get("preferences", {})
+    print(f"  • {BOLD}Target Track{RESET}   : {pref.get('target_track') or 'All Tracks'}")
+    print(f"  • {BOLD}Difficulty{RESET}     : {pref.get('target_difficulty') or 'all'}\n")
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="tutor",
@@ -773,6 +825,16 @@ def main(argv=None):
     # status
     p_stat = subparsers.add_parser("status", help="Show workspace status and solved metrics")
     p_stat.set_defaults(func=cmd_status)
+
+    # identity / profile
+    p_id = subparsers.add_parser("identity", aliases=["id", "profile"], help="Manage sovereign learner identity and profile persistence (Issue #7)")
+    p_id.add_argument("--set-handle", default=None, help="Update learner display handle")
+    p_id.add_argument("--track", default=None, help="Update preferred learning track (e.g. 'Track 0')")
+    p_id.add_argument("--diff", default=None, choices=["all", "Easy", "Medium", "Hard"], help="Update target difficulty")
+    p_id.add_argument("--export-file", default=None, help="Export profile JSON backup to file path")
+    p_id.add_argument("--import-file", default=None, help="Import profile JSON backup from file path")
+    p_id.add_argument("--purge", action="store_true", help="Verified deletion: purge local sovereign identity and profile")
+    p_id.set_defaults(func=cmd_identity)
 
     args = parser.parse_args(argv)
     if not args.command:
