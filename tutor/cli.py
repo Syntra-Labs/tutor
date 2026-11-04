@@ -358,11 +358,14 @@ def cmd_ci_grade_pr(args):
     user = args.user
     changed_files = [f for f in args.changed_files if f.strip()]
 
-    ok, msg = verify_pr_isolation(changed_files, user)
+    from tutor.policy import verify_submission_policy
+    catalog = ProblemCatalog()
+    ok, violations = verify_submission_policy(changed_files, user, catalog_problems=catalog.list_problems())
     if not ok:
-        print(f"{RED}✗ {msg}{RESET}")
+        for v in violations:
+            print(f"{RED}✗ {v}{RESET}")
         return 1
-    print(f"{GREEN}✓ PR Isolation Verified: {msg}{RESET}")
+    print(f"{GREEN}✓ PR Isolation & Policies Verified (policy/judge.rego): POL-000 through POL-005 satisfied.{RESET}")
 
     # Identify unique problem IDs under submissions/<user>/<problem_id>/
     prob_ids = sorted(
@@ -413,6 +416,30 @@ def cmd_ci_grade_pr(args):
         json.dump({"user": user, "all_passed": all_passed, "entries": entries}, f, indent=2)
 
     return 0 if all_passed else 1
+
+
+def cmd_verify_policy(args):
+    """
+    Enforces Syntra Tutor's canonical OPA Rego policies (`policy/judge.rego`).
+    Checks submitter isolation, artifact purity, leaderboard protection, and scoring determinism.
+    """
+    from tutor.policy import verify_submission_policy
+    catalog = ProblemCatalog()
+    problems = catalog.list_problems()
+
+    actor = getattr(args, "actor", "") or "local-actor"
+    changed_files = [f for f in getattr(args, "pr_files", []) or [] if f.strip()]
+
+    print(f"🛡️  Evaluating Syntra Tutor Policies (`policy/judge.rego`) for actor: @{actor}")
+    ok, violations = verify_submission_policy(changed_files, actor, catalog_problems=problems)
+    if not ok:
+        print(f"\n{RED}✗ Policy Violations Detected ({len(violations)}):{RESET}")
+        for v in violations:
+            print(f"  • {RED}{v}{RESET}")
+        return 1
+
+    print(f"{GREEN}✓ All active judge & architecture policies satisfied (POL-000 through POL-005).{RESET}")
+    return 0
 
 
 def cmd_ci_merge_scoreboard(args):
@@ -719,6 +746,12 @@ def main(argv=None):
     p_lint = subparsers.add_parser("lint", help="Lint task contracts and verification obligations")
     p_lint.add_argument("root", nargs="?", default=".", help="Root directory to scan")
     p_lint.set_defaults(func=cmd_lint)
+
+    # verify-policy
+    p_policy = subparsers.add_parser("verify-policy", help="Enforce active OPA Rego judge policies (policy/judge.rego)")
+    p_policy.add_argument("--actor", default="local-actor", help="GitHub handle of contributor")
+    p_policy.add_argument("--pr-files", nargs="*", default=[], help="List of modified files to validate")
+    p_policy.set_defaults(func=cmd_verify_policy)
 
     # status
     p_stat = subparsers.add_parser("status", help="Show workspace status and solved metrics")
