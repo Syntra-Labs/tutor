@@ -492,7 +492,8 @@ def cmd_serve(args):
                         success, log, runtime_ms, metrics = runner.run_test(
                             prob, lang=lang, submission_dir=Path(tmp_dir)
                         )
-                        if success:
+                        is_submission = bool(req.get("is_submission", False))
+                        if success and is_submission:
                             from tutor.state import mark_solved
                             mark_solved(
                                 prob["id"],
@@ -518,6 +519,7 @@ def cmd_serve(args):
                             200,
                             {
                                 "ok": success,
+                                "is_submission": is_submission,
                                 "log": log,
                                 "runtime_ms": round(runtime_ms, 2),
                                 "metrics": metrics,

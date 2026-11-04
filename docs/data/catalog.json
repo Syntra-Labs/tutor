@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T05:35:23.444480+00:00",
+  "generated_at": "2026-11-04T18:05:03.649748+00:00",
   "total_problems": 78,
   "problems": [
     {
@@ -2717,7 +2717,9 @@
       "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
       "category": "Neurosymbolic & Formal Verification",
       "difficulty": "Medium",
-      "depends_on": [],
+      "depends_on": [
+        "067-symbolic-ast-evaluator"
+      ],
       "colspec": [
         {
           "hdr": "Score",
@@ -2788,7 +2790,7 @@
       "category": "Systems & Tooling",
       "difficulty": "Medium",
       "depends_on": [
-        "075-container-namespace-isolation"
+        "005-fnv1a-splitmix64"
       ],
       "colspec": [
         {

@@ -4,7 +4,7 @@
   "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
   "category": "Neurosymbolic & Formal Verification",
   "difficulty": "Medium",
-  "depends_on": [],
+  "depends_on": ["067-symbolic-ast-evaluator"],
   "colspec": [
     {"hdr": "Score", "asc": false},
     {"hdr": "Cycles/Op", "asc": true},

@@ -399,6 +399,25 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
 .lc-field-box.out-pass { color: #065f46; border-color: #a7f3d0; background: #f0fdf4; }
 .lc-field-box.out-fail { color: #991b1b; border-color: #fecaca; background: #fef2f2; }
 
+.lc-banner {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.lc-banner.pass-submitted {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #14532d;
+}
+.lc-banner.pass-run {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+}
+
 /* DAG Grid */
 .filter-bar {
   display: flex;
@@ -827,6 +846,8 @@ body.is-resizing-v, body.is-resizing-v * {
   flex-shrink: 0;
 }
 .nvim-btn:hover { background: #000000; color: #ffffff; }
+.nvim-btn.primary { background: #000000; color: #ffffff; }
+.nvim-btn.primary:hover { background: #333333; }
 
 /* Help Overlay (:Manual / <Space>m) */
 .help-overlay {
@@ -910,7 +931,8 @@ body.is-resizing-v, body.is-resizing-v * {
         <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">Prev</button>
         <select class="problem-select" id="problem-select" onchange="loadProblemById(this.value)"></select>
         <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next</button>
-        <button class="small-btn primary" onclick="triggerRun()">:Run / Test (&lt;F5&gt;)</button>
+        <button class="small-btn" id="run-btn" onclick="triggerRun()" title="Run test cases (:Run / <F5>)">:Run (&lt;F5&gt;)</button>
+        <button class="small-btn primary" id="submit-btn" onclick="triggerSubmit()" title="Official Submit &amp; persist score (:Submit / <Ctrl+Enter>)">:Submit (&lt;Ctrl+Enter&gt;)</button>
         <button class="small-btn" id="vm-toggle-btn" onclick="toggleVMPane()" title="Toggle Live Linux VM Terminal (Right Split)">Terminal</button>
       </div>
 
@@ -1011,9 +1033,11 @@ body.is-resizing-v, body.is-resizing-v * {
 ==============================================================================
 1. NEOVIM EX COMMANDS &amp; KEYBINDINGS                                 *commands*
 
-  :w                       Save buffer &amp; immediately run the locked C++20 Judge!
-  :Run, :R                 Compile &amp; run solution.hpp against locked harness.cpp.
-  &lt;Space&gt;r, &lt;F5&gt;, &lt;C-CR&gt;   Compile &amp; run from Normal or Insert mode.
+  :w, :Run, :R             Compile &amp; run solution against testcases (fast feedback).
+  &lt;Space&gt;r, &lt;F5&gt;           Run test suite from Normal or Insert mode.
+  :Submit, :S              Official submit: benchmarks code, records on Scoreboard,
+                           and unlocks downstream problems in Prerequisite DAG.
+  &lt;C-CR&gt;, &lt;Space&gt;s         Submit solution from Normal or Insert mode (&lt;Ctrl+Enter&gt;).
   :Next, &lt;Space&gt;n          Switch to the next problem in the 76-problem catalog.
   :Prev, &lt;Space&gt;p          Switch to the previous problem.
   :DAG, &lt;Space&gt;d           Open the 76-Problem Prerequisite Skill-Tree DAG.
@@ -1025,14 +1049,16 @@ body.is-resizing-v, body.is-resizing-v * {
 2. HOW THE DUAL-MODE C++20 JUDGE WORKS                                 *judge*
 
   - Every problem has a locked `harness.cpp` and a starter `solution_stub.hpp`.
-  - When you type `:w` or `:Run`:
+  - When you type `:Run` (<F5>):
+    Runs all test cases to verify your implementation.
+  - When you type `:Submit` (<Ctrl+Enter>):
     1. If running via `python3 tutor.py serve`, your local `g++ -O3 -std=c++20`
-       compiles and benchmarks your code in ~50ms.
-    2. If running on static GitHub Pages, the browser bundles your `solution.hpp`
-       with the locked `harness.cpp` and executes it on `g++ 13.2 -O3 -std=c++20`
-       (via Compiler Explorer API), parsing `SCOREBOARD_JSON` cycles &amp; code bytes.
-  - Passing 100% of assertions marks the problem SOLVED and unlocks downstream
-    problems in the Prerequisite DAG.
+       compiles and benchmarks your code in ~50ms, updating local rankings.
+    2. If running on static GitHub Pages, the browser executes on `g++ 13.2 -O3`
+       (via Compiler Explorer API), records your score locally, and provides
+       a 1-click Pull Request generator to publish to the global leaderboard.
+  - Passing 100% of assertions on `:Submit` marks the problem SOLVED and unlocks
+    downstream problems in the Prerequisite DAG.
         </div>
       </div>
 
@@ -1045,6 +1071,7 @@ body.is-resizing-v, body.is-resizing-v * {
           <button class="nvim-btn" onclick="resetCurrentStub()" title="Reset to starter stub (:Reset)">:Reset</button>
           <button class="nvim-btn" id="help-btn" title="Reference manual (:Manual / <Space>m)">:Manual</button>
           <button class="nvim-btn" id="run-trigger" title="Compile &amp; test (:Run / :w / <F5>)">:Run</button>
+          <button class="nvim-btn primary" id="submit-trigger" title="Official Submit (:Submit / :S / <Ctrl+Enter>)">:Submit</button>
         </div>
       </div>
     </div>
@@ -1096,6 +1123,7 @@ window.switchTab = switchTab;
 window.loadProblemById = loadProblemById;
 window.stepProblem = stepProblem;
 window.triggerRun = triggerRun;
+window.triggerSubmit = triggerSubmit;
 window.renderDag = renderDag;
 window.renderScoreboard = renderScoreboard;
 window.resetCurrentStub = resetCurrentStub;
@@ -1120,6 +1148,88 @@ function savedCodeKey(probId) {
   return `tutor_code_${probId}`;
 }
 
+function getUserSubmissions() {
+  try {
+    return JSON.parse(localStorage.getItem("tutor_user_submissions_v1") || "{}");
+  } catch (_) {
+    return {};
+  }
+}
+
+function saveUserSubmission(user, probId, entry) {
+  const subs = getUserSubmissions();
+  const existing = subs[probId];
+  let update = true;
+  if (existing) {
+    const eScore = Number(existing.score ?? 0);
+    const nScore = Number(entry.score ?? 0);
+    const eCycles = Number(existing.cycles_per_op ?? 1e18);
+    const nCycles = Number(entry.cycles_per_op ?? 1e18);
+    const eBytes = Number(existing.code_bytes ?? 1e18);
+    const nBytes = Number(entry.code_bytes ?? 1e18);
+    if (eScore > nScore) {
+      update = false;
+    } else if (eScore === nScore) {
+      if (eCycles < nCycles) {
+        update = false;
+      } else if (eCycles === nCycles && eBytes <= nBytes) {
+        update = false;
+      }
+    }
+  }
+  if (update) {
+    subs[probId] = {
+      user: user || "you",
+      problem_id: probId,
+      score: entry.score,
+      cycles_per_op: entry.cycles_per_op,
+      code_bytes: entry.code_bytes,
+      scoreboard: [entry.score, entry.cycles_per_op, entry.code_bytes],
+      submitted_at: entry.submitted_at || new Date().toISOString()
+    };
+    try {
+      localStorage.setItem("tutor_user_submissions_v1", JSON.stringify(subs));
+    } catch (_) {}
+  }
+}
+
+function syncUserSubmissionsToLeaderboard() {
+  if (!leaderboard) leaderboard = { problems: {}, global_rankings: [] };
+  if (!leaderboard.problems) leaderboard.problems = {};
+  const subs = getUserSubmissions();
+  for (const [probId, sub] of Object.entries(subs)) {
+    const vec = sub.scoreboard || [sub.score, sub.cycles_per_op, sub.code_bytes];
+    const list = leaderboard.problems[probId] ? [...leaderboard.problems[probId]] : [];
+    const filtered = list.filter(item => item.user !== sub.user);
+    filtered.push({
+      user: sub.user,
+      problem_id: probId,
+      score: sub.score,
+      scoreboard: vec,
+      submitted_at: sub.submitted_at
+    });
+    filtered.sort((a, b) => {
+      const va = a.scoreboard || [0, 1e18, 1e18];
+      const vb = b.scoreboard || [0, 1e18, 1e18];
+      if (va[0] !== vb[0]) return vb[0] - va[0];
+      if (va[1] !== vb[1]) return va[1] - vb[1];
+      return va[2] - vb[2];
+    });
+    const dedup = [];
+    const seen = new Set();
+    for (const item of filtered) {
+      if (seen.has(item.user)) continue;
+      seen.add(item.user);
+      dedup.push({ ...item, rank: dedup.length + 1 });
+    }
+    leaderboard.problems[probId] = dedup;
+  }
+  recomputeGlobalStandings();
+  try {
+    localStorage.setItem("tutor_leaderboard_cache_v1", JSON.stringify(leaderboard));
+  } catch (_) {}
+}
+
 async function initStudio() {
   try {
     const [catRes, boardRes] = await Promise.all([
@@ -1133,24 +1243,62 @@ async function initStudio() {
     if (boardRes.ok) {
       leaderboard = await boardRes.json();
     }
-    const cachedBoard = JSON.parse(localStorage.getItem("tutor_leaderboard_cache_v1") || "null");
-    if (cachedBoard && cachedBoard.problems) {
-      if (!leaderboard.problems) leaderboard.problems = {};
-      for (const [pid, rows] of Object.entries(cachedBoard.problems)) {
-        for (const r of rows || []) {
-          recordInBrowserScoreboardEntry(r.user || "you", pid, r.scoreboard || [100, 0, 0]);
-        }
-      }
-    }
   } catch (err) {
     console.warn("Failed to load catalog/leaderboard:", err);
   }
+
+  // Backwards-compatible migration from legacy tutor_leaderboard_cache_v1
+  try {
+    const existingSubs = getUserSubmissions();
+    if (Object.keys(existingSubs).length === 0) {
+      const legacyCache = JSON.parse(localStorage.getItem("tutor_leaderboard_cache_v1") || "null");
+      if (legacyCache && legacyCache.problems) {
+        const savedUser = localStorage.getItem("tutor_gh_user") || "you";
+        for (const [pid, rows] of Object.entries(legacyCache.problems)) {
+          const userRow = (rows || []).find(r => r.user === savedUser || r.user === "you" || r.user === "browser-user");
+          if (userRow) {
+            const vec = userRow.scoreboard || [100.0, 0, 0];
+            saveUserSubmission(userRow.user || savedUser, pid, {
+              score: Number(vec[0] ?? 100.0),
+              cycles_per_op: Number(vec[1] ?? 0.0),
+              code_bytes: Number(vec[2] ?? 0),
+              submitted_at: userRow.submitted_at || new Date().toISOString()
+            });
+          }
+        }
+      }
+    }
+  } catch (_) {}
+
+  // Sync solvedSet with tutor_user_submissions_v1
+  const subs = getUserSubmissions();
+  for (const pid of Object.keys(subs)) {
+    solvedSet.add(pid);
+  }
+  localStorage.setItem("tutor_solved_v1", JSON.stringify([...solvedSet]));
+
+  // Cleanly merge user submissions over official leaderboard
+  syncUserSubmissionsToLeaderboard();
 
   const savedUser = localStorage.getItem("tutor_gh_user") || "";
   const userEl = document.getElementById("gh-username");
   if (savedUser) userEl.value = savedUser;
   userEl.addEventListener("change", () => {
-    localStorage.setItem("tutor_gh_user", userEl.value.trim());
+    const newHandle = userEl.value.trim() || "you";
+    localStorage.setItem("tutor_gh_user", newHandle);
+    const currentSubs = getUserSubmissions();
+    let changed = false;
+    for (const pid of Object.keys(currentSubs)) {
+      if (currentSubs[pid].user !== newHandle) {
+        currentSubs[pid].user = newHandle;
+        changed = true;
+      }
+    }
+    if (changed) {
+      localStorage.setItem("tutor_user_submissions_v1", JSON.stringify(currentSubs));
+      syncUserSubmissionsToLeaderboard();
+      renderScoreboard();
+    }
   });
 
   populateSelectors();
@@ -1501,6 +1649,8 @@ let lastTestCases = [];
 let activeCaseIdx = 0;
 let lastBuildErrors = "";
 let lastRuntimeErrors = "";
+let lastIsSubmission = false;
+let lastSuccess = false;
 
 window.selectTestCase = function(idx) {
   activeCaseIdx = idx;
@@ -1567,10 +1717,30 @@ function renderLeetCodeJudgeBody() {
     html = `<div style="color:var(--fg-dim);">All assertions verified.</div>`;
   }
 
+  // 3. Status banners for Submission vs Test Run
+  if (lastSuccess) {
+    if (lastIsSubmission) {
+      html += `
+        <div class="lc-banner pass-submitted">
+          <div style="font-weight:700; margin-bottom:4px;">✓ Solved &amp; Recorded on Scoreboard!</div>
+          <div style="margin-bottom:8px;">Your solution passed all assertions, persisted to local rankings, and unlocked downstream DAG problems. Submit a Pull Request to publish your score to the official global repository leaderboard:</div>
+          <button class="small-btn primary" onclick="openGitHubPrSubmission()">Submit PR to Global Leaderboard ↗</button>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="lc-banner pass-run">
+          <div style="font-weight:700; margin-bottom:2px;">💡 All test cases passed!</div>
+          <div>Press <b style="cursor:pointer;text-decoration:underline;" onclick="triggerSubmit()">:Submit (&lt;Ctrl+Enter&gt;)</b> to officially record your score on the scoreboard and unlock downstream problems in the Skill-Tree DAG.</div>
+        </div>
+      `;
+    }
+  }
+
   logEl.innerHTML = html;
 }
 
-async function executeVMSolution(codeStr, prob) {
+async function executeVMSolution(codeStr, prob, isSubmission = false) {
   openVMPane();
   const logEl = document.getElementById("judge-log");
   const statusEl = document.getElementById("judge-status-text");
@@ -1579,7 +1749,9 @@ async function executeVMSolution(codeStr, prob) {
 
   isJudging = true;
   engineEl.textContent = "Live Linux 5.6 VM (x86_WASM)";
-  statusEl.textContent = `Running container harness inside guest VM...`;
+  statusEl.textContent = isSubmission
+    ? `Submitting container harness inside guest VM...`
+    : `Running container harness inside guest VM...`;
   logEl.textContent = "[*] Launching execution in Live Linux 5.6 WebAssembly VM...\n";
 
   try {
@@ -1712,7 +1884,8 @@ echo DONE > /mnt/done_${nonce}.txt
       testCases,
       1.0,
       codeBytes,
-      user
+      user,
+      isSubmission
     );
   } catch (err) {
     headerEl.className = "judge-header fail";
@@ -1723,7 +1896,7 @@ echo DONE > /mnt/done_${nonce}.txt
   }
 }
 
-async function executeJudge(codeStr) {
+async function executeJudge(codeStr, isSubmission = false) {
   if (isJudging || !catalog.length) return;
   const prob = catalog[currentIdx];
   isJudging = true;
@@ -1738,12 +1911,16 @@ async function executeJudge(codeStr) {
   const logEl = document.getElementById("judge-log");
 
   headerEl.className = "judge-header";
-  statusEl.textContent = `Running testcases for ${prob.id}...`;
-  logEl.textContent = "Compiling and executing test suite...";
+  statusEl.textContent = isSubmission
+    ? `Submitting and verifying ${prob.id}...`
+    : `Running testcases for ${prob.id}...`;
+  logEl.textContent = isSubmission
+    ? "Compiling, verifying test suite, and preparing official submission..."
+    : "Compiling and executing test suite...";
   switchTab("spec");
 
   if ((prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9")) {
-    await executeVMSolution(codeStr, prob);
+    await executeVMSolution(codeStr, prob, isSubmission);
     return;
   }
 
@@ -1757,7 +1934,13 @@ async function executeJudge(codeStr) {
       const resp = await fetch("/api/judge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problem_id: prob.id, code: codeStr, user: user }),
+        body: JSON.stringify({
+          problem_id: prob.id,
+          code: codeStr,
+          user: user,
+          is_submission: isSubmission,
+          update_board: isSubmission
+        }),
         signal: ctrl.signal
       });
       clearTimeout(timer);
@@ -1776,7 +1959,8 @@ async function executeJudge(codeStr) {
           testCases,
           Number(cycles),
           codeBytes,
-          user
+          user,
+          isSubmission
         );
         return;
       }
@@ -1862,7 +2046,7 @@ async function executeJudge(codeStr) {
 
     const success = buildOk && (exitCode === 0) && Boolean(gbData.didExecute) && doneReceived && (testCases.length > 0) && testCases.every(c => c.passed);
     isJudging = false;
-    applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, Number(cyclesPerOp), codeBytes, user);
+    applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, Number(cyclesPerOp), codeBytes, user, isSubmission);
   } catch (err) {
     isJudging = false;
     headerEl.className = "judge-header fail";
@@ -1871,13 +2055,15 @@ async function executeJudge(codeStr) {
   }
 }
 
-function applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, cyclesPerOp, codeBytes, user) {
+function applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testCases, cyclesPerOp, codeBytes, user, isSubmission = false) {
   const headerEl = document.getElementById("judge-header");
   const statusEl = document.getElementById("judge-status-text");
 
   lastTestCases = testCases || [];
   lastBuildErrors = (!buildOk || buildStderr) ? buildStderr : "";
   lastRuntimeErrors = execStderr || "";
+  lastIsSubmission = Boolean(isSubmission);
+  lastSuccess = Boolean(success);
 
   const failedIdx = lastTestCases.findIndex(c => !c.passed);
   activeCaseIdx = failedIdx >= 0 ? failedIdx : 0;
@@ -1885,20 +2071,34 @@ function applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testC
 
   if (success) {
     headerEl.className = "judge-header pass";
-    statusEl.textContent = lastTestCases.length > 0
-      ? `Accepted — ${passedCount} / ${lastTestCases.length} testcases passed`
-      : `Accepted — ${prob.id} SOLVED`;
+    if (isSubmission) {
+      statusEl.textContent = lastTestCases.length > 0
+        ? `Accepted (Submitted) — ${passedCount} / ${lastTestCases.length} testcases passed`
+        : `Accepted (Submitted) — ${prob.id} SOLVED`;
+    } else {
+      statusEl.textContent = lastTestCases.length > 0
+        ? `Passed (Test Run) — ${passedCount} / ${lastTestCases.length} testcases passed`
+        : `Passed (Test Run) — ${prob.id}`;
+    }
     document.getElementById("metric-score").textContent = "100.0";
     document.getElementById("metric-cycles").textContent = `${Number(cyclesPerOp).toFixed(2)}`;
     document.getElementById("metric-bytes").textContent = `${codeBytes} B`;
 
-    solvedSet.add(prob.id);
-    localStorage.setItem("tutor_solved_v1", JSON.stringify([...solvedSet]));
-    populateSelectors();
+    if (isSubmission) {
+      solvedSet.add(prob.id);
+      localStorage.setItem("tutor_solved_v1", JSON.stringify([...solvedSet]));
+      populateSelectors();
 
-    recordInBrowserScoreboardEntry(user, prob.id, [100.0, Number(Number(cyclesPerOp).toFixed(2)), codeBytes]);
-    renderDag();
-    renderScoreboard();
+      saveUserSubmission(user, prob.id, {
+        score: 100.0,
+        cycles_per_op: Number(Number(cyclesPerOp).toFixed(2)),
+        code_bytes: codeBytes,
+        submitted_at: new Date().toISOString()
+      });
+      syncUserSubmissionsToLeaderboard();
+      renderDag();
+      renderScoreboard();
+    }
   } else {
     headerEl.className = "judge-header fail";
     if (!buildOk) {
@@ -1916,36 +2116,13 @@ function applyJudgeResult(prob, success, buildOk, buildStderr, execStderr, testC
 }
 
 function recordInBrowserScoreboardEntry(user, probId, vec) {
-  if (!leaderboard.problems) leaderboard.problems = {};
-  const list = leaderboard.problems[probId] || [];
-  list.push({
-    user,
-    problem_id: probId,
-    score: 100.0,
-    scoreboard: vec,
+  saveUserSubmission(user, probId, {
+    score: Number(vec?.[0] ?? 100.0),
+    cycles_per_op: Number(vec?.[1] ?? 0.0),
+    code_bytes: Number(vec?.[2] ?? 0),
     submitted_at: new Date().toISOString()
   });
-  // Sort by Score DESC, Cycles ASC, Bytes ASC
-  list.sort((a, b) => {
-    const va = a.scoreboard || [0, 1e18, 1e18];
-    const vb = b.scoreboard || [0, 1e18, 1e18];
-    if (va[0] !== vb[0]) return vb[0] - va[0];
-    if (va[1] !== vb[1]) return va[1] - vb[1];
-    return va[2] - vb[2];
-  });
-  // Deduplicate by user (Autolab DISTINCT ON user)
-  const dedup = [];
-  const seen = new Set();
-  for (const item of list) {
-    if (seen.has(item.user)) continue;
-    seen.add(item.user);
-    dedup.push({ ...item, rank: dedup.length + 1 });
-  }
-  leaderboard.problems[probId] = dedup;
-  recomputeGlobalStandings();
-  try {
-    localStorage.setItem("tutor_leaderboard_cache_v1", JSON.stringify(leaderboard));
-  } catch (_) {}
+  syncUserSubmissionsToLeaderboard();
 }
 
 function recomputeGlobalStandings() {
@@ -2116,9 +2293,11 @@ function downloadOrCopySubmission() {
   if (!prob) return;
   navigator.clipboard?.writeText(currentBufferText).catch(() => {});
   const blob = new Blob([currentBufferText], { type: "text/plain;charset=utf-8" });
+  const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
+  const filename = isSh ? "solution.sh" : "solution.hpp";
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "solution.hpp";
+  a.download = filename;
   a.click();
 }
 
@@ -2128,7 +2307,9 @@ function openGitHubPrSubmission() {
   const user = (document.getElementById("gh-username").value || "your-username").trim();
   navigator.clipboard?.writeText(currentBufferText).catch(() => {});
   const encoded = encodeURIComponent(currentBufferText);
-  const filename = encodeURIComponent(`submissions/${user}/${prob.id}/solution.hpp`);
+  const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
+  const ext = isSh ? "solution.sh" : "solution.hpp";
+  const filename = encodeURIComponent(`submissions/${user}/${prob.id}/${ext}`);
   const repoUrl = "https://github.com/Syntra-Labs/tutor";
   window.open(`${repoUrl}/new/main?filename=${filename}&value=${encoded}`, "_blank");
 }
@@ -2343,11 +2524,19 @@ function primeNeovim() {
       local function execute_tutor_judge()
         local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
         vim.rpcnotify(ui_chan, 'tutor_run', lines)
-        print("[syntra-tutor] compiling & running locked C++20 harness...")
+        print("[syntra-tutor] compiling & running test cases...")
       end
 
-      vim.api.nvim_create_user_command("Run", execute_tutor_judge, { desc = "Compile & run locked C++20 harness" })
-      vim.api.nvim_create_user_command("R", execute_tutor_judge, { desc = "Compile & run locked C++20 harness" })
+      local function execute_tutor_submit()
+        local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        vim.rpcnotify(ui_chan, 'tutor_submit', lines)
+        print("[syntra-tutor] submitting solution to official scoreboard...")
+      end
+
+      vim.api.nvim_create_user_command("Run", execute_tutor_judge, { desc = "Compile & run test cases" })
+      vim.api.nvim_create_user_command("R", execute_tutor_judge, { desc = "Compile & run test cases" })
+      vim.api.nvim_create_user_command("Submit", execute_tutor_submit, { desc = "Submit solution to scoreboard" })
+      vim.api.nvim_create_user_command("S", execute_tutor_submit, { desc = "Submit solution to scoreboard" })
       vim.api.nvim_create_user_command("Manual", function() vim.rpcnotify(ui_chan, 'tutor_manual') end, { desc = "Open manual" })
       vim.api.nvim_create_user_command("Next", function() vim.rpcnotify(ui_chan, 'tutor_next') end, { desc = "Next problem" })
       vim.api.nvim_create_user_command("Prev", function() vim.rpcnotify(ui_chan, 'tutor_prev') end, { desc = "Previous problem" })
@@ -2356,9 +2545,10 @@ function primeNeovim() {
       vim.api.nvim_create_user_command("Reset", function() vim.rpcnotify(ui_chan, 'tutor_reset') end, { desc = "Reset stub" })
 
       vim.keymap.set('n', '<leader>r', execute_tutor_judge, { silent = true })
-      vim.keymap.set('n', '<leader><CR>', execute_tutor_judge, { silent = true })
       vim.keymap.set({'n', 'i'}, '<F5>', execute_tutor_judge, { silent = true })
-      vim.keymap.set({'n', 'i'}, '<C-CR>', execute_tutor_judge, { silent = true })
+      vim.keymap.set('n', '<leader>s', execute_tutor_submit, { silent = true })
+      vim.keymap.set('n', '<leader><CR>', execute_tutor_submit, { silent = true })
+      vim.keymap.set({'n', 'i'}, '<C-CR>', execute_tutor_submit, { silent = true })
       vim.keymap.set('n', '<leader>m', function() vim.rpcnotify(ui_chan, 'tutor_manual') end, { silent = true })
       vim.keymap.set({'n', 'i'}, '<F1>', function() vim.rpcnotify(ui_chan, 'tutor_manual') end, { silent = true })
       vim.keymap.set('n', '<leader>n', function() vim.rpcnotify(ui_chan, 'tutor_next') end, { silent = true })
@@ -2380,7 +2570,7 @@ function primeNeovim() {
           vim.bo[ev.buf].modified = false
           local lines = vim.api.nvim_buf_get_lines(ev.buf, 0, -1, false)
           vim.rpcnotify(ui_chan, 'tutor_run', lines)
-          vim.api.nvim_echo({{'"solution.hpp" [written] — running C++20 judge...', "Normal"}}, false, {})
+          vim.api.nvim_echo({{'"' .. vim.fn.expand('%:t') .. '" [written] — running test cases (:Run)...', "Normal"}}, false, {})
         end
       })
 
@@ -2461,7 +2651,11 @@ function handleWorkerMessage(event) {
     if (method === "tutor_run") {
       const lines = params?.[0] || [];
       currentBufferText = lines.join("\n");
-      executeJudge(currentBufferText);
+      executeJudge(currentBufferText, false);
+    } else if (method === "tutor_submit") {
+      const lines = params?.[0] || [];
+      currentBufferText = lines.join("\n");
+      executeJudge(currentBufferText, true);
     } else if (method === "tutor_change") {
       const lines = params?.[0] || [];
       currentBufferText = lines.join("\n");
@@ -2807,6 +3001,11 @@ gridEl.addEventListener("keydown", (ev) => {
   }
   if (ev.key === "Enter" && ev.ctrlKey) {
     ev.preventDefault();
+    triggerSubmit();
+    return;
+  }
+  if (ev.key === "F5") {
+    ev.preventDefault();
     triggerRun();
     return;
   }
@@ -2843,9 +3042,17 @@ document.getElementById("help-btn").addEventListener("click", openHelp);
 document.getElementById("help-close-btn").addEventListener("click", closeHelp);
 
 function triggerRun() {
-  executeJudge(currentBufferText);
+  executeJudge(currentBufferText, false);
 }
-document.getElementById("run-trigger").addEventListener("click", triggerRun);
+function triggerSubmit() {
+  executeJudge(currentBufferText, true);
+}
+window.triggerRun = triggerRun;
+window.triggerSubmit = triggerSubmit;
+const runTrigger = document.getElementById("run-trigger");
+if (runTrigger) runTrigger.addEventListener("click", triggerRun);
+const submitTrigger = document.getElementById("submit-trigger");
+if (submitTrigger) submitTrigger.addEventListener("click", triggerSubmit);
 
 /* ========================================================================= */
 /* 5. VERTICAL SPLIT (LEFT SPEC) + HORIZONTAL SPLIT (EDITOR TOP / VM BOTTOM) */

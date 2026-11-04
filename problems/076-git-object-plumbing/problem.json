@@ -4,7 +4,7 @@
   "track": "Track 9: Systems Engineering, Containers & Git Internals",
   "category": "Systems & Tooling",
   "difficulty": "Medium",
-  "depends_on": ["075-container-namespace-isolation"],
+  "depends_on": ["005-fnv1a-splitmix64"],
   "colspec": [
     {"hdr": "Score", "asc": false},
     {"hdr": "Plumbing Pass", "asc": false},
