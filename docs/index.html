@@ -585,6 +585,24 @@ body.is-resizing-v, body.is-resizing-v * {
   position: relative;
   flex-shrink: 0;
   z-index: 10;
+  overscroll-behavior: contain;
+}
+.vm-pane.fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  z-index: 10000 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 .vm-topbar {
   height: 44px;
@@ -598,6 +616,11 @@ body.is-resizing-v, body.is-resizing-v * {
   font-size: 11px;
   color: #f0f6fc;
   flex-shrink: 0;
+}
+.vm-pane.fullscreen .vm-topbar {
+  padding: 0 16px;
+  background: #0d1117;
+  border-bottom: 1px solid #30363d;
 }
 .vm-brand {
   display: flex;
@@ -633,6 +656,14 @@ body.is-resizing-v, body.is-resizing-v * {
   background: #30363d;
   border-color: #8b949e;
 }
+.vm-actions .small-btn.primary {
+  background: #238636;
+  border-color: #2ea043;
+  color: #ffffff;
+}
+.vm-actions .small-btn.primary:hover {
+  background: #2ea043;
+}
 .vm-screen-wrapper {
   flex: 1;
   background: #000000;
@@ -644,11 +675,22 @@ body.is-resizing-v, body.is-resizing-v * {
   color: #f0f6fc;
   cursor: text;
   outline: none;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.vm-pane.fullscreen .vm-screen-wrapper {
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 18px;
 }
 .vm-screen-wrapper span {
   font-family: var(--mono) !important;
   font-size: 13px !important;
   line-height: 15px !important;
+}
+.vm-pane.fullscreen .vm-screen-wrapper span {
+  font-size: 15px !important;
+  line-height: 18px !important;
 }
 .vm-placeholder {
   display: flex;
@@ -1020,6 +1062,7 @@ body.is-resizing-v, body.is-resizing-v * {
           <span id="vm-status-label">LINUX 5.6 VM (x86_WASM)</span>
         </div>
         <div class="vm-actions">
+          <button class="small-btn" id="btn-vm-focus" onclick="window.toggleVMFocus()" title="Toggle full-screen focus mode (Shift+Esc to exit)">⛶ Focus</button>
           <button class="small-btn" id="btn-vm-boot" onclick="window.bootLinuxVM()">Boot VM</button>
           <button class="small-btn" id="btn-vm-reset" onclick="window.rebootLinuxVM()" title="Restart Linux VM">Reboot</button>
           <button class="small-btn" id="btn-vm-close" onclick="window.closeVMPane()" title="Close VM Split">[x]</button>
@@ -2915,6 +2958,9 @@ function openVMPane() {
 window.openVMPane = openVMPane;
 
 function closeVMPane() {
+  if (vmPane.classList.contains("fullscreen")) {
+    toggleVMFocus(false);
+  }
   vmPane.classList.add("hidden");
   vmGutter.classList.add("hidden");
 
@@ -2936,6 +2982,164 @@ function toggleVMPane() {
   }
 }
 window.toggleVMPane = toggleVMPane;
+
+// Full-screen / Focus Mode for Linux VM Studio
+function toggleVMFocus(force) {
+  const isFocus = force !== undefined ? Boolean(force) : !vmPane.classList.contains("fullscreen");
+  const focusBtn = document.getElementById("btn-vm-focus");
+
+  if (isFocus) {
+    if (vmPane.classList.contains("hidden")) {
+      openVMPane();
+    }
+    vmPane.classList.add("fullscreen");
+    vmGutter.classList.add("hidden");
+    if (focusBtn) {
+      focusBtn.innerHTML = "⤓ Exit Focus";
+      focusBtn.title = "Exit full-screen focus mode (Shift+Esc)";
+      focusBtn.classList.add("primary");
+    }
+    if (document.fullscreenEnabled && !document.fullscreenElement) {
+      vmPane.requestFullscreen().catch(() => {});
+    }
+  } else {
+    vmPane.classList.remove("fullscreen");
+    if (!vmPane.classList.contains("hidden")) {
+      vmGutter.classList.remove("hidden");
+    }
+    if (focusBtn) {
+      focusBtn.innerHTML = "⛶ Focus";
+      focusBtn.title = "Toggle full-screen focus mode (Shift+Esc to exit)";
+      focusBtn.classList.remove("primary");
+    }
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    if (workerReady) {
+      const dims = computeGridDimensions();
+      sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+    }
+  }
+
+  const container = document.getElementById("vm-screen-container");
+  if (container) {
+    container.focus();
+    if (v86Instance && typeof v86Instance.screen_set_scale === "function") {
+      v86Instance.screen_set_scale(1, 1);
+    }
+  }
+}
+window.toggleVMFocus = toggleVMFocus;
+
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && vmPane.classList.contains("fullscreen")) {
+    toggleVMFocus(false);
+  }
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && e.shiftKey && vmPane.classList.contains("fullscreen")) {
+    e.preventDefault();
+    toggleVMFocus(false);
+  }
+});
+
+// --- Linux VM Terminal Scrolling (Mouse Wheel & Touchpad) ---
+const vmScreenContainer = document.getElementById("vm-screen-container");
+let vmWheelAccumulator = 0;
+let vmWheelInFlight = false;
+
+if (vmScreenContainer) {
+  vmScreenContainer.addEventListener("wheel", (ev) => {
+    // 1. Prevent outer page / editor from scrolling while pointer is over VM
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    // 2. If the container DOM itself has vertical overflow, scroll it directly
+    const hasVertOverflow = vmScreenContainer.scrollHeight > vmScreenContainer.clientHeight;
+    if (hasVertOverflow) {
+      const atTop = vmScreenContainer.scrollTop <= 0;
+      const atBottom = vmScreenContainer.scrollTop >= (vmScreenContainer.scrollHeight - vmScreenContainer.clientHeight - 1);
+      const scrollingDown = ev.deltaY > 0;
+      const scrollingUp = ev.deltaY < 0;
+
+      if ((scrollingDown && !atBottom) || (scrollingUp && !atTop)) {
+        vmScreenContainer.scrollTop += ev.deltaY;
+        return;
+      }
+    }
+
+    // 3. Horizontal touchpad scroll support
+    if (ev.deltaX && vmScreenContainer.scrollWidth > vmScreenContainer.clientWidth) {
+      vmScreenContainer.scrollLeft += ev.deltaX;
+    }
+
+    // 4. Linux Console Scrollback Navigation (Shift+PageUp / Shift+PageDown)
+    if (!v86Instance || !v86Booted) return;
+
+    let delta = ev.deltaY;
+    if (ev.deltaMode === 1) delta *= 24;      // DOM_DELTA_LINE
+    else if (ev.deltaMode === 2) delta *= 120; // DOM_DELTA_PAGE
+
+    vmWheelAccumulator += delta;
+
+    // Threshold of ~32px accommodates both trackpad flick and single mouse-wheel notch
+    const threshold = 32;
+    if (Math.abs(vmWheelAccumulator) >= threshold && !vmWheelInFlight) {
+      vmWheelInFlight = true;
+      const isUp = vmWheelAccumulator < 0;
+      vmWheelAccumulator = 0;
+
+      // PS/2 Scancodes (Set 1):
+      // Shift+PageUp: ShiftLeft Make (0x2A), PageUp Make (0xE0, 0x49), PageUp Break (0xE0, 0xC9), ShiftLeft Break (0xAA)
+      // Shift+PageDown: ShiftLeft Make (0x2A), PageDown Make (0xE0, 0x51), PageDown Break (0xE0, 0xD1), ShiftLeft Break (0xAA)
+      const scancodes = isUp
+        ? [0x2A, 0xE0, 0x49, 0xE0, 0xC9, 0xAA]
+        : [0x2A, 0xE0, 0x51, 0xE0, 0xD1, 0xAA];
+
+      try {
+        if (typeof v86Instance.keyboard_send_scancodes === "function") {
+          v86Instance.keyboard_send_scancodes(scancodes);
+        }
+        if (v86Instance.mouse_adapter && v86Instance.mouse_adapter.enabled && v86Instance.bus) {
+          v86Instance.bus.send("mouse-wheel", [isUp ? 1 : -1, 0]);
+        }
+      } catch (_) {}
+
+      setTimeout(() => {
+        vmWheelInFlight = false;
+      }, 35);
+    }
+  }, { passive: false });
+
+  // Touchpad touch gesture support
+  let touchStartY = 0;
+  let touchStartX = 0;
+  vmScreenContainer.addEventListener("touchstart", (ev) => {
+    if (ev.touches.length >= 1) {
+      touchStartY = ev.touches[0].clientY;
+      touchStartX = ev.touches[0].clientX;
+    }
+  }, { passive: true });
+
+  vmScreenContainer.addEventListener("touchmove", (ev) => {
+    if (ev.touches.length >= 1) {
+      const dy = touchStartY - ev.touches[0].clientY;
+      const dx = touchStartX - ev.touches[0].clientX;
+      touchStartY = ev.touches[0].clientY;
+      touchStartX = ev.touches[0].clientX;
+
+      if (vmScreenContainer.scrollHeight > vmScreenContainer.clientHeight) {
+        vmScreenContainer.scrollTop += dy;
+        ev.stopPropagation();
+      }
+      if (vmScreenContainer.scrollWidth > vmScreenContainer.clientWidth) {
+        vmScreenContainer.scrollLeft += dx;
+        ev.stopPropagation();
+      }
+    }
+  }, { passive: true });
+}
 
 // In-Browser Linux VM Lifecycle (v86)
 let v86Instance = null;
