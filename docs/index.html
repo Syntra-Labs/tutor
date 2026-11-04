@@ -701,6 +701,18 @@ body.is-resizing-v, body.is-resizing-v * {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+/* Hide scrollbar in split terminal view while preserving scrollability */
+.vm-pane:not(.fullscreen) .vm-screen-wrapper,
+.vm-pane:not(.fullscreen) .vm-screen-wrapper * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.vm-pane:not(.fullscreen) .vm-screen-wrapper::-webkit-scrollbar,
+.vm-pane:not(.fullscreen) .vm-screen-wrapper *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 .vm-pane.fullscreen .vm-screen-wrapper {
   padding: 16px 20px;
   font-size: 15px;
