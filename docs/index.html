@@ -126,6 +126,47 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   -ms-overflow-style: none;
 }
 
+/* --- Left Split Workspace: Problems above Description (Issue #13) --- */
+.left-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+  height: calc(100vh - 44px);
+}
+.problems-split-pane {
+  height: 42%;
+  min-height: 90px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: height 0.1s ease-out;
+}
+.problems-split-pane.hidden {
+  display: none !important;
+}
+.problems-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+}
+.description-split-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  min-height: 0;
+  background: var(--bg);
+}
+.description-split-pane.hidden {
+  display: none !important;
+}
+
 /* Problem Selector Bar */
 .problem-bar {
   display: flex;
@@ -609,6 +650,23 @@ body.is-resizing-v, body.is-resizing-v * {
   flex-shrink: 0;
   z-index: 10;
   overscroll-behavior: contain;
+  transition: height 0.15s ease-out;
+}
+.vm-pane.collapsed {
+  height: 36px !important;
+  min-height: 36px !important;
+  overflow: hidden !important;
+  border-top: 1px solid var(--line);
+}
+.vm-pane.collapsed .vm-topbar {
+  height: 36px;
+  border-bottom: none;
+}
+.vm-pane.collapsed .vm-screen-wrapper {
+  display: none !important;
+}
+.split-gutter-h.collapsed-gutter {
+  display: none !important;
 }
 .vm-pane.fullscreen {
   position: fixed !important;
@@ -776,27 +834,17 @@ body.is-resizing-v, body.is-resizing-v * {
   box-shadow: inset 0 -2px 0 0 #000000 !important;
 }
 
-/* --- Live Linux VM Terminal Minimal Solid White Cursor --- */
+/* --- Live Linux VM Terminal Cursor (Disabled White Overlay per Issue #15) --- */
 #vm-screen-container .cursor,
 .vm-screen-wrapper .cursor,
-#vm-screen-container div.cursor {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  display: inline-block !important;
-  width: 8px !important;
-  min-height: 14px !important;
-  vertical-align: text-bottom !important;
-  opacity: 1 !important;
-  animation: none !important;
-  -webkit-animation: none !important;
-}
-
+#vm-screen-container div.cursor,
 #vm-screen-container .blinking-cursor,
 .vm-screen-wrapper .blinking-cursor {
-  animation: none !important;
-  -webkit-animation: none !important;
-  opacity: 1 !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: transparent !important;
+  pointer-events: none !important;
 }
 
 .nvim-statusline {
@@ -941,9 +989,31 @@ body.is-resizing-v, body.is-resizing-v * {
       </div>
     </div>
 
-    <div class="left-scroll">
-      <!-- TAB 1: PROBLEM SPEC & LIVE C++20 JUDGE OUTPUT -->
-      <div id="tab-spec">
+    <!-- MAIN WORKSPACE FOR LEFT PANE: PROBLEMS ON TOP (TOGGLEABLE) & DESCRIPTION ON BOTTOM -->
+    <div class="left-workspace" id="left-workspace">
+      <!-- PROBLEMS SPLIT (TOP, TOGGLEABLE ABOVE DESCRIPTION) -->
+      <div id="tab-dag" class="problems-split-pane hidden">
+        <div class="filter-bar">
+          <input type="search" id="dag-search" placeholder="Filter 76 problems by ID, title, tag..." oninput="renderDag()" />
+          <select id="dag-track-filter" onchange="renderDag()">
+            <option value="">All 8 Tracks</option>
+          </select>
+          <select id="dag-status-filter" onchange="renderDag()">
+            <option value="">All Statuses</option>
+            <option value="ready">Ready / Unlocked</option>
+            <option value="solved">Solved</option>
+          </select>
+        </div>
+        <div id="dag-container" class="problems-scroll"></div>
+      </div>
+
+      <!-- HORIZONTAL SPLIT GUTTER (BETWEEN PROBLEMS ON TOP & DESCRIPTION ON BOTTOM) -->
+      <div class="split-gutter-h hidden" id="left-split-gutter" title="Drag to resize Problems split (Double-click for 42/58)">
+        <div class="gutter-handle-h"></div>
+      </div>
+
+      <!-- DESCRIPTION SPLIT (BOTTOM) -->
+      <div id="tab-spec" class="description-split-pane">
         <div class="problem-bar">
           <div class="problem-actions-group">
             <button class="small-btn" id="run-btn" onclick="triggerRun()" title="Run test cases (:Run / <F5>)">:Run (&lt;F5&gt;)</button>
@@ -982,25 +1052,10 @@ body.is-resizing-v, body.is-resizing-v * {
           <input type="text" id="gh-username" value="you" placeholder="handle" style="font-family:var(--mono);font-size:11.5px;padding:4px 8px;border:1px solid var(--line);width:150px;" />
         </div>
       </div>
+    </div>
 
-      <!-- TAB 2: 76-PROBLEM PREREQUISITE SKILL-TREE DAG -->
-      <div id="tab-dag" class="hidden">
-        <div class="filter-bar">
-          <input type="search" id="dag-search" placeholder="Filter 76 problems by ID, title, tag..." oninput="renderDag()" />
-          <select id="dag-track-filter" onchange="renderDag()">
-            <option value="">All 8 Tracks</option>
-          </select>
-          <select id="dag-status-filter" onchange="renderDag()">
-            <option value="">All Statuses</option>
-            <option value="ready">Ready / Unlocked</option>
-            <option value="solved">Solved</option>
-          </select>
-        </div>
-        <div id="dag-container"></div>
-      </div>
-
-      <!-- TAB 3: AUTOLAB MULTI-METRIC SCOREBOARD -->
-      <div id="tab-board" class="hidden">
+    <!-- TAB 3: AUTOLAB MULTI-METRIC SCOREBOARD -->
+    <div id="tab-board" class="left-scroll hidden">
         <div class="filter-bar">
           <select id="board-scope-select" onchange="renderScoreboard()" style="width:100%;">
             <option value="__global__">Global Standings (All 76 Problems)</option>
@@ -1103,6 +1158,7 @@ body.is-resizing-v, body.is-resizing-v * {
           <span id="vm-status-label">LINUX 5.6 VM (x86_WASM)</span>
         </div>
         <div class="vm-actions">
+          <button class="small-btn" id="btn-vm-collapse" onclick="window.toggleVMCollapse()" title="Collapse / Expand terminal split">_</button>
           <button class="small-btn" id="btn-vm-focus" onclick="window.toggleVMFocus()" title="Toggle full-screen focus mode (Shift+Esc to exit)">⛶ Focus</button>
           <button class="small-btn" id="btn-vm-boot" onclick="window.bootLinuxVM()">Boot VM</button>
           <button class="small-btn" id="btn-vm-reset" onclick="window.rebootLinuxVM()" title="Restart Linux VM">Reboot</button>
@@ -1475,7 +1531,15 @@ async function loadProblem(idx) {
   renderDag();
 
   if (isSh) {
-    openVMPane();
+    collapseVMPane();
+  } else {
+    closeVMPane();
+  }
+
+  // If description split was displaced/hidden, restore it so user sees the selected problem
+  const specSplitEl = document.getElementById("tab-spec");
+  if (specSplitEl && specSplitEl.classList.contains("hidden")) {
+    reopenDescriptionSplit();
   }
 }
 
@@ -1488,14 +1552,116 @@ function resetCurrentStub() {
   setBufferCode(prob.stub || "", solFilename, isSh ? "sh" : "cpp");
 }
 
-function switchTab(tabName) {
-  ["spec", "dag", "board"].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tabName);
-    document.getElementById(`tab-btn-${t}`).classList.toggle("active", t === tabName);
-  });
-  if (tabName === "dag") renderDag();
-  if (tabName === "board") renderScoreboard();
+function toggleProblemsSplit() {
+  const dagSplit = document.getElementById("tab-dag");
+  const leftGutter = document.getElementById("left-split-gutter");
+  const specSplit = document.getElementById("tab-spec");
+  const boardView = document.getElementById("tab-board");
+  const leftWorkspace = document.getElementById("left-workspace");
+
+  const btnDag = document.getElementById("tab-btn-dag");
+  const btnSpec = document.getElementById("tab-btn-spec");
+  const btnBoard = document.getElementById("tab-btn-board");
+
+  if (boardView && !boardView.classList.contains("hidden")) {
+    boardView.classList.add("hidden");
+    if (btnBoard) btnBoard.classList.remove("active");
+    if (leftWorkspace) leftWorkspace.classList.remove("hidden");
+  }
+
+  const isHidden = dagSplit.classList.contains("hidden");
+  if (isHidden) {
+    dagSplit.classList.remove("hidden");
+    leftGutter.classList.remove("hidden");
+    if (!dagSplit.style.height || dagSplit.style.height === "0px" || dagSplit.style.height === "100%") {
+      dagSplit.style.height = "42%";
+    }
+    specSplit.classList.remove("hidden");
+    btnDag.classList.add("active");
+    btnSpec.classList.add("active");
+    renderDag();
+  } else {
+    dagSplit.classList.add("hidden");
+    leftGutter.classList.add("hidden");
+    specSplit.classList.remove("hidden");
+    btnDag.classList.remove("active");
+    btnSpec.classList.add("active");
+  }
 }
+window.toggleProblemsSplit = toggleProblemsSplit;
+
+function reopenDescriptionSplit() {
+  const dagSplit = document.getElementById("tab-dag");
+  const leftGutter = document.getElementById("left-split-gutter");
+  const specSplit = document.getElementById("tab-spec");
+  const boardView = document.getElementById("tab-board");
+  const leftWorkspace = document.getElementById("left-workspace");
+
+  const btnDag = document.getElementById("tab-btn-dag");
+  const btnSpec = document.getElementById("tab-btn-spec");
+  const btnBoard = document.getElementById("tab-btn-board");
+
+  if (boardView && !boardView.classList.contains("hidden")) {
+    boardView.classList.add("hidden");
+    if (btnBoard) btnBoard.classList.remove("active");
+    if (leftWorkspace) leftWorkspace.classList.remove("hidden");
+  }
+
+  // If description was displaced by problems split taking 100%
+  if (specSplit.classList.contains("hidden")) {
+    specSplit.classList.remove("hidden");
+    dagSplit.style.height = "42%";
+    leftGutter.classList.remove("hidden");
+    btnSpec.classList.add("active");
+    btnDag.classList.add("active");
+    return;
+  }
+
+  // If problems split is currently open alongside description, close problems split
+  if (!dagSplit.classList.contains("hidden")) {
+    dagSplit.classList.add("hidden");
+    leftGutter.classList.add("hidden");
+    btnDag.classList.remove("active");
+    btnSpec.classList.add("active");
+    return;
+  }
+
+  btnSpec.classList.add("active");
+}
+window.reopenDescriptionSplit = reopenDescriptionSplit;
+
+function showScoreboardView() {
+  const dagSplit = document.getElementById("tab-dag");
+  const leftGutter = document.getElementById("left-split-gutter");
+  const specSplit = document.getElementById("tab-spec");
+  const boardView = document.getElementById("tab-board");
+  const leftWorkspace = document.getElementById("left-workspace");
+
+  const btnDag = document.getElementById("tab-btn-dag");
+  const btnSpec = document.getElementById("tab-btn-spec");
+  const btnBoard = document.getElementById("tab-btn-board");
+
+  if (leftWorkspace) leftWorkspace.classList.add("hidden");
+  if (boardView) boardView.classList.remove("hidden");
+
+  if (btnBoard) btnBoard.classList.add("active");
+  if (btnSpec) btnSpec.classList.remove("active");
+  if (btnDag) btnDag.classList.remove("active");
+
+  renderScoreboard();
+}
+window.showScoreboardView = showScoreboardView;
+
+function switchTab(tabName) {
+  if (tabName === "dag") {
+    toggleProblemsSplit();
+  } else if (tabName === "spec") {
+    reopenDescriptionSplit();
+  } else if (tabName === "board") {
+    showScoreboardView();
+  }
+}
+window.switchTab = switchTab;
 
 /* ========================================================================= */
 /* 2. DUAL-ENGINE C++20 JUDGE (LOCAL `/api/judge` + CLOUD GODBOLT FALLBACK)  */
@@ -1754,7 +1920,7 @@ function renderLeetCodeJudgeBody() {
 }
 
 async function executeVMSolution(codeStr, prob, isSubmission = false) {
-  openVMPane();
+  expandVMPane();
   const logEl = document.getElementById("judge-log");
   const statusEl = document.getElementById("judge-status-text");
   const engineEl = document.getElementById("judge-engine-badge");
@@ -1787,21 +1953,7 @@ async function executeVMSolution(codeStr, prob, isSubmission = false) {
     if (needsGit && !v86GitInstalled) {
       statusEl.textContent = "Installing Git binaries in guest Linux...";
       logEl.textContent += "[*] Fetching and installing Git runtime into guest VM...\n";
-      const resp = await fetch("./images/git_bundle.tar.gz");
-      if (!resp.ok) throw new Error("Failed to load git_bundle.tar.gz");
-      const buf = await resp.arrayBuffer();
-      await v86Instance.create_file("git_bundle.tar.gz", new Uint8Array(buf));
-      const installScript = "zcat /mnt/git_bundle.tar.gz | tar -x -C / && rm -f /mnt/git_bundle.tar.gz && echo GIT_READY > /mnt/git_ready.txt\n";
-      await v86Instance.create_file("install_git.sh", new TextEncoder().encode(installScript));
-      await v86Instance.keyboard_send_text("sh /mnt/install_git.sh\n", 10);
-      const tStartGit = performance.now();
-      while (performance.now() - tStartGit < 8000) {
-        try {
-          const r = await v86Instance.read_file("git_ready.txt");
-          if (r) { v86GitInstalled = true; break; }
-        } catch (_) {}
-        await new Promise(r => setTimeout(r, 150));
-      }
+      await provisionGitAndRemotes();
       if (!v86GitInstalled) {
         throw new Error("Git runtime installation timed out inside guest VM");
       }
@@ -2356,7 +2508,7 @@ function computeGridDimensions() {
   let charH = 19.575;
   const probe = document.createElement("span");
   probe.style.fontFamily = 'var(--mono)';
-  probe.style.fontSize = "13.5px";
+  probe.style.fontSize = gridEl.style.fontSize || "13.5px";
   probe.style.lineHeight = "1.45";
   probe.style.position = "absolute";
   probe.style.visibility = "hidden";
@@ -3119,6 +3271,68 @@ gutter.addEventListener("dblclick", () => {
   }
 });
 
+// Left Split Dragging (Problems list on Top vs Description on Bottom)
+const leftSplitGutter = document.getElementById("left-split-gutter");
+const leftWorkspace = document.getElementById("left-workspace");
+const dagSplitPane = document.getElementById("tab-dag");
+const specSplitPane = document.getElementById("tab-spec");
+const tabBtnSpec = document.getElementById("tab-btn-spec");
+const tabBtnDag = document.getElementById("tab-btn-dag");
+
+let isDraggingLeftSplit = false;
+
+if (leftSplitGutter) {
+  leftSplitGutter.addEventListener("pointerdown", (e) => {
+    isDraggingLeftSplit = true;
+    leftSplitGutter.classList.add("dragging");
+    document.body.classList.add("is-resizing-v");
+    leftSplitGutter.setPointerCapture(e.pointerId);
+  });
+  leftSplitGutter.addEventListener("pointermove", (e) => {
+    if (!isDraggingLeftSplit || !leftWorkspace) return;
+    const rect = leftWorkspace.getBoundingClientRect();
+    const newH = e.clientY - rect.top;
+
+    // When enlarged enough, close / displace the description split completely
+    if (newH >= rect.height - 70) {
+      dagSplitPane.style.height = "100%";
+      specSplitPane.classList.add("hidden");
+      leftSplitGutter.classList.add("hidden");
+      if (tabBtnSpec) tabBtnSpec.classList.remove("active");
+      if (tabBtnDag) tabBtnDag.classList.add("active");
+      return;
+    }
+
+    // When shrunk too small, collapse problems split
+    if (newH < 70) {
+      dagSplitPane.classList.add("hidden");
+      leftSplitGutter.classList.add("hidden");
+      if (tabBtnDag) tabBtnDag.classList.remove("active");
+      specSplitPane.classList.remove("hidden");
+      if (tabBtnSpec) tabBtnSpec.classList.add("active");
+      return;
+    }
+
+    specSplitPane.classList.remove("hidden");
+    if (tabBtnSpec) tabBtnSpec.classList.add("active");
+    dagSplitPane.style.height = `${newH}px`;
+  });
+  function endLeftSplit() {
+    if (!isDraggingLeftSplit) return;
+    isDraggingLeftSplit = false;
+    leftSplitGutter.classList.remove("dragging");
+    document.body.classList.remove("is-resizing-v");
+  }
+  leftSplitGutter.addEventListener("pointerup", endLeftSplit);
+  leftSplitGutter.addEventListener("pointercancel", endLeftSplit);
+  leftSplitGutter.addEventListener("dblclick", () => {
+    dagSplitPane.style.height = "42%";
+    specSplitPane.classList.remove("hidden");
+    if (tabBtnSpec) tabBtnSpec.classList.add("active");
+    if (tabBtnDag) tabBtnDag.classList.add("active");
+  });
+}
+
 // Horizontal Split Dragging (Neovim on Top vs Live VM Terminal on Bottom)
 vmGutter.addEventListener("pointerdown", (e) => {
   isDraggingVmSplit = true;
@@ -3150,32 +3364,71 @@ function endVmSplit() {
 vmGutter.addEventListener("pointerup", endVmSplit);
 vmGutter.addEventListener("pointercancel", endVmSplit);
 vmGutter.addEventListener("dblclick", () => {
-  vmPane.style.height = "50%";
-  if (workerReady) {
-    const dims = computeGridDimensions();
-    sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+  if (vmPane.classList.contains("collapsed")) {
+    expandVMPane();
+  } else {
+    collapseVMPane();
   }
 });
 
-// VM Pane Open/Close Functions
-function openVMPane() {
-  vmPane.classList.remove("hidden");
-  vmGutter.classList.remove("hidden");
-  if (!vmPane.style.height || vmPane.style.height === "0px") {
-    vmPane.style.height = "42%";
+// VM Pane Open/Close & Collapse Functions
+function collapseVMPane() {
+  if (vmPane.classList.contains("fullscreen")) {
+    toggleVMFocus(false);
   }
-
+  vmPane.classList.remove("hidden");
+  vmPane.classList.add("collapsed");
+  vmGutter.classList.add("collapsed-gutter");
+  const collapseBtn = document.getElementById("btn-vm-collapse");
+  if (collapseBtn) {
+    collapseBtn.textContent = "+";
+    collapseBtn.title = "Expand terminal split";
+  }
   const btn = document.getElementById("vm-toggle-btn");
   if (btn) btn.classList.add("primary");
-
   if (workerReady) {
     const dims = computeGridDimensions();
     sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
   }
+}
+window.collapseVMPane = collapseVMPane;
 
+function expandVMPane() {
+  vmPane.classList.remove("hidden");
+  vmPane.classList.remove("collapsed");
+  vmGutter.classList.remove("collapsed-gutter");
+  vmGutter.classList.remove("hidden");
+  if (!vmPane.style.height || vmPane.style.height === "0px" || vmPane.style.height === "36px") {
+    vmPane.style.height = "42%";
+  }
+  const collapseBtn = document.getElementById("btn-vm-collapse");
+  if (collapseBtn) {
+    collapseBtn.textContent = "_";
+    collapseBtn.title = "Collapse terminal to bottom edge";
+  }
+  const btn = document.getElementById("vm-toggle-btn");
+  if (btn) btn.classList.add("primary");
+  if (workerReady) {
+    const dims = computeGridDimensions();
+    sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
+  }
   if (!v86Instance && !v86Booting) {
     bootLinuxVM();
   }
+}
+window.expandVMPane = expandVMPane;
+
+function toggleVMCollapse() {
+  if (vmPane.classList.contains("collapsed")) {
+    expandVMPane();
+  } else {
+    collapseVMPane();
+  }
+}
+window.toggleVMCollapse = toggleVMCollapse;
+
+function openVMPane() {
+  expandVMPane();
 }
 window.openVMPane = openVMPane;
 
@@ -3185,6 +3438,8 @@ function closeVMPane() {
   }
   vmPane.classList.add("hidden");
   vmGutter.classList.add("hidden");
+  vmGutter.classList.remove("collapsed-gutter");
+  vmPane.classList.remove("collapsed");
 
   const btn = document.getElementById("vm-toggle-btn");
   if (btn) btn.classList.remove("primary");
@@ -3199,6 +3454,8 @@ window.closeVMPane = closeVMPane;
 function toggleVMPane() {
   if (vmPane.classList.contains("hidden")) {
     openVMPane();
+  } else if (!vmPane.classList.contains("collapsed")) {
+    collapseVMPane();
   } else {
     closeVMPane();
   }
@@ -3363,12 +3620,123 @@ if (vmScreenContainer) {
   }, { passive: true });
 }
 
+// --- Independent Split Zoom Controls (Issue #14) ---
+const splitZoomLevels = {
+  "left-pane": 1.0,
+  "editor-pane": 1.0,
+  "vm-pane": 1.0,
+};
+let focusedSplitId = "editor-pane";
+
+["left-pane", "editor-pane", "vm-pane"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("pointerenter", () => { focusedSplitId = id; }, { passive: true });
+  el.addEventListener("focusin", () => { focusedSplitId = id; }, { passive: true });
+});
+
+function applySplitZoom(splitId, delta) {
+  const current = splitZoomLevels[splitId] || 1.0;
+  let next = delta === 0 ? 1.0 : Math.round((current + delta) * 10) / 10;
+  next = Math.max(0.7, Math.min(1.8, next));
+  splitZoomLevels[splitId] = next;
+
+  if (splitId === "left-pane") {
+    const el = document.getElementById("left-pane");
+    if (el) el.style.zoom = next;
+  } else if (splitId === "editor-pane") {
+    const grid = document.getElementById("nvim-grid");
+    if (grid) {
+      grid.style.fontSize = `${(13.5 * next).toFixed(1)}px`;
+      if (workerReady) {
+        const dims = computeGridDimensions();
+        if (dims.cols !== cols || dims.rows !== rows) {
+          cols = dims.cols;
+          rows = dims.rows;
+          sendRpc("nvim_ui_try_resize", [cols, rows]);
+        }
+      }
+    }
+  } else if (splitId === "vm-pane") {
+    const container = document.getElementById("vm-screen-container");
+    if (container) {
+      container.style.zoom = next;
+      if (v86Instance && typeof v86Instance.screen_set_scale === "function") {
+        v86Instance.screen_set_scale(next, next);
+      }
+    }
+  }
+}
+window.applySplitZoom = applySplitZoom;
+window.getSplitZoom = (id) => splitZoomLevels[id] || 1.0;
+
+window.addEventListener("keydown", (ev) => {
+  if (ev.ctrlKey || ev.metaKey) {
+    if (ev.key === "+" || ev.key === "=" || ev.code === "NumpadAdd" || ev.code === "Equal") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      applySplitZoom(focusedSplitId, 0.1);
+      return;
+    }
+    if (ev.key === "-" || ev.key === "_" || ev.code === "NumpadSubtract" || ev.code === "Minus") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      applySplitZoom(focusedSplitId, -0.1);
+      return;
+    }
+    if (ev.key === "0" || ev.code === "Numpad0" || ev.code === "Digit0") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      applySplitZoom(focusedSplitId, 0);
+      return;
+    }
+  }
+}, true);
+
 // In-Browser Linux VM Lifecycle (v86)
 let v86Instance = null;
 let v86Booted = false;
 let v86Booting = false;
 let v86GitInstalled = false;
+let v86GitProvisioning = false;
 let v86BootCheckInterval = null;
+
+async function provisionGitAndRemotes() {
+  if (v86GitInstalled || v86GitProvisioning || !v86Instance) return;
+  v86GitProvisioning = true;
+  try {
+    const resp = await fetch("./images/git_bundle.tar.gz");
+    if (!resp.ok) return;
+    const buf = await resp.arrayBuffer();
+    await v86Instance.create_file("git_bundle.tar.gz", new Uint8Array(buf));
+    const setupScript = `zcat /mnt/git_bundle.tar.gz | tar -x -C / 2>/dev/null
+rm -f /mnt/git_bundle.tar.gz
+git config --global user.name "Learner" 2>/dev/null || true
+git config --global user.email "learner@syntra.org" 2>/dev/null || true
+git config --global init.defaultBranch main 2>/dev/null || true
+mkdir -p /remotes/origin.git && cd /remotes/origin.git && git init --bare --quiet 2>/dev/null || true
+echo GIT_READY > /mnt/git_ready.txt
+`;
+    await v86Instance.create_file("setup_env.sh", new TextEncoder().encode(setupScript));
+    await v86Instance.keyboard_send_text("sh /mnt/setup_env.sh\n", 10);
+    const t0 = performance.now();
+    while (performance.now() - t0 < 6000) {
+      try {
+        const r = await v86Instance.read_file("git_ready.txt");
+        if (r && r.length) {
+          v86GitInstalled = true;
+          break;
+        }
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, 200));
+    }
+  } catch (e) {
+    console.warn("Git auto-provisioning deferred:", e);
+  } finally {
+    v86GitProvisioning = false;
+  }
+}
+window.provisionGitAndRemotes = provisionGitAndRemotes;
 
 function bootLinuxVM() {
   if (v86Instance || v86Booting) return;
@@ -3413,6 +3781,7 @@ function bootLinuxVM() {
         v86Booting = false;
         if (dot) dot.className = "vm-status-dot online";
         if (label) label.textContent = "LINUX 5.6 VM (ONLINE)";
+        provisionGitAndRemotes();
       }
     }, 200);
   } catch (err) {
