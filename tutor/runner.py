@@ -90,7 +90,7 @@ class TestRunner:
             # Measure solution code bytes
             sol_file = sandbox_dir / "solution.hpp"
             if not sol_file.exists():
-                for cand in ["solution.py", "solution.rs", "solution.h", "Makefile"]:
+                for cand in ["solution.sh", "solution.py", "solution.rs", "solution.h", "Makefile"]:
                     if (sandbox_dir / cand).exists():
                         sol_file = sandbox_dir / cand
                         break
@@ -157,10 +157,12 @@ class TestRunner:
                 cmd = ["cargo", "test", "--release"]
             elif (sandbox_dir / "test_solution.py").exists():
                 cmd = [sys.executable, "-m", "unittest", "test_solution.py"]
+            elif (sandbox_dir / "harness.sh").exists():
+                cmd = ["/bin/sh", "harness.sh"]
             else:
                 return (
                     False,
-                    "No valid test harness found (missing Makefile, Cargo.toml, test_solution.py, or harness.cpp)",
+                    "No valid test harness found (missing Makefile, Cargo.toml, test_solution.py, harness.sh, or harness.cpp)",
                     0.0,
                     {"score": 0.0, "scoreboard": None},
                 )

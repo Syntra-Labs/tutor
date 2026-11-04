@@ -11,6 +11,7 @@ EXTENSIONS = {
     "python": "py",
     "c": "h",
     "go": "go",
+    "sh": "sh",
 }
 
 class WorkspaceManager:

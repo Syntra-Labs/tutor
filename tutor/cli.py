@@ -147,7 +147,7 @@ def cmd_pick(args):
         return 1
 
     config = get_config()
-    lang = args.lang or config.get("default_lang", "cpp")
+    lang = args.lang or (problem.get("languages") or [config.get("default_lang", "cpp")])[0]
 
     workspace = WorkspaceManager()
     solution_path, readme_path = workspace.scaffold(problem, lang=lang)
@@ -196,7 +196,7 @@ def cmd_test(args):
         return 1
 
     config = get_config()
-    lang = args.lang or config.get("default_lang", "cpp")
+    lang = args.lang or (problem.get("languages") or [config.get("default_lang", "cpp")])[0]
     sub_dir = Path(args.submission_dir) if getattr(args, "submission_dir", None) else None
 
     print(f"\n⚡ Running locked test harness for {BOLD}{problem.get('title', problem['id'])}{RESET} [{lang}]...")
@@ -254,7 +254,7 @@ def cmd_submit(args):
         return 1
 
     config = get_config()
-    lang = args.lang or config.get("default_lang", "cpp")
+    lang = args.lang or (problem.get("languages") or [config.get("default_lang", "cpp")])[0]
     user = args.user or os.environ.get("GITHUB_ACTOR") or os.environ.get("USER", "student")
 
     runner = TestRunner()
@@ -264,7 +264,7 @@ def cmd_submit(args):
         return 1
 
     ws_prob_dir = Path(config["workspace_dir"]) / problem["id"]
-    sol_src = ws_prob_dir / "solution.hpp"
+    sol_src = ws_prob_dir / ("solution.sh" if lang == "sh" else "solution.hpp")
     if not sol_src.exists():
         print(f"{RED}Error: Solution file not found at {sol_src}{RESET}")
         return 1
