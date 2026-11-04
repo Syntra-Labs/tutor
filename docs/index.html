@@ -510,12 +510,28 @@ body.is-resizing, body.is-resizing * {
   cursor: col-resize !important;
   user-select: none !important;
 }
+body.is-resizing-v, body.is-resizing-v * {
+  cursor: row-resize !important;
+  user-select: none !important;
+}
 
-/* --- Right Pane: Genuine Neovim WASM Editor --- */
+/* --- Right Workspace: Stacks Editor on Top & VM Terminal on Bottom --- */
+.right-pane {
+  flex: 1;
+  min-width: 320px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+}
+
+/* --- Top: Genuine Neovim WASM Editor --- */
 .editor-pane {
   flex: 1;
-  min-width: 280px;
-  height: 100vh;
+  width: 100%;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   background: var(--bg);
@@ -523,15 +539,48 @@ body.is-resizing, body.is-resizing * {
   overflow: hidden;
 }
 
-/* --- Right Pane: Live Linux x86 WebAssembly VM --- */
+/* --- Resizable Horizontal Gutter (between Editor & VM) --- */
+.split-gutter-h {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  cursor: row-resize;
+  position: relative;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.split-gutter-h:hover,
+.split-gutter-h.dragging {
+  background: var(--panel);
+}
+.gutter-handle-h {
+  width: 44px;
+  height: 2px;
+  background: var(--line);
+  pointer-events: none;
+  border-radius: 1px;
+}
+.split-gutter-h:hover .gutter-handle-h,
+.split-gutter-h.dragging .gutter-handle-h {
+  height: 3px;
+  background: #000000;
+}
+
+/* --- Bottom Pane: Live Linux x86 WebAssembly VM (Under Editor) --- */
 .vm-pane {
-  width: 35%;
-  min-width: 280px;
-  height: 100vh;
+  width: 100%;
+  height: 42%;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   background: #000000;
-  border-left: 1px solid var(--line);
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
@@ -870,25 +919,28 @@ body.is-resizing, body.is-resizing * {
     <div class="gutter-handle"></div>
   </div>
 
-  <!-- RIGHT PANE: GENUINE NEOVIM WEBASSEMBLY EDITOR -->
-  <div class="editor-pane" id="editor-pane">
-    <div class="nvim-container" id="nvim-container">
-      <div id="nvim-grid" class="nvim-grid" tabindex="0" aria-label="Neovim WebAssembly grid"></div>
+  <!-- RIGHT WORKSPACE: TOP = NEOVIM EDITOR, BOTTOM = LIVE LINUX VM -->
+  <div class="right-pane" id="right-pane">
 
-      <div class="nvim-loading-splash" id="nvim-loading-splash">
-        <div class="nvim-spinner"></div>
-        <div>Starting Neovim WebAssembly...</div>
-        <div style="font-size:11px;color:#777;">(nvim-asyncify.wasm + C++20 Judge)</div>
-      </div>
-    </div>
+    <!-- TOP: GENUINE NEOVIM WEBASSEMBLY EDITOR -->
+    <div class="editor-pane" id="editor-pane">
+      <div class="nvim-container" id="nvim-container">
+        <div id="nvim-grid" class="nvim-grid" tabindex="0" aria-label="Neovim WebAssembly grid"></div>
 
-    <!-- Help Drawer (:Manual / <Space>m / <F1>) -->
-    <div class="help-overlay hidden" id="help-drawer">
-      <div class="help-header">
-        <span><b>tutor.txt</b> [RO] — SYNTRA TUTOR NEOVIM MANUAL</span>
-        <button class="small-btn" id="help-close-btn">[x] :q</button>
+        <div class="nvim-loading-splash" id="nvim-loading-splash">
+          <div class="nvim-spinner"></div>
+          <div>Starting Neovim WebAssembly...</div>
+          <div style="font-size:11px;color:#777;">(nvim-asyncify.wasm + C++20 Judge)</div>
+        </div>
       </div>
-      <div class="help-body">
+
+      <!-- Help Drawer (:Manual / <Space>m / <F1>) -->
+      <div class="help-overlay hidden" id="help-drawer">
+        <div class="help-header">
+          <span><b>tutor.txt</b> [RO] — SYNTRA TUTOR NEOVIM MANUAL</span>
+          <button class="small-btn" id="help-close-btn">[x] :q</button>
+        </div>
+        <div class="help-body">
 *tutor.txt*   Syntra Tutor Studio — Genuine Neovim WebAssembly + C++20 Judge
 
 ==============================================================================
@@ -916,46 +968,48 @@ body.is-resizing, body.is-resizing * {
        (via Compiler Explorer API), parsing `SCOREBOARD_JSON` cycles &amp; code bytes.
   - Passing 100% of assertions marks the problem SOLVED and unlocks downstream
     problems in the Prerequisite DAG.
+        </div>
+      </div>
+
+      <!-- Neovim Statusline -->
+      <div class="nvim-statusline">
+        <div class="nvim-mode mode-normal" id="nvim-mode">NORMAL</div>
+        <div class="nvim-file"><b id="nvim-filename">002-hypervector-hamming/solution.hpp</b> [C++20]</div>
+        <div class="nvim-info">
+          <span id="nvim-cursor">ln 1, col 1</span>
+          <button class="nvim-btn" onclick="resetCurrentStub()" title="Reset to starter stub (:Reset)">:Reset</button>
+          <button class="nvim-btn" id="help-btn" title="Reference manual (:Manual / <Space>m)">:Manual</button>
+          <button class="nvim-btn" id="run-trigger" title="Compile &amp; test (:Run / :w / <F5>)">:Run</button>
+        </div>
       </div>
     </div>
 
-    <!-- Neovim Statusline -->
-    <div class="nvim-statusline">
-      <div class="nvim-mode mode-normal" id="nvim-mode">NORMAL</div>
-      <div class="nvim-file"><b id="nvim-filename">002-hypervector-hamming/solution.hpp</b> [C++20]</div>
-      <div class="nvim-info">
-        <span id="nvim-cursor">ln 1, col 1</span>
-        <button class="nvim-btn" onclick="resetCurrentStub()" title="Reset to starter stub (:Reset)">:Reset</button>
-        <button class="nvim-btn" id="help-btn" title="Reference manual (:Manual / <Space>m)">:Manual</button>
-        <button class="nvim-btn" id="run-trigger" title="Compile &amp; test (:Run / :w / <F5>)">:Run</button>
-      </div>
+    <!-- RESIZABLE HORIZONTAL SPLIT GUTTER (BETWEEN EDITOR ON TOP & VM ON BOTTOM) -->
+    <div class="split-gutter-h hidden" id="vm-split-gutter" title="Drag to resize VM terminal height (Double-click for 50/50)">
+      <div class="gutter-handle-h"></div>
     </div>
-  </div>
 
-  <!-- RESIZABLE SPLIT GUTTER 2 (VM SPLIT) -->
-  <div class="split-gutter vm-gutter hidden" id="vm-split-gutter" title="Drag to resize VM terminal (Double-click for equal splits)">
-    <div class="gutter-handle"></div>
-  </div>
+    <!-- BOTTOM PANE: LIVE LINUX VM TERMINAL (UNDER TEXT EDITOR) -->
+    <div class="vm-pane hidden" id="vm-pane">
+      <div class="vm-topbar">
+        <div class="vm-brand">
+          <span class="vm-status-dot" id="vm-status-dot"></span>
+          <span id="vm-status-label">LINUX 5.6 VM (x86_WASM)</span>
+        </div>
+        <div class="vm-actions">
+          <button class="small-btn" id="btn-vm-boot" onclick="window.bootLinuxVM()">Boot VM</button>
+          <button class="small-btn" id="btn-vm-reset" onclick="window.rebootLinuxVM()" title="Restart Linux VM">Reboot</button>
+          <button class="small-btn" id="btn-vm-close" onclick="window.closeVMPane()" title="Close VM Split">[x]</button>
+        </div>
+      </div>
+      <div class="vm-screen-wrapper" id="vm-screen-container" tabindex="0">
+        <div class="vm-placeholder">
+          <span>Click <b>[Boot VM]</b> or open a Track 9 problem to start the live Linux shell.</span>
+        </div>
+      </div>
+    </div>
 
-  <!-- RIGHT PANE: LIVE LINUX VM TERMINAL -->
-  <div class="vm-pane hidden" id="vm-pane">
-    <div class="vm-topbar">
-      <div class="vm-brand">
-        <span class="vm-status-dot" id="vm-status-dot"></span>
-        <span id="vm-status-label">LINUX 5.6 VM (x86_WASM)</span>
-      </div>
-      <div class="vm-actions">
-        <button class="small-btn" id="btn-vm-boot" onclick="window.bootLinuxVM()">Boot VM</button>
-        <button class="small-btn" id="btn-vm-reset" onclick="window.rebootLinuxVM()" title="Restart Linux VM">Reboot</button>
-        <button class="small-btn" id="btn-vm-close" onclick="window.closeVMPane()" title="Close VM Split">[x]</button>
-      </div>
-    </div>
-    <div class="vm-screen-wrapper" id="vm-screen-container" tabindex="0">
-      <div class="vm-placeholder">
-        <span>Click <b>[Boot VM]</b> or open a Track 9 problem to start the live Linux shell.</span>
-      </div>
-    </div>
-  </div>
+  </div> <!-- /right-pane -->
 
 </div>
 
@@ -2725,18 +2779,19 @@ function triggerRun() {
 document.getElementById("run-trigger").addEventListener("click", triggerRun);
 
 /* ========================================================================= */
-/* 5. DUAL VERTICAL SPLITS & IN-BROWSER LINUX VM LIFECYCLE                  */
+/* 5. VERTICAL SPLIT (LEFT SPEC) + HORIZONTAL SPLIT (EDITOR TOP / VM BOTTOM) */
 /* ========================================================================= */
 const gutter = document.getElementById("split-gutter");
 const vmGutter = document.getElementById("vm-split-gutter");
 const leftPane = document.getElementById("left-pane");
+const rightPane = document.getElementById("right-pane");
 const vmPane = document.getElementById("vm-pane");
 const editorPane = document.getElementById("editor-pane");
 
 let isDraggingSplit = false;
 let isDraggingVmSplit = false;
 
-// Left-to-Middle Split Dragging
+// Main Vertical Split Dragging (Left Problem Description vs Right Workspace)
 gutter.addEventListener("pointerdown", (e) => {
   isDraggingSplit = true;
   gutter.classList.add("dragging");
@@ -2746,9 +2801,7 @@ gutter.addEventListener("pointerdown", (e) => {
 gutter.addEventListener("pointermove", (e) => {
   if (!isDraggingSplit) return;
   const w = window.innerWidth;
-  const isVmOpen = !vmPane.classList.contains("hidden");
-  const maxLeft = isVmOpen ? w * 0.5 : w - 300;
-  const clamped = Math.max(320, Math.min(maxLeft, e.clientX));
+  const clamped = Math.max(320, Math.min(w - 360, e.clientX));
   leftPane.style.width = `${(clamped / w) * 100}%`;
   if (workerReady) {
     const dims = computeGridDimensions();
@@ -2768,32 +2821,26 @@ function endSplit() {
 gutter.addEventListener("pointerup", endSplit);
 gutter.addEventListener("pointercancel", endSplit);
 gutter.addEventListener("dblclick", () => {
-  const isVmOpen = !vmPane.classList.contains("hidden");
-  if (isVmOpen) {
-    leftPane.style.width = "33.3%";
-    vmPane.style.width = "33.3%";
-  } else {
-    leftPane.style.width = "50%";
-  }
+  leftPane.style.width = "50%";
   if (workerReady) {
     const dims = computeGridDimensions();
     sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
   }
 });
 
-// Middle-to-Right (VM) Split Dragging
+// Horizontal Split Dragging (Neovim on Top vs Live VM Terminal on Bottom)
 vmGutter.addEventListener("pointerdown", (e) => {
   isDraggingVmSplit = true;
   vmGutter.classList.add("dragging");
-  document.body.classList.add("is-resizing");
+  document.body.classList.add("is-resizing-v");
   vmGutter.setPointerCapture(e.pointerId);
 });
 vmGutter.addEventListener("pointermove", (e) => {
-  if (!isDraggingVmSplit) return;
-  const w = window.innerWidth;
-  const rightWidth = w - e.clientX;
-  const clamped = Math.max(280, Math.min(w * 0.55, rightWidth));
-  vmPane.style.width = `${(clamped / w) * 100}%`;
+  if (!isDraggingVmSplit || !rightPane) return;
+  const rect = rightPane.getBoundingClientRect();
+  const bottomH = rect.bottom - e.clientY;
+  const clamped = Math.max(120, Math.min(rect.height - 140, bottomH));
+  vmPane.style.height = `${clamped}px`;
   if (workerReady) {
     const dims = computeGridDimensions();
     if (dims.cols !== cols || dims.rows !== rows) {
@@ -2807,13 +2854,12 @@ function endVmSplit() {
   if (!isDraggingVmSplit) return;
   isDraggingVmSplit = false;
   vmGutter.classList.remove("dragging");
-  document.body.classList.remove("is-resizing");
+  document.body.classList.remove("is-resizing-v");
 }
 vmGutter.addEventListener("pointerup", endVmSplit);
 vmGutter.addEventListener("pointercancel", endVmSplit);
 vmGutter.addEventListener("dblclick", () => {
-  leftPane.style.width = "33.3%";
-  vmPane.style.width = "33.3%";
+  vmPane.style.height = "50%";
   if (workerReady) {
     const dims = computeGridDimensions();
     sendRpc("nvim_ui_try_resize", [dims.cols, dims.rows]);
@@ -2824,8 +2870,9 @@ vmGutter.addEventListener("dblclick", () => {
 function openVMPane() {
   vmPane.classList.remove("hidden");
   vmGutter.classList.remove("hidden");
-  leftPane.style.width = "32%";
-  vmPane.style.width = "34%";
+  if (!vmPane.style.height || vmPane.style.height === "0px") {
+    vmPane.style.height = "42%";
+  }
 
   const btn = document.getElementById("vm-toggle-btn");
   if (btn) btn.classList.add("primary");
@@ -2844,7 +2891,6 @@ window.openVMPane = openVMPane;
 function closeVMPane() {
   vmPane.classList.add("hidden");
   vmGutter.classList.add("hidden");
-  leftPane.style.width = "50%";
 
   const btn = document.getElementById("vm-toggle-btn");
   if (btn) btn.classList.remove("primary");
