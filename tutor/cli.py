@@ -420,25 +420,32 @@ def cmd_ci_grade_pr(args):
 
 def cmd_verify_policy(args):
     """
-    Enforces Syntra Tutor's canonical OPA Rego policies (`policy/judge.rego`).
-    Checks submitter isolation, artifact purity, leaderboard protection, and scoring determinism.
+    Enforces Syntra Tutor's canonical OPA Rego policies (`policy/architecture.rego`).
+    Checks Architecture-as-Code invariants: markdown prohibition, submitter isolation,
+    artifact purity, leaderboard protection, and scoring determinism.
     """
-    from tutor.policy import verify_submission_policy
+    from tutor.policy import verify_architecture_policy
     catalog = ProblemCatalog()
     problems = catalog.list_problems()
 
     actor = getattr(args, "actor", "") or "local-actor"
     changed_files = [f for f in getattr(args, "pr_files", []) or [] if f.strip()]
+    audit_md = getattr(args, "audit_markdown", False)
 
-    print(f"🛡️  Evaluating Syntra Tutor Policies (`policy/judge.rego`) for actor: @{actor}")
-    ok, violations = verify_submission_policy(changed_files, actor, catalog_problems=problems)
+    print(f"🛡️  Evaluating Syntra Tutor Architecture Policies (`policy/architecture.rego`)")
+    ok, violations = verify_architecture_policy(
+        changed_files=changed_files,
+        actor=actor,
+        catalog_problems=problems,
+        check_all_markdown=audit_md,
+    )
     if not ok:
-        print(f"\n{RED}✗ Policy Violations Detected ({len(violations)}):{RESET}")
+        print(f"\n{RED}✗ Architecture Violations / Flagged Legacy Items ({len(violations)}):{RESET}")
         for v in violations:
             print(f"  • {RED}{v}{RESET}")
         return 1
 
-    print(f"{GREEN}✓ All active judge & architecture policies satisfied (POL-000 through POL-005).{RESET}")
+    print(f"{GREEN}✓ All active architecture policies satisfied (ARCH-001 through ARCH-005).{RESET}")
     return 0
 
 
@@ -748,9 +755,10 @@ def main(argv=None):
     p_lint.set_defaults(func=cmd_lint)
 
     # verify-policy
-    p_policy = subparsers.add_parser("verify-policy", help="Enforce active OPA Rego judge policies (policy/judge.rego)")
+    p_policy = subparsers.add_parser("verify-policy", help="Enforce active OPA Rego architecture policies (policy/architecture.rego)")
     p_policy.add_argument("--actor", default="local-actor", help="GitHub handle of contributor")
     p_policy.add_argument("--pr-files", nargs="*", default=[], help="List of modified files to validate")
+    p_policy.add_argument("--audit-markdown", action="store_true", help="Audit repository for ARCH-001 markdown prohibitions and migration targets")
     p_policy.set_defaults(func=cmd_verify_policy)
 
     # status
