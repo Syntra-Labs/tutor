@@ -1795,6 +1795,7 @@ function sendRpc(method, params = []) {
     pendingRpcResolvers.set(curId, { resolve, reject });
   });
 }
+window.sendRpc = sendRpc;
 
 function sendRpcResponse(requestId, error, result) {
   const payload = [1, requestId, error, result];
@@ -1938,6 +1939,25 @@ function primeNeovim() {
           vim.api.nvim_echo({{'"solution.hpp" [written] — running C++20 judge...', "Normal"}}, false, {})
         end
       })
+
+      _G.tutor_scroll = function(dy, dx)
+        local v = vim.fn.winsaveview()
+        local total_lines = vim.fn.line('$')
+        local height = vim.api.nvim_win_get_height(0)
+        if dy and dy ~= 0 then
+          local new_top = math.max(1, math.min(total_lines, v.topline + dy))
+          v.topline = new_top
+          if v.lnum < new_top then
+            v.lnum = new_top
+          elseif v.lnum >= new_top + height then
+            v.lnum = math.max(1, new_top + height - 1)
+          end
+        end
+        if dx and dx ~= 0 then
+          v.leftcol = math.max(0, (v.leftcol or 0) + dx)
+        end
+        vim.fn.winrestview(v)
+      end
     end
   `;
   sendRpc("nvim_exec_lua", [lua, []]);
@@ -2283,42 +2303,35 @@ gridEl.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
 let wheelDeltaY = 0;
 let wheelDeltaX = 0;
-let wheelLastTarget = { row: 0, col: 0, mod: "" };
+let wheelRafScheduled = false;
 let wheelInFlight = false;
-let wheelResetTimer = null;
+let wheelDecayTimer = null;
 
-function processWheelQueue() {
-  if (wheelInFlight || !workerReady) return;
-  const thresholdY = (lastCharH || 18) * 1.5;
-  const thresholdX = (lastCharW || 9) * 2;
+function flushWheel() {
+  wheelRafScheduled = false;
+  if (!workerReady) return;
 
-  if (Math.abs(wheelDeltaY) < thresholdY && Math.abs(wheelDeltaX) < thresholdX) return;
+  const charH = lastCharH || 19;
+  const charW = lastCharW || 8.5;
 
-  let dir = "";
-  if (Math.abs(wheelDeltaY) >= thresholdY) {
-    dir = wheelDeltaY < 0 ? "up" : "down";
-    wheelDeltaY -= Math.sign(wheelDeltaY) * thresholdY;
-  } else if (Math.abs(wheelDeltaX) >= thresholdX) {
-    dir = wheelDeltaX < 0 ? "left" : "right";
-    wheelDeltaX -= Math.sign(wheelDeltaX) * thresholdX;
-  }
+  const lines = Math.trunc(wheelDeltaY / charH);
+  const cols = Math.trunc(wheelDeltaX / charW);
 
-  if (!dir) return;
+  if (lines === 0 && cols === 0) return;
+
+  wheelDeltaY -= lines * charH;
+  wheelDeltaX -= cols * charW;
 
   wheelInFlight = true;
-  sendRpc("nvim_input_mouse", [
-    "wheel",
-    dir,
-    wheelLastTarget.mod || "",
-    0,
-    wheelLastTarget.row || 0,
-    wheelLastTarget.col || 0
-  ]).finally(() => {
+  sendRpc("nvim_exec_lua", ["_G.tutor_scroll(..., ...)", [lines, cols]]).finally(() => {
     wheelInFlight = false;
-    const thY = (lastCharH || 18) * 1.5;
-    const thX = (lastCharW || 9) * 2;
-    if (Math.abs(wheelDeltaY) >= thY || Math.abs(wheelDeltaX) >= thX) {
-      processWheelQueue();
+    const cH = lastCharH || 19;
+    const cW = lastCharW || 8.5;
+    if (Math.abs(wheelDeltaY) >= cH || Math.abs(wheelDeltaX) >= cW) {
+      if (!wheelRafScheduled) {
+        wheelRafScheduled = true;
+        requestAnimationFrame(flushWheel);
+      }
     }
   });
 }
@@ -2329,39 +2342,39 @@ gridEl.addEventListener("wheel", (ev) => {
 
   let dy = ev.deltaY;
   let dx = ev.deltaX;
-  if (ev.deltaMode === 1) { // DOM_DELTA_LINE
-    dy *= (lastCharH || 18);
-    dx *= (lastCharW || 9);
-  } else if (ev.deltaMode === 2) { // DOM_DELTA_PAGE
-    dy *= (lastCharH || 18) * (rows || 24);
-    dx *= (lastCharW || 9) * (cols || 80);
+
+  const charH = lastCharH || 19;
+  const charW = lastCharW || 8.5;
+  if (ev.deltaMode === 1) { // lines
+    dy *= charH;
+    dx *= charW;
+  } else if (ev.deltaMode === 2) { // pages
+    dy *= charH * (rows || 24);
+    dx *= charW * (cols || 80);
   }
 
   wheelDeltaY += dy;
   wheelDeltaX += dx;
 
-  const { row, col } = mouseCoordsToCell(ev);
-  wheelLastTarget = { row, col, mod: mouseModifierStr(ev) };
-
-  const thresholdY = (lastCharH || 18) * 1.5;
-  const maxBacklogY = thresholdY * 3;
+  const maxBacklogY = charH * (rows || 30) * 2;
   if (Math.abs(wheelDeltaY) > maxBacklogY) {
     wheelDeltaY = Math.sign(wheelDeltaY) * maxBacklogY;
   }
-
-  const thresholdX = (lastCharW || 9) * 2;
-  const maxBacklogX = thresholdX * 3;
+  const maxBacklogX = charW * (cols || 80);
   if (Math.abs(wheelDeltaX) > maxBacklogX) {
     wheelDeltaX = Math.sign(wheelDeltaX) * maxBacklogX;
   }
 
-  clearTimeout(wheelResetTimer);
-  wheelResetTimer = setTimeout(() => {
+  clearTimeout(wheelDecayTimer);
+  wheelDecayTimer = setTimeout(() => {
     wheelDeltaY = 0;
     wheelDeltaX = 0;
-  }, 120);
+  }, 100);
 
-  processWheelQueue();
+  if (!wheelRafScheduled && !wheelInFlight) {
+    wheelRafScheduled = true;
+    requestAnimationFrame(flushWheel);
+  }
 }, { passive: false });
 
 gridEl.addEventListener("keydown", (ev) => {
