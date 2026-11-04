@@ -192,12 +192,14 @@ class TestRunner:
                 cycles_per_op = round(runtime_ms * 100.0, 2)
                 clean_lines = []
                 testcases = []
+                parsed_payload = {}
                 done_received = (f"{nonce}:DONE" in log) if ((sandbox_dir / "harness.cpp").exists()) else True
 
                 for line in log.splitlines():
                     if (sandbox_dir / "harness.cpp").exists() and f"{nonce}:SCOREBOARD_JSON:" in line:
                         try:
                             payload = json.loads(line.split(f"{nonce}:SCOREBOARD_JSON:", 1)[1].strip())
+                            parsed_payload = payload
                             if "cycles_per_op" in payload:
                                 cycles_per_op = round(float(payload["cycles_per_op"]), 3)
                         except Exception:
@@ -205,6 +207,7 @@ class TestRunner:
                     elif not (sandbox_dir / "harness.cpp").exists() and line.startswith("SCOREBOARD_JSON:"):
                         try:
                             payload = json.loads(line.split("SCOREBOARD_JSON:", 1)[1].strip())
+                            parsed_payload = payload
                             if "cycles_per_op" in payload:
                                 cycles_per_op = round(float(payload["cycles_per_op"]), 3)
                         except Exception:
@@ -245,7 +248,37 @@ class TestRunner:
 
                 if success:
                     score = 100.0
-                    scoreboard_vec = [score, cycles_per_op, code_bytes]
+                    colspec = problem.get("colspec") or [
+                        {"hdr": "Score", "asc": False},
+                        {"hdr": "Cycles/Op", "asc": True},
+                        {"hdr": "Bytes", "asc": True},
+                    ]
+                    scoreboard_vec = []
+                    for idx, col in enumerate(colspec):
+                        hdr = col.get("hdr", "")
+                        val = None
+                        if hdr in parsed_payload:
+                            val = parsed_payload[hdr]
+                        elif hdr.lower() in parsed_payload:
+                            val = parsed_payload[hdr.lower()]
+                        elif hdr.lower().replace(" ", "_").replace("/", "_") in parsed_payload:
+                            val = parsed_payload[hdr.lower().replace(" ", "_").replace("/", "_")]
+
+                        if val is None:
+                            if idx == 0 or hdr.lower() == "score":
+                                val = score
+                            elif "cycles" in hdr.lower() or "runtime" in hdr.lower():
+                                val = cycles_per_op
+                            elif "bytes" in hdr.lower() or "code" in hdr.lower():
+                                val = code_bytes
+                            else:
+                                val = 100.0 if not col.get("asc", True) else 0.0
+
+                        try:
+                            scoreboard_vec.append(round(float(val), 3))
+                        except (ValueError, TypeError):
+                            scoreboard_vec.append(0.0)
+
                     if submission_dir is None:
                         mark_solved(
                             prob_id,

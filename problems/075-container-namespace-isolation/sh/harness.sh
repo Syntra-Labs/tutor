@@ -22,7 +22,12 @@ mknod -m 666 "$TEST_ROOT/dev/null" c 1 3 2>/dev/null || touch "$TEST_ROOT/dev/nu
 # Copy minimal busybox binaries into jail
 if [ -f "/bin/busybox" ]; then
     mkdir -p "$TEST_ROOT/lib"
-    cp -a /lib/* "$TEST_ROOT/lib/" 2>/dev/null || true
+    if [ -d "/lib" ] && ! file /bin/busybox 2>/dev/null | grep -q "statically linked"; then
+        for so in $(ldd /bin/busybox 2>/dev/null | grep -o '/lib[^ ]*'); do
+            mkdir -p "$TEST_ROOT/$(dirname "$so")"
+            cp -L "$so" "$TEST_ROOT/$so" 2>/dev/null || true
+        done
+    fi
     cp /bin/busybox "$TEST_ROOT/bin/"
     for applet in sh ls cat ps echo mkdir test; do
         ln -sf /bin/busybox "$TEST_ROOT/bin/$applet" 2>/dev/null || true

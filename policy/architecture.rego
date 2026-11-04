@@ -158,3 +158,42 @@ violations contains msg if {
 is_volatile_metric(name) if contains(name, "wall")
 is_volatile_metric(name) if contains(name, "runtime_ms")
 is_volatile_metric(name) if contains(name, "elapsed")
+
+# ------------------------------------------------------------------------------
+# ARCH-006: Catalog Schema Completeness & Colspec Registration
+# Every catalog problem must declare complete metadata: id, title, track,
+# difficulty, colspec, and supported languages.
+# ------------------------------------------------------------------------------
+violations contains msg if {
+    some prob in input.catalog_problems
+    not prob.id
+    msg := "[ARCH-006 Incomplete Metadata]: Problem definition missing mandatory 'id' field."
+}
+
+violations contains msg if {
+    some prob in input.catalog_problems
+    not prob.colspec
+    msg := sprintf("[ARCH-006 Missing Colspec]: Problem '%v' omits 'colspec' scoring vector definition.", [prob.id])
+}
+
+violations contains msg if {
+    some prob in input.catalog_problems
+    not prob.languages
+    msg := sprintf("[ARCH-006 Missing Languages]: Problem '%v' omits 'languages' whitelist.", [prob.id])
+}
+
+# ------------------------------------------------------------------------------
+# ARCH-007: Prerequisite Skill-Tree DAG Reference Integrity
+# Every dependency referenced in depends_on must exist in the problem catalog.
+# ------------------------------------------------------------------------------
+violations contains msg if {
+    some prob in input.catalog_problems
+    some dep in object.get(prob, "depends_on", [])
+    not catalog_has_id(dep, input.catalog_problems)
+    msg := sprintf("[ARCH-007 Broken DAG Edge]: Problem '%v' references nonexistent prerequisite '%v'.", [prob.id, dep])
+}
+
+catalog_has_id(id, problems) if {
+    some p in problems
+    p.id == id
+}

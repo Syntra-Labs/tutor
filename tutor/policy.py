@@ -153,14 +153,31 @@ def evaluate_policy_native(input_data: Dict[str, Any]) -> Tuple[bool, List[str]]
             )
 
     # ARCH-005: Deterministic Metrics Contract
+    known_pids = {p.get("id") for p in catalog_problems if p.get("id")}
     for prob in catalog_problems:
+        pid = prob.get("id")
         colspec = prob.get("colspec", [])
         if colspec:
             primary_hdr = str(colspec[0].get("hdr", "")).lower()
             if any(term in primary_hdr for term in ["wall", "runtime_ms", "elapsed"]):
                 violations.append(
-                    f"[ARCH-005 Volatile Timing Ban]: Problem '{prob.get('id')}' uses volatile metric '{primary_hdr}'. "
+                    f"[ARCH-005 Volatile Timing Ban]: Problem '{pid}' uses volatile metric '{primary_hdr}'. "
                     "Hardware cycles or testcase pass rate required."
+                )
+
+        # ARCH-006: Catalog Schema Completeness & Colspec Registration
+        if not pid:
+            violations.append("[ARCH-006 Incomplete Metadata]: Problem definition missing mandatory 'id' field.")
+        if not colspec:
+            violations.append(f"[ARCH-006 Missing Colspec]: Problem '{pid}' omits 'colspec' scoring vector definition.")
+        if not prob.get("languages"):
+            violations.append(f"[ARCH-006 Missing Languages]: Problem '{pid}' omits 'languages' whitelist.")
+
+        # ARCH-007: Prerequisite Skill-Tree DAG Reference Integrity
+        for dep in prob.get("depends_on", []):
+            if dep not in known_pids:
+                violations.append(
+                    f"[ARCH-007 Broken DAG Edge]: Problem '{pid}' references nonexistent prerequisite '{dep}'."
                 )
 
     return (len(violations) == 0, violations)

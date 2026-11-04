@@ -6,5 +6,10 @@
   "difficulty": "Easy",
   "depends_on": ["000a-hello-world"],
   "tags": ["warmup", "arithmetic", "integers"],
+  "colspec": [
+    {"hdr": "Score", "asc": false},
+    {"hdr": "Cycles/Op", "asc": true},
+    {"hdr": "Bytes", "asc": true}
+  ],
   "languages": ["cpp"]
 }

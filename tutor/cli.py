@@ -271,7 +271,7 @@ def cmd_submit(args):
 
     dest_dir = REPO_ROOT / "submissions" / user / problem["id"]
     dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(sol_src, dest_dir / "solution.hpp")
+    shutil.copy2(sol_src, dest_dir / sol_src.name)
 
     # Also record on local leaderboard if --local-board is passed
     if getattr(args, "update_board", False):
@@ -290,7 +290,7 @@ def cmd_submit(args):
 
     vec = metrics["scoreboard"]
     print(f"\n{GREEN}{BOLD}✓ Staged verified submission for {problem['id']}!{RESET}")
-    print(f"  • Path       : {CYAN}{dest_dir / 'solution.hpp'}{RESET}")
+    print(f"  • Path       : {CYAN}{dest_dir / sol_src.name}{RESET}")
     print(f"  • Scoreboard : Score={vec[0]:.1f}, Cycles/Op={vec[1]:.2f}, Bytes={vec[2]} B")
     print(f"  • Next Step  : {DIM}git add submissions/{user}/{problem['id']} && git commit -m 'solve {problem['id']}' && git push{RESET}\n")
     return 0
@@ -389,20 +389,29 @@ def cmd_ci_grade_pr(args):
             continue
 
         sub_dir = REPO_ROOT / "submissions" / user / prob["id"]
-        print(f"⚡ Grading {user}/{prob['id']}...")
-        success, log, runtime_ms, metrics = runner.run_test(prob, lang="cpp", submission_dir=sub_dir)
+        langs = prob.get("languages", ["cpp"])
+        sub_files = [f.name for f in sub_dir.iterdir() if f.is_file()] if sub_dir.exists() else []
+        if any(f.endswith(".sh") for f in sub_files) or "sh" in langs:
+            eval_lang = "sh"
+        elif any(f.endswith(".rs") for f in sub_files) or "rust" in langs:
+            eval_lang = "rust"
+        else:
+            eval_lang = langs[0] if langs else "cpp"
+
+        print(f"⚡ Grading {user}/{prob['id']} ({eval_lang})...")
+        success, log, runtime_ms, metrics = runner.run_test(prob, lang=eval_lang, submission_dir=sub_dir)
         print(log)
         if not success:
             print(f"{RED}✗ Submission failed for {prob['id']}{RESET}")
             all_passed = False
         else:
             vec = metrics["scoreboard"]
-            print(f"{GREEN}✓ Passed {prob['id']}: Score={vec[0]}, Cycles/Op={vec[1]}, Bytes={vec[2]}{RESET}")
+            print(f"{GREEN}✓ Passed {prob['id']}: Score={vec[0]}, Vector={vec}{RESET}")
             entries.append(
                 {
                     "user": user,
                     "problem_id": prob["id"],
-                    "lang": "cpp",
+                    "lang": eval_lang,
                     "score": metrics["score"],
                     "scoreboard": metrics["scoreboard"],
                     "submitted_at": datetime.now(timezone.utc).isoformat(),
@@ -445,7 +454,7 @@ def cmd_verify_policy(args):
             print(f"  • {RED}{v}{RESET}")
         return 1
 
-    print(f"{GREEN}✓ All active architecture policies satisfied (ARCH-001 through ARCH-005).{RESET}")
+    print(f"{GREEN}✓ All active architecture policies satisfied (ARCH-001 through ARCH-007).{RESET}")
     return 0
 
 
