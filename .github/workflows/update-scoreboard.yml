@@ -1,10 +1,6 @@
 name: Update Autolab Scoreboard & GitHub Pages (Trusted)
 
 on:
-  workflow_run:
-    workflows: ["Grade Pull Request (Untrusted Sandbox)"]
-    types:
-      - completed
   push:
     branches: [ main, master ]
     paths:
@@ -13,8 +9,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: scoreboard-updater
@@ -22,48 +16,24 @@ concurrency:
 
 jobs:
   merge-scoreboard:
-    # Only run if Workflow 1 succeeded (100% of tests passed & PR isolation verified) or direct push
-    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout trusted main branch (never checks out untrusted PR code)
+      - name: Checkout trusted main branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 2
 
-      - name: Download verified scoreboard_entries.json from Workflow 1
-        if: ${{ github.event_name == 'workflow_run' }}
-        uses: actions/github-script@v7
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          script: |
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
-            });
-            const match = artifacts.data.artifacts.find(a => a.name === 'scoreboard-entries');
-            if (!match) {
-              core.setFailed('No scoreboard-entries artifact found.');
-              return;
-            }
-            const download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: match.id,
-              archive_format: 'zip',
-            });
-            const fs = require('fs');
-            fs.writeFileSync('/tmp/artifact.zip', Buffer.from(download.data));
+          python-version: "3.11"
 
-      - name: Merge into Autolab Leaderboard & Export GitHub Pages Data
+      - name: Merge into Autolab Leaderboard & Export Static Catalog
         env:
           PYTHONPATH: .
         run: |
-          if [ -f /tmp/artifact.zip ]; then
-            unzip -o /tmp/artifact.zip -d /tmp/artifact_out
-            python3 -m tutor.cli ci-merge-scoreboard --input /tmp/artifact_out/scoreboard_entries.json
-          elif [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event_name }}" = "push" ]; then
             CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
             USERS=$(echo "$CHANGED" | grep '^submissions/' | cut -d/ -f2 | sort -u || true)
             for U in $USERS; do
@@ -72,14 +42,12 @@ jobs:
                 python3 -m tutor.cli ci-merge-scoreboard --input /tmp/direct_entries_${U}.json
               fi
             done
-            python3 -m tutor.cli export-pages
-          else
-            python3 -m tutor.cli export-pages
           fi
+          python3 -m tutor.cli export-pages
 
-      - name: Commit updated leaderboard.json & catalog.json
+      - name: Commit updated scoreboard and static data chunks
         run: |
-          git config user.name "wwwportal"
-          git config user.email "yamraoui2001@gmail.com"
-          git add docs/data/leaderboard.json docs/data/catalog.json
-          git diff --staged --quiet || (git commit -m "chore(scoreboard): update Autolab standings [skip ci]" && git push)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/leaderboard.json docs/data/catalog.json docs/data/manifest.json docs/data/problems/
+          git diff --staged --quiet || (git commit -m "chore(scoreboard): update Autolab standings & catalog data [skip ci]" && git push)
