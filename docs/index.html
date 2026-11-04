@@ -143,41 +143,6 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   gap: 6px;
   flex-wrap: wrap;
 }
-.problem-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border: 1px solid #000000;
-  color: #000000;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-weight: 600;
-  border-radius: 2px;
-  transition: background 0.1s ease;
-}
-.problem-pill-btn:hover {
-  background: #f4f4f4;
-}
-.problem-pill-btn .pill-index {
-  color: var(--fg-dim);
-  font-weight: 500;
-  font-size: 10.5px;
-}
-.problem-pill-btn .pill-title {
-  font-weight: 700;
-  color: #000000;
-}
-.problem-pill-btn .pill-hint {
-  font-size: 10px;
-  color: #555555;
-  background: #eeeeee;
-  padding: 1px 6px;
-  border-radius: 2px;
-  letter-spacing: 0.02em;
-}
 .small-btn {
   background: #ffffff;
   border: 1px solid #000000;
@@ -970,11 +935,6 @@ body.is-resizing-v, body.is-resizing-v * {
         <div class="problem-bar">
           <div class="problem-nav-group">
             <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">◀ Prev</button>
-            <button class="problem-pill-btn" onclick="switchTab('dag')" title="Browse all 76 problems in Problems tab (:DAG / <Space>d)">
-              <span class="pill-index" id="prob-pill-index">1 / 76</span>
-              <span class="pill-title" id="prob-pill-title">000a-hello-world</span>
-              <span class="pill-hint">Browse ▾</span>
-            </button>
             <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next ▶</button>
           </div>
           <div class="problem-actions-group">
@@ -1461,10 +1421,6 @@ function loadProblem(idx) {
   const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
   const solFilename = isSh ? `${prob.id}/solution.sh` : `${prob.id}/solution.hpp`;
 
-  const pillIndex = document.getElementById("prob-pill-index");
-  if (pillIndex) pillIndex.textContent = `${currentIdx + 1} / ${catalog.length}`;
-  const pillTitle = document.getElementById("prob-pill-title");
-  if (pillTitle) pillTitle.textContent = prob.id;
   document.getElementById("nvim-filename").textContent = solFilename;
 
   const solved = solvedSet.has(prob.id);
