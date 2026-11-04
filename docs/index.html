@@ -137,16 +137,46 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
 }
-.problem-select {
-  flex: 1;
-  min-width: 200px;
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 5px 8px;
-  border: 1px solid #000000;
+.problem-nav-group, .problem-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.problem-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: #ffffff;
+  border: 1px solid #000000;
   color: #000000;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 5px 10px;
+  cursor: pointer;
   font-weight: 600;
+  border-radius: 2px;
+  transition: background 0.1s ease;
+}
+.problem-pill-btn:hover {
+  background: #f4f4f4;
+}
+.problem-pill-btn .pill-index {
+  color: var(--fg-dim);
+  font-weight: 500;
+  font-size: 10.5px;
+}
+.problem-pill-btn .pill-title {
+  font-weight: 700;
+  color: #000000;
+}
+.problem-pill-btn .pill-hint {
+  font-size: 10px;
+  color: #555555;
+  background: #eeeeee;
+  padding: 1px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.02em;
 }
 .small-btn {
   background: #ffffff;
@@ -460,7 +490,16 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   transition: all .1s;
 }
 .dag-card:hover { border-color: #000000; background: var(--bg-subtle); }
-.dag-card.active { border: 2px solid #000000; }
+.dag-card.active { border: 2px solid #000000; box-shadow: 0 0 0 1px #000000; }
+.dag-current-badge {
+  background: #000000;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
 .dag-card.solved { border-left: 4px solid #000000; }
 .dag-card.locked { opacity: 0.6; border-style: dashed; }
 .dag-card-top {
@@ -926,18 +965,25 @@ body.is-resizing-v, body.is-resizing-v * {
     </div>
 
     <div class="left-scroll">
-      <!-- Persistent Problem Switcher & Judge Trigger -->
-      <div class="problem-bar">
-        <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">Prev</button>
-        <select class="problem-select" id="problem-select" onchange="loadProblemById(this.value)"></select>
-        <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next</button>
-        <button class="small-btn" id="run-btn" onclick="triggerRun()" title="Run test cases (:Run / <F5>)">:Run (&lt;F5&gt;)</button>
-        <button class="small-btn primary" id="submit-btn" onclick="triggerSubmit()" title="Official Submit &amp; persist score (:Submit / <Ctrl+Enter>)">:Submit (&lt;Ctrl+Enter&gt;)</button>
-        <button class="small-btn" id="vm-toggle-btn" onclick="toggleVMPane()" title="Toggle Live Linux VM Terminal (Right Split)">Terminal</button>
-      </div>
-
       <!-- TAB 1: PROBLEM SPEC & LIVE C++20 JUDGE OUTPUT -->
       <div id="tab-spec">
+        <div class="problem-bar">
+          <div class="problem-nav-group">
+            <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">◀ Prev</button>
+            <button class="problem-pill-btn" onclick="switchTab('dag')" title="Browse all 76 problems in Problems tab (:DAG / <Space>d)">
+              <span class="pill-index" id="prob-pill-index">1 / 76</span>
+              <span class="pill-title" id="prob-pill-title">000a-hello-world</span>
+              <span class="pill-hint">Browse ▾</span>
+            </button>
+            <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next ▶</button>
+          </div>
+          <div class="problem-actions-group">
+            <button class="small-btn" id="run-btn" onclick="triggerRun()" title="Run test cases (:Run / <F5>)">:Run (&lt;F5&gt;)</button>
+            <button class="small-btn primary" id="submit-btn" onclick="triggerSubmit()" title="Official Submit &amp; persist score (:Submit / <Ctrl+Enter>)">:Submit (&lt;Ctrl+Enter&gt;)</button>
+            <button class="small-btn" id="vm-toggle-btn" onclick="toggleVMPane()" title="Toggle Live Linux VM Terminal (Right Split)">Terminal</button>
+          </div>
+        </div>
+
         <div class="meta-row" id="prob-meta-row"></div>
         <div class="spec-box" id="prob-readme">Loading problem catalog...</div>
 
@@ -1310,22 +1356,13 @@ async function initStudio() {
 }
 
 function populateSelectors() {
-  const sel = document.getElementById("problem-select");
   const boardSel = document.getElementById("board-scope-select");
   const trackSel = document.getElementById("dag-track-filter");
 
-  sel.innerHTML = "";
   const tracks = new Set();
 
   catalog.forEach((p, idx) => {
     tracks.add(p.track);
-    const solved = solvedSet.has(p.id);
-    const unlocked = isUnlocked(p);
-    const mark = solved ? "[SOLVED]" : (unlocked ? "[READY]" : "[LOCKED]");
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = `${mark} ${p.id} — ${p.title} [${p.difficulty}]`;
-    sel.appendChild(opt);
 
     if (boardSel.querySelectorAll(`option[value="${p.id}"]`).length === 0) {
       const bOpt = document.createElement("option");
@@ -1346,9 +1383,6 @@ function populateSelectors() {
 
   document.getElementById("top-progress").textContent = `${solvedSet.size} / ${catalog.length} SOLVED`;
   document.getElementById("tab-btn-dag").textContent = `Problems (${catalog.length})`;
-  if (catalog[currentIdx]) {
-    sel.value = catalog[currentIdx].id;
-  }
 }
 
 function loadProblemById(probId) {
@@ -1427,7 +1461,10 @@ function loadProblem(idx) {
   const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
   const solFilename = isSh ? `${prob.id}/solution.sh` : `${prob.id}/solution.hpp`;
 
-  document.getElementById("problem-select").value = prob.id;
+  const pillIndex = document.getElementById("prob-pill-index");
+  if (pillIndex) pillIndex.textContent = `${currentIdx + 1} / ${catalog.length}`;
+  const pillTitle = document.getElementById("prob-pill-title");
+  if (pillTitle) pillTitle.textContent = prob.id;
   document.getElementById("nvim-filename").textContent = solFilename;
 
   const solved = solvedSet.has(prob.id);
@@ -2194,18 +2231,20 @@ function renderDag() {
     probs.forEach(p => {
       const solved = solvedSet.has(p.id);
       const unlocked = isUnlocked(p);
+      const isCurrent = (p.id === activeId);
       const statusText = solved ? "SOLVED" : (unlocked ? "READY" : "LOCKED");
+      const currentBadge = isCurrent ? `<span class="dag-current-badge">CURRENT</span>` : "";
       const deps = (p.depends_on || []).map(d => d.split("-")[0]).join(", ");
 
       const card = document.createElement("div");
-      card.className = `dag-card ${solved ? "solved" : (!unlocked ? "locked" : "")} ${p.id === activeId ? "active" : ""}`;
+      card.className = `dag-card ${solved ? "solved" : (!unlocked ? "locked" : "")} ${isCurrent ? "active" : ""}`;
       card.onclick = () => {
         loadProblemById(p.id);
         switchTab("spec");
       };
       card.innerHTML = `
         <div class="dag-card-top">
-          <span>${p.id.split("-")[0]} | ${statusText}</span>
+          <span>${p.id.split("-")[0]} | ${statusText}${currentBadge}</span>
           ${difficultyBadgeHtml(p.difficulty)}
         </div>
         <div class="dag-card-title">${p.title}</div>
