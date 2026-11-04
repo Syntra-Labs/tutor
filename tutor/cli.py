@@ -454,7 +454,7 @@ def cmd_verify_policy(args):
             print(f"  • {RED}{v}{RESET}")
         return 1
 
-    print(f"{GREEN}✓ All active architecture policies satisfied (ARCH-001 through ARCH-007).{RESET}")
+    print(f"{GREEN}✓ All active architecture policies satisfied (ARCH-001 through ARCH-008).{RESET}")
     return 0
 
 

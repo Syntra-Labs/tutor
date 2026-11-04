@@ -56,6 +56,12 @@ components := {
         "runtime": "OPA Rego",
         "tech": ["Open Policy Agent", "Architecture-as-Code"],
         "purpose": "Executable enforcement of architecture boundaries, path sandboxing, and doc bans."
+    },
+    "issue_tracker_dag": {
+        "tier": "distributed_governance",
+        "runtime": "GitHub Issues & Projects API",
+        "tech": ["Parent-Epic / Child-Spike Hierarchy", "Upstream Channel Links", "Bidirectional Tasklists"],
+        "purpose": "Decentralized tracking of branching architectural concerns, upstream repository channels, and verifiable decision gates."
     }
 }
 
@@ -201,4 +207,23 @@ violations contains msg if {
 catalog_has_id(id, problems) if {
     some p in problems
     p.id == id
+}
+
+# ------------------------------------------------------------------------------
+# ARCH-008: Distributed Issue-Tracking & Upstream Channel Federation Protocol
+# Rationale: Complex architectural explorations, cross-system integrations
+# (e.g. UOR/Kappa), and branching concerns must not rot in untracked notes.
+# Invariants:
+# 1. Epic-Spike Hierarchy: Every major research exploration must anchor to a
+#    Parent Tracking Epic decomposing orthogonal concerns into focused Child Spikes.
+# 2. Upstream Linkage: Any external investigation targeting an upstream repo
+#    must maintain a formal upstream connection channel with bidirectional links.
+# 3. Explicit Blocking Gates: Spikes must declare their blocking relationships
+#    to downstream milestone decisions.
+# ------------------------------------------------------------------------------
+issue_tracking_protocol := {
+    "standard": "Federated GitHub Issues & Bidirectional Linking",
+    "hierarchy": "Parent Epic -> Child Spikes",
+    "upstream_channels": "Cross-repo issue referencing (e.g. UOR-Foundation/kappa-registry)",
+    "lifecycle": ["Triage", "Spike Investigation", "Upstream Channel Link", "Decision Gate", "Close"]
 }
