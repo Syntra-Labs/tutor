@@ -1,0 +1,37 @@
+{
+  "id": "046-hopf-fibration-map",
+  "title": "Hopf Fibration Projection (S3 to S2) & Fibre Invariance",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Hopf Fibration & Fibre Bundles",
+  "difficulty": "Medium",
+  "depends_on": [
+    "043-quat-hamilton-rotor"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "hopf-fibration",
+    "s3-to-s2",
+    "fibre-bundle",
+    "u1-gauge-invariance"
+  ],
+  "spec": "# 046: Hopf Fibration Projection ($S^3 \\to S^2$) & Fibre Invariance\n\n## Problem Statement\n\nThe **Hopf fibration** $S^1 \\hookrightarrow S^3 \\xrightarrow{h} S^2$ maps a unit quaternion $q = (w, x, y, z) \\in S^3$ onto a 3D unit vector on the 2-sphere $S^2$ via $q \\mapsto q k \\bar{q}$. Because any $U(1)$ phase rotor $e_\\psi = (\\cos\\psi, 0, 0, \\sin\\psi) = \\cos\\psi + k\\sin\\psi$ commutes with $k$, right-multiplying $q$ by $e_\\psi$ moves $q$ along a circular $S^1$ fibre in $S^3$ while leaving its shadow $h(q) \\in S^2$ strictly invariant.\n\n## Mathematical Law / Invariant\n\nFor $q = (w, x, y, z) \\in S^3$:\n$$h(q) = \\begin{pmatrix} 2(xz + wy) \\\\ 2(yz - wx) \\\\ w^2 + z^2 - x^2 - y^2 \\end{pmatrix} \\in S^2$$\n\nInvariants:\n1. **Unit-Sphere Landing Identity:**\n   $$\\|h(q)\\|_2^2 = 4(w^2+z^2)(x^2+y^2) + (w^2+z^2 - x^2-y^2)^2 = (w^2+x^2+y^2+z^2)^2 = \\|q\\|_2^4$$\n   Thus $\\|q\\|_2 = 1 \\implies \\|h(q)\\|_2 = 1$.\n2. **Exact $U(1)$ Fibre Gauge Invariance:** For $e_\\psi = (\\cos\\psi, 0, 0, \\sin\\psi)$ and any $\\psi \\in \\mathbb{R}$:\n   $$h(q \\otimes e_\\psi) = h(q)$$\n\n## Function Signature\n\n```cpp\nVec3 hopf_project(const Quat& q);\nQuat hopf_phase_rotor(double psi);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (quadratic polynomial in $(w, x, y, z)$, zero trig/sqrt calls for projection).\n- **Space:** $O(1)$.\n",
+  "readme": "# 046: Hopf Fibration Projection ($S^3 \\to S^2$) & Fibre Invariance\n\n## Problem Statement\n\nThe **Hopf fibration** $S^1 \\hookrightarrow S^3 \\xrightarrow{h} S^2$ maps a unit quaternion $q = (w, x, y, z) \\in S^3$ onto a 3D unit vector on the 2-sphere $S^2$ via $q \\mapsto q k \\bar{q}$. Because any $U(1)$ phase rotor $e_\\psi = (\\cos\\psi, 0, 0, \\sin\\psi) = \\cos\\psi + k\\sin\\psi$ commutes with $k$, right-multiplying $q$ by $e_\\psi$ moves $q$ along a circular $S^1$ fibre in $S^3$ while leaving its shadow $h(q) \\in S^2$ strictly invariant.\n\n## Mathematical Law / Invariant\n\nFor $q = (w, x, y, z) \\in S^3$:\n$$h(q) = \\begin{pmatrix} 2(xz + wy) \\\\ 2(yz - wx) \\\\ w^2 + z^2 - x^2 - y^2 \\end{pmatrix} \\in S^2$$\n\nInvariants:\n1. **Unit-Sphere Landing Identity:**\n   $$\\|h(q)\\|_2^2 = 4(w^2+z^2)(x^2+y^2) + (w^2+z^2 - x^2-y^2)^2 = (w^2+x^2+y^2+z^2)^2 = \\|q\\|_2^4$$\n   Thus $\\|q\\|_2 = 1 \\implies \\|h(q)\\|_2 = 1$.\n2. **Exact $U(1)$ Fibre Gauge Invariance:** For $e_\\psi = (\\cos\\psi, 0, 0, \\sin\\psi)$ and any $\\psi \\in \\mathbb{R}$:\n   $$h(q \\otimes e_\\psi) = h(q)$$\n\n## Function Signature\n\n```cpp\nVec3 hopf_project(const Quat& q);\nQuat hopf_phase_rotor(double psi);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (quadratic polynomial in $(w, x, y, z)$, zero trig/sqrt calls for projection).\n- **Space:** $O(1)$.\n",
+  "stub": "#pragma once\n\n#include <cmath>\n\nstruct Vec3 {\n    double x{0.0};\n    double y{0.0};\n    double z{0.0};\n\n    double norm() const {\n        return std::sqrt(x * x + y * y + z * z);\n    }\n};\n\nstruct Quat {\n    double w{1.0};\n    double x{0.0};\n    double y{0.0};\n    double z{0.0};\n\n    Quat() = default;\n    Quat(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) {}\n\n    Quat normalize() const {\n        double n = std::sqrt(w * w + x * x + y * y + z * z);\n        if (n < 1e-12) return Quat(1.0, 0.0, 0.0, 0.0);\n        return Quat(w / n, x / n, y / n, z / n);\n    }\n\n    Quat mul(const Quat& q) const {\n        return Quat(\n            w * q.w - x * q.x - y * q.y - z * q.z,\n            w * q.x + x * q.w + y * q.z - z * q.y,\n            w * q.y - x * q.z + y * q.w + z * q.x,\n            w * q.z + x * q.y - y * q.x + z * q.w\n        );\n    }\n};\n\n// Construct U(1) fibre rotor e_psi = (cos(psi), 0, 0, sin(psi))\ninline Quat hopf_phase_rotor(double psi) {\n    // TODO: return (cos(psi), 0, 0, sin(psi))\n    (void)psi;\n    return Quat{};\n}\n\n// Project unit quaternion q=(w,x,y,z) onto S^2 via (2(xz+wy), 2(yz-wx), w^2+z^2-x^2-y^2)\ninline Vec3 hopf_project(const Quat& q) {\n    // TODO: implement Hopf projection S^3 -> S^2\n    (void)q;\n    return Vec3{};\n}\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <cmath>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 046 Hopf Fibration Projection Test Suite ===\\n\";\n\n    // Test 1: Canonical poles: (1,0,0,0) -> (0,0,1) North Pole; (0,1,0,0) -> (0,0,-1) South Pole\n    Vec3 north = hopf_project(Quat(1.0, 0.0, 0.0, 0.0));\n    Vec3 south = hopf_project(Quat(0.0, 1.0, 0.0, 0.0));\n    assert(std::abs(north.x) < 1e-12 && std::abs(north.y) < 1e-12 && std::abs(north.z - 1.0) < 1e-12);\n    assert(std::abs(south.x) < 1e-12 && std::abs(south.y) < 1e-12 && std::abs(south.z + 1.0) < 1e-12);\n    std::cout << \"  \u2022 Test 1: Canonical North and South pole projections ... [PASS]\\n\";\n\n    // Test 2: Unit-sphere landing |h(q)| == 1 for arbitrary unit quaternions\n    Quat q = Quat(0.3, -0.7, 1.1, -0.5).normalize();\n    Vec3 hq = hopf_project(q);\n    assert(std::abs(hq.norm() - 1.0) < 1e-12);\n    std::cout << \"  \u2022 Test 2: Unit-sphere landing identity |h(q)| == 1 ... [PASS]\\n\";\n\n    // Test 3: Exact U(1) right-fibre invariance h(q * e_psi) == h(q)\n    for (double psi : {0.25, 1.13, -2.41, 3.14159265}) {\n        Quat q_rot = q.mul(hopf_phase_rotor(psi));\n        Vec3 h_rot = hopf_project(q_rot);\n        assert(std::abs(h_rot.x - hq.x) < 1e-12);\n        assert(std::abs(h_rot.y - hq.y) < 1e-12);\n        assert(std::abs(h_rot.z - hq.z) < 1e-12);\n    }\n    std::cout << \"  \u2022 Test 3: Exact U(1) fibre gauge invariance h(q * e_psi) == h(q) ... [PASS]\\n\";\n\n    constexpr int ITERS = 200000;\n    volatile double sink = 0.0;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (int i = 0; i < ITERS; ++i) {\n        Vec3 v = hopf_project(q);\n        sink = sink + v.x + v.z;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    (void)sink;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / ITERS;\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

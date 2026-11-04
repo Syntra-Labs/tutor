@@ -1,0 +1,35 @@
+{
+  "id": "003-lru-cache-o1",
+  "title": "O(1) Intrusive LRU Cache",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Data Structures & Memory",
+  "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "lru",
+    "cache",
+    "hash-map",
+    "linked-list"
+  ],
+  "spec": "# 003: O(1) Intrusive LRU Cache\n\n## Specification & Contract\n\nDesign and implement a Least Recently Used (LRU) cache supporting $O(1)$ operations without heap fragmentation on hits.\n\n### Requirements:\n1. `std::optional<V> get(const K& key)`:\n   - Returns the cached value if `key` exists and moves the entry to the front (most recently used).\n   - Returns `std::nullopt` if `key` does not exist.\n2. `void put(const K& key, const V& value)`:\n   - Updates value if key exists, promoting it to the front.\n   - Inserts new key-value pair. If capacity is exceeded, evicts the least recently used key.\n3. Both operations must run in strictly $O(1)$ average time complexity.\n",
+  "readme": "# 003: O(1) Intrusive LRU Cache\n\n## Specification & Contract\n\nDesign and implement a Least Recently Used (LRU) cache supporting $O(1)$ operations without heap fragmentation on hits.\n\n### Requirements:\n1. `std::optional<V> get(const K& key)`:\n   - Returns the cached value if `key` exists and moves the entry to the front (most recently used).\n   - Returns `std::nullopt` if `key` does not exist.\n2. `void put(const K& key, const V& value)`:\n   - Updates value if key exists, promoting it to the front.\n   - Inserts new key-value pair. If capacity is exceeded, evicts the least recently used key.\n3. Both operations must run in strictly $O(1)$ average time complexity.\n",
+  "stub": "#pragma once\n\n#include <cstddef>\n#include <list>\n#include <optional>\n#include <unordered_map>\n\ntemplate <typename K, typename V>\nclass LruCache {\npublic:\n    explicit LruCache(size_t capacity) : capacity_(capacity) {}\n\n    std::optional<V> get(const K& key) {\n        // TODO: Implement O(1) lookup & promotion\n        (void)key;\n        return std::nullopt;\n    }\n\n    void put(const K& key, const V& value) {\n        // TODO: Implement O(1) insertion & LRU eviction\n        (void)key;\n        (void)value;\n    }\n\n    [[nodiscard]] size_t size() const noexcept {\n        return items_.size();\n    }\n\nprivate:\n    size_t capacity_;\n    std::list<std::pair<K, V>> items_;\n    std::unordered_map<K, typename std::list<std::pair<K, V>>::iterator> index_;\n};\n",
+  "harness": "#include <cassert>\n#include <iostream>\n#include <string>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running LRU Cache Test Suite ===\\n\";\n\n    LruCache<int, std::string> cache(2);\n\n    cache.put(1, \"one\");\n    cache.put(2, \"two\");\n\n    assert(cache.get(1).value_or(\"\") == \"one\"); // promotes 1, making 2 LRU\n\n    cache.put(3, \"three\"); // evicts 2\n\n    assert(cache.get(2) == std::nullopt);\n    assert(cache.get(3).value_or(\"\") == \"three\");\n    assert(cache.get(1).value_or(\"\") == \"one\");\n\n    std::cout << \"  \u2022 Test 1: Eviction and promotion invariants ... [PASS]\\n\";\n    std::cout << \"All LRU Cache tests passed successfully!\\n\";\n    return 0;\n}\n"
+}

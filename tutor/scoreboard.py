@@ -212,14 +212,22 @@ def verify_pr_isolation(changed_files: List[str], github_actor: str) -> Tuple[bo
 
 def export_static_site_data() -> Tuple[Path, Path]:
     """
-    Exports `docs/data/catalog.json` (full curriculum + DAG + specs) and
-    initializes `docs/data/leaderboard.json` if not present.
+    Exports static curriculum data:
+    1. Monolithic `docs/data/catalog.json` (for offline / single-bundle execution).
+    2. Lightweight `docs/data/manifest.json` (~30 KB for instant studio boot).
+    3. Partitioned `docs/data/problems/<id>.json` chunks for on-demand lazy loading.
+    4. Initializes `docs/data/leaderboard.json` if not present.
     """
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    problems_chunk_dir = DOCS_DATA_DIR / "problems"
+    problems_chunk_dir.mkdir(parents=True, exist_ok=True)
+
     catalog = ProblemCatalog()
     problems = catalog.list_problems()
 
     export_list = []
+    manifest_list = []
+
     for p in problems:
         prob_dir = Path(p["dir"])
         readme_path = prob_dir / "README.md"
@@ -236,7 +244,29 @@ def export_static_site_data() -> Tuple[Path, Path]:
             harness_path = prob_dir / "cpp" / "harness.cpp"
             harness_text = harness_path.read_text(encoding="utf-8") if harness_path.exists() else ""
 
-        export_list.append(
+        full_entry = {
+            "id": p["id"],
+            "title": p.get("title", p["id"]),
+            "track": p.get("track", p.get("category", "Systems")),
+            "category": p.get("category", "Systems"),
+            "difficulty": p.get("difficulty", "Medium"),
+            "depends_on": p.get("depends_on", []),
+            "colspec": p.get("colspec", DEFAULT_COLSPEC),
+            "languages": p.get("languages", ["cpp"]),
+            "tags": p.get("tags", []),
+            "spec": readme_text,
+            "readme": readme_text,
+            "stub": stub_text,
+            "harness": harness_text,
+        }
+        export_list.append(full_entry)
+
+        # Write individual problem chunk for lazy-loading
+        chunk_file = problems_chunk_dir / f"{p['id']}.json"
+        with open(chunk_file, "w", encoding="utf-8") as f:
+            json.dump(full_entry, f, indent=2)
+
+        manifest_list.append(
             {
                 "id": p["id"],
                 "title": p.get("title", p["id"]),
@@ -247,20 +277,29 @@ def export_static_site_data() -> Tuple[Path, Path]:
                 "colspec": p.get("colspec", DEFAULT_COLSPEC),
                 "languages": p.get("languages", ["cpp"]),
                 "tags": p.get("tags", []),
-                "spec": readme_text,
-                "readme": readme_text,
-                "stub": stub_text,
-                "harness": harness_text,
             }
         )
 
+    now_iso = datetime.now(timezone.utc).isoformat()
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": now_iso,
         "total_problems": len(export_list),
         "problems": export_list,
     }
     with open(CATALOG_EXPORT_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
+
+    manifest_file = DOCS_DATA_DIR / "manifest.json"
+    with open(manifest_file, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "generated_at": now_iso,
+                "total_problems": len(manifest_list),
+                "problems": manifest_list,
+            },
+            f,
+            indent=2,
+        )
 
     if not LEADERBOARD_FILE.exists():
         board = load_leaderboard(LEADERBOARD_FILE)

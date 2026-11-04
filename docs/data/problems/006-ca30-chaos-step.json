@@ -1,0 +1,38 @@
+{
+  "id": "006-ca30-chaos-step",
+  "title": "Cellular Automaton Rule 30 Step (64-Bit SWAR)",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Cellular Automata & SWAR",
+  "difficulty": "Easy",
+  "depends_on": [
+    "004-ca184-demarcation"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "cellular-automata",
+    "rule-30",
+    "swar",
+    "bit-manipulation",
+    "chaos"
+  ],
+  "spec": "# 006: Cellular Automaton Rule 30 Step (64-Bit SWAR)\n\n## Problem Statement\n\nStephen Wolfram's elementary Cellular Automaton **Rule 30** exhibits Class-3 aperiodic chaos from single-bit initial conditions and serves as the chaotic reference arm in counterfactual stream demarcation.\n\nImplement a 64-bit SWAR (SIMD Within A Register) periodic ring step for Rule 30:\n- Left neighbor register: `l = std::rotl(state, 1)`\n- Right neighbor register: `r = std::rotr(state, 1)`\n- Parallel 64-cell update: `l ^ (state | r)`\n\n## Mathematical Law / Invariant\n\n- **Local Transition Law:** For cell $i$ on a 64-bit cyclic ring ($\\mathbb{Z}_{64}$):\n  $$x_i^{t+1} = l_i^t \\oplus (c_i^t \\lor r_i^t)$$\n  Truth table over $(l, c, r) \\in \\{111, 110, 101, 100, 011, 010, 001, 000\\}$: outputs $00011110_2 = 30_{10}$.\n- **Cyclic Shift Equivariance:** For any shift $k \\in [0, 63]$:\n  $$\\text{step\\_rule\\_30}(\\text{rotl}(x, k)) = \\text{rotl}(\\text{step\\_rule\\_30}(x), k)$$\n- **Non-Conservative Chaos:** Unlike Rule 184, Rule 30 does not conserve `std::popcount(state)`.\n\n## Function Signature\n\n```cpp\nuint64_t step_rule_30(uint64_t state);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 4 CPU instructions (`rol`, `ror`, `or`, `xor`) updating all 64 cells simultaneously.\n- **Space:** $O(1)$ registers.\n",
+  "readme": "# 006: Cellular Automaton Rule 30 Step (64-Bit SWAR)\n\n## Problem Statement\n\nStephen Wolfram's elementary Cellular Automaton **Rule 30** exhibits Class-3 aperiodic chaos from single-bit initial conditions and serves as the chaotic reference arm in counterfactual stream demarcation.\n\nImplement a 64-bit SWAR (SIMD Within A Register) periodic ring step for Rule 30:\n- Left neighbor register: `l = std::rotl(state, 1)`\n- Right neighbor register: `r = std::rotr(state, 1)`\n- Parallel 64-cell update: `l ^ (state | r)`\n\n## Mathematical Law / Invariant\n\n- **Local Transition Law:** For cell $i$ on a 64-bit cyclic ring ($\\mathbb{Z}_{64}$):\n  $$x_i^{t+1} = l_i^t \\oplus (c_i^t \\lor r_i^t)$$\n  Truth table over $(l, c, r) \\in \\{111, 110, 101, 100, 011, 010, 001, 000\\}$: outputs $00011110_2 = 30_{10}$.\n- **Cyclic Shift Equivariance:** For any shift $k \\in [0, 63]$:\n  $$\\text{step\\_rule\\_30}(\\text{rotl}(x, k)) = \\text{rotl}(\\text{step\\_rule\\_30}(x), k)$$\n- **Non-Conservative Chaos:** Unlike Rule 184, Rule 30 does not conserve `std::popcount(state)`.\n\n## Function Signature\n\n```cpp\nuint64_t step_rule_30(uint64_t state);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 4 CPU instructions (`rol`, `ror`, `or`, `xor`) updating all 64 cells simultaneously.\n- **Space:** $O(1)$ registers.\n",
+  "stub": "#pragma once\n\n#include <bit>\n#include <cstdint>\n\n// Step a 64-bit periodic ring forward by 1 generation under Wolfram Rule 30:\n// l = std::rotl(state, 1), r = std::rotr(state, 1), next = l ^ (state | r)\ninline uint64_t step_rule_30(uint64_t state) {\n    // TODO: implement 64-bit SWAR Rule 30 step on a periodic ring\n    (void)state;\n    return 0;\n}\n",
+  "harness": "#include <bit>\n#include <cassert>\n#include <chrono>\n#include <cstdint>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 006 CA Rule 30 Step Test Suite ===\\n\";\n\n    // Test 1: Absorbing states and single-bit seed expansion\n    assert(step_rule_30(0ULL) == 0ULL);\n    assert(step_rule_30(~0ULL) == 0ULL);\n    // For state = 1 (bit 0 set):\n    // l has bit 1 set (2), r has bit 63 set (1ULL << 63), c has bit 0 set (1).\n    // l ^ (c | r) => bits 0, 1, and 63 set!\n    uint64_t s1 = step_rule_30(1ULL);\n    assert(s1 == (1ULL | 2ULL | (1ULL << 63)));\n    std::cout << \"  \u2022 Test 1: Fixed points & single-bit light-cone expansion ... [PASS]\\n\";\n\n    // Test 2: Cyclic shift equivariance: step(rotl(x, k)) == rotl(step(x), k)\n    uint64_t pattern = 0xD3ADB33FCAFEF00DULL;\n    uint64_t stepped = step_rule_30(pattern);\n    for (int k = 0; k < 64; ++k) {\n        assert(step_rule_30(std::rotl(pattern, k)) == std::rotl(stepped, k));\n    }\n    std::cout << \"  \u2022 Test 2: 64-position cyclic rotation equivariance ... [PASS]\\n\";\n\n    // Test 3: Multi-step chaotic trajectory from seed = 1ULL << 32\n    uint64_t x = 1ULL << 32;\n    x = step_rule_30(x); // t=1: bits 31, 32, 33 -> 0b111 << 31\n    assert(x == (0b111ULL << 31));\n    x = step_rule_30(x); // t=2: 11001 in Rule 30 pyramid centered at 32 -> bits 30..34 = 10011_2 (since l=bit-1, r=bit+1)\n    assert(std::popcount(x) == 3);\n    std::cout << \"  \u2022 Test 3: Multi-step Rule 30 light-cone trajectory ... [PASS]\\n\";\n\n    // Timing benchmark\n    constexpr size_t ITERS = 2000000;\n    uint64_t state = 0x123456789ABCDEF1ULL;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (size_t i = 0; i < ITERS; ++i) {\n        state = step_rule_30(state) ^ i;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    if (state == 0xdeadbeefULL) std::cout << state;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / static_cast<double>(ITERS);\n\n    std::cout << \"All 006 tests passed!\\n\";\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

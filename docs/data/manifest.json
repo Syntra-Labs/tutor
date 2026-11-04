@@ -1,0 +1,2591 @@
+{
+  "generated_at": "2026-11-04T19:14:13.212789+00:00",
+  "total_problems": 78,
+  "problems": [
+    {
+      "id": "000a-hello-world",
+      "title": "Hello World & String Greeting",
+      "track": "Track 0: Warmup & Sanity Checks",
+      "category": "Track 0: Warmup & Sanity Checks",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "warmup",
+        "strings",
+        "sanity-check"
+      ]
+    },
+    {
+      "id": "000b-simple-arithmetic",
+      "title": "Simple Integer Arithmetic & Polynomial Eval",
+      "track": "Track 0: Warmup & Sanity Checks",
+      "category": "Track 0: Warmup & Sanity Checks",
+      "difficulty": "Easy",
+      "depends_on": [
+        "000a-hello-world"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "warmup",
+        "arithmetic",
+        "integers"
+      ]
+    },
+    {
+      "id": "001-lockfree-ringbuffer",
+      "title": "SPSC Lock-Free Ring Buffer",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Concurrency & Systems",
+      "difficulty": "Medium",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "atomics",
+        "memory-ordering",
+        "spsc",
+        "lock-free",
+        "ring-buffer"
+      ]
+    },
+    {
+      "id": "002-hypervector-hamming",
+      "title": "8192-bit Hypervector Hamming Distance",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "bit-manipulation",
+        "popcount",
+        "hypervector",
+        "simd"
+      ]
+    },
+    {
+      "id": "003-lru-cache-o1",
+      "title": "O(1) Intrusive LRU Cache",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Data Structures & Memory",
+      "difficulty": "Medium",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "lru",
+        "cache",
+        "hash-map",
+        "linked-list"
+      ]
+    },
+    {
+      "id": "004-ca184-demarcation",
+      "title": "Rule 184 Stream Boundary Demarcation",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Information Theory & Automata",
+      "difficulty": "Medium",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "cellular-automata",
+        "rule-184",
+        "swar",
+        "stream-chunking"
+      ]
+    },
+    {
+      "id": "005-fnv1a-splitmix64",
+      "title": "FNV-1a Hash & SplitMix64 Bijective Finalizer",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Hashing & Bit-Dispersion",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hashing",
+        "fnv1a",
+        "splitmix64",
+        "bijection",
+        "avalanche"
+      ]
+    },
+    {
+      "id": "006-ca30-chaos-step",
+      "title": "Cellular Automaton Rule 30 Step (64-Bit SWAR)",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Cellular Automata & SWAR",
+      "difficulty": "Easy",
+      "depends_on": [
+        "004-ca184-demarcation"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "cellular-automata",
+        "rule-30",
+        "swar",
+        "bit-manipulation",
+        "chaos"
+      ]
+    },
+    {
+      "id": "007-ca110-universal-step",
+      "title": "Cellular Automaton Rule 110 Step (64-Bit SWAR)",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Cellular Automata & SWAR",
+      "difficulty": "Easy",
+      "depends_on": [
+        "004-ca184-demarcation"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "cellular-automata",
+        "rule-110",
+        "swar",
+        "turing-complete"
+      ]
+    },
+    {
+      "id": "008-ca-counterfactual-demarc",
+      "title": "CA 184 / CA 30 Counterfactual Match-Inversion Demarcator",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Cellular Automata & SWAR",
+      "difficulty": "Medium",
+      "depends_on": [
+        "004-ca184-demarcation",
+        "006-ca30-chaos-step"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "cellular-automata",
+        "rule-184",
+        "rule-30",
+        "demarcation",
+        "counterfactual"
+      ]
+    },
+    {
+      "id": "009-packed-trit-encoding",
+      "title": "Packed 2-Bit Balanced Ternary Representation",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Balanced Ternary & SWAR",
+      "difficulty": "Easy",
+      "depends_on": [
+        "002-hypervector-hamming"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "balanced-ternary",
+        "bit-planes",
+        "swar",
+        "popcount"
+      ]
+    },
+    {
+      "id": "010-swar-trit-multiply",
+      "title": "Branchless SWAR Balanced Ternary Multiplication",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Balanced Ternary & SWAR",
+      "difficulty": "Easy",
+      "depends_on": [
+        "009-packed-trit-encoding"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "balanced-ternary",
+        "swar",
+        "bit-manipulation",
+        "monoid"
+      ]
+    },
+    {
+      "id": "011-swar-trit-adder",
+      "title": "Branchless SWAR Balanced Ternary Full-Adder",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Balanced Ternary & SWAR",
+      "difficulty": "Medium",
+      "depends_on": [
+        "009-packed-trit-encoding"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "balanced-ternary",
+        "swar",
+        "full-adder",
+        "bit-manipulation"
+      ]
+    },
+    {
+      "id": "012-ternary-dot-product",
+      "title": "Multiplier-Free Ternary Dot Product",
+      "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+      "category": "Balanced Ternary & SWAR",
+      "difficulty": "Easy",
+      "depends_on": [
+        "010-swar-trit-multiply"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "balanced-ternary",
+        "dot-product",
+        "popcount",
+        "multiplier-free"
+      ]
+    },
+    {
+      "id": "013-hypervec-seed-zscore",
+      "title": "Deterministic Hypervector Expansion & Z-Score Metric",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Easy",
+      "depends_on": [
+        "002-hypervector-hamming",
+        "005-fnv1a-splitmix64"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hypervector",
+        "vsa",
+        "splitmix64",
+        "z-score",
+        "concentration-of-measure"
+      ]
+    },
+    {
+      "id": "014-vsa-xor-binding",
+      "title": "VSA XOR Binding & Self-Inverse Unbinding",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Easy",
+      "depends_on": [
+        "013-hypervec-seed-zscore"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "vsa",
+        "xor-binding",
+        "isometry",
+        "hypervector",
+        "unbinding"
+      ]
+    },
+    {
+      "id": "015-hypervec-cyclic-rotl",
+      "title": "8192-Bit Cross-Word Cyclic Permutation",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Medium",
+      "depends_on": [
+        "013-hypervec-seed-zscore"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "vsa",
+        "permutation",
+        "cyclic-shift",
+        "hypervector",
+        "bit-manipulation"
+      ]
+    },
+    {
+      "id": "016-bipolar-byte-lut",
+      "title": "Precomputed 256x8 Bipolar Byte Expansion LUT",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "lut",
+        "bipolar",
+        "constexpr",
+        "simd",
+        "hypervector"
+      ]
+    },
+    {
+      "id": "017-bipolar-accumulator",
+      "title": "Bipolar Majority-Vote Accumulator & Unrolled Projection",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Medium",
+      "depends_on": [
+        "016-bipolar-byte-lut"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "vsa",
+        "bundling",
+        "majority-vote",
+        "bipolar",
+        "simd"
+      ]
+    },
+    {
+      "id": "018-bitsliced-vertical-adder",
+      "title": "8-Register Bit-Sliced Carry-Save Hypervector Encoder",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Hard",
+      "depends_on": [
+        "017-bipolar-accumulator"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "bit-slicing",
+        "carry-save-adder",
+        "swar",
+        "hypervector",
+        "vsa"
+      ]
+    },
+    {
+      "id": "019-helix-signature-256",
+      "title": "256-Bit Multi-Resolution Helix Quadrant Signature",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Easy",
+      "depends_on": [
+        "013-hypervec-seed-zscore"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "helix-signature",
+        "multi-resolution",
+        "popcount",
+        "hypervector",
+        "sketch"
+      ]
+    },
+    {
+      "id": "020-triad-majority-consensus",
+      "title": "Inline 3-Block Triad Majority Consensus Signature",
+      "track": "Track 2: Hyperdimensional Computing (VSA) & Bit-Sliced Accumulators",
+      "category": "Hyperdimensional Computing (VSA)",
+      "difficulty": "Easy",
+      "depends_on": [
+        "019-helix-signature-256"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "triad",
+        "majority-consensus",
+        "helix-signature",
+        "median-graph",
+        "swar"
+      ]
+    },
+    {
+      "id": "021-charclass-topology-lut",
+      "title": "Constexpr Character-Class Topology & Transition Flux",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "lut",
+        "constexpr",
+        "character-class",
+        "topology",
+        "streaming"
+      ]
+    },
+    {
+      "id": "022-shannon-entropy-q8",
+      "title": "Empirical Byte Shannon Entropy & Q8 Quantizer",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Easy",
+      "depends_on": [
+        "021-charclass-topology-lut"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "entropy",
+        "shannon",
+        "quantization",
+        "information-theory"
+      ]
+    },
+    {
+      "id": "023-surprisal-frequency-sketch",
+      "title": "Online Hash-Bucket Document-Frequency Surprisal Sketch",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Medium",
+      "depends_on": [
+        "005-fnv1a-splitmix64"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "sketch",
+        "surprisal",
+        "idf",
+        "streaming",
+        "hash-table"
+      ]
+    },
+    {
+      "id": "024-dirichlet-byte-markov",
+      "title": "Order-2 Interpolated Dirichlet Byte-Markov Surprisal",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Medium",
+      "depends_on": [
+        "022-shannon-entropy-q8"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "markov",
+        "dirichlet",
+        "surprisal",
+        "information-theory",
+        "bigram"
+      ]
+    },
+    {
+      "id": "025-prime-skipgram-extractor",
+      "title": "CamelCase, N-Gram & Prime-Stride Skip-Gram Extractor",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Medium",
+      "depends_on": [
+        "015-hypervec-cyclic-rotl"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "skipgram",
+        "fnv1a",
+        "camelcase",
+        "ngram",
+        "rotl"
+      ]
+    },
+    {
+      "id": "026-semantic-mass-sparsifier",
+      "title": "90% Salience Sparsification (Top-K Semantic Mass Nodes)",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Medium",
+      "depends_on": [
+        "023-surprisal-frequency-sketch",
+        "025-prime-skipgram-extractor"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "sparsification",
+        "top-k",
+        "semantic-mass",
+        "salience",
+        "partial-sort"
+      ]
+    },
+    {
+      "id": "027-phase-spike-stream-chunker",
+      "title": "Grammar-Free Byte-Markov + CA 184/30 Stream Chunker",
+      "track": "Track 3: Streaming Information Theory, Surprisal & Demarcation",
+      "category": "Information Theory & Surprisal",
+      "difficulty": "Hard",
+      "depends_on": [
+        "008-ca-counterfactual-demarc",
+        "024-dirichlet-byte-markov"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "chunker",
+        "cellular-automata",
+        "markov",
+        "surprisal",
+        "demarcation"
+      ]
+    },
+    {
+      "id": "028-golden-integers-ring",
+      "title": "Golden Integer Ring Z[phi] Addition & Multiplication",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "golden-ratio",
+        "ring",
+        "exact-arithmetic",
+        "algebra",
+        "icosians"
+      ]
+    },
+    {
+      "id": "029-golden-integers-norm-inv",
+      "title": "Z[phi] Galois Conjugate, Norm & Unit Inversion",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [
+        "028-golden-integers-ring"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "galois-conjugate",
+        "algebraic-norm",
+        "units",
+        "golden-ratio",
+        "ring"
+      ]
+    },
+    {
+      "id": "030-golden-integers-pow",
+      "title": "Z[phi] Binary Exponentiation & Fibonacci Identity",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [
+        "029-golden-integers-norm-inv"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "fibonacci",
+        "binary-exponentiation",
+        "golden-ratio",
+        "units",
+        "ring"
+      ]
+    },
+    {
+      "id": "031-f32-to-exact-rational",
+      "title": "Bit-Exact IEEE-754 binary32 to Dyadic Rational Decoder",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "ieee754",
+        "dyadic",
+        "exact-rational",
+        "bit-manipulation",
+        "subnormal"
+      ]
+    },
+    {
+      "id": "032-u256-exact-primitives",
+      "title": "256-Bit Unsigned Integer (U256) Shift, Add & Multiply",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Medium",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "u256",
+        "multiprecision",
+        "dyadic",
+        "sticky-shift",
+        "exact-arithmetic"
+      ]
+    },
+    {
+      "id": "033-dyadic-round-to-even",
+      "title": "Bounded-Precision Dyadic Dy<P> Canonicalization & Rounding",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Hard",
+      "depends_on": [
+        "032-u256-exact-primitives"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "dyadic",
+        "round-to-even",
+        "canonical",
+        "multiprecision",
+        "exact-arithmetic"
+      ]
+    },
+    {
+      "id": "034-isqrt-and-nibble-mul",
+      "title": "Exact Integer Square Root (isqrt) & Base-16 LUT Multiply",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "isqrt",
+        "lut",
+        "multiplier-free",
+        "bit-manipulation",
+        "integer-serving"
+      ]
+    },
+    {
+      "id": "035-uorlut01-group-projection",
+      "title": "4-Bit Group-Scaled LUT Matrix-Vector Projection",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Medium",
+      "depends_on": [
+        "034-isqrt-and-nibble-mul"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "uorlut01",
+        "lut",
+        "quantization",
+        "group-scale",
+        "integer-serving"
+      ]
+    },
+    {
+      "id": "036-prime-address-gcd",
+      "title": "Prime Token Factor Set & Exact GCD Set Intersection",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "primes",
+        "gcd",
+        "unique-factorization",
+        "set-intersection",
+        "number-theory"
+      ]
+    },
+    {
+      "id": "037-prime-zeta-codebook",
+      "title": "Riemann Zeta Critical-Line Phase Codebook",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Medium",
+      "depends_on": [
+        "036-prime-address-gcd"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "riemann-zeta",
+        "primes",
+        "unitary-phase",
+        "homomorphism",
+        "q30"
+      ]
+    },
+    {
+      "id": "038-microtonal-72edo",
+      "title": "72-EDO Microtonal Frequency & Harmonic Consonance",
+      "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+      "category": "Exact Algebraic Rings & Number Theory",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "72-edo",
+        "microtonal",
+        "acoustic-tokenizer",
+        "cyclic-group",
+        "pitch-class"
+      ]
+    },
+    {
+      "id": "039-spherical-haversine",
+      "title": "Great-Circle Haversine Distance on S2",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Spherical Geometry",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "sphere",
+        "haversine",
+        "geodesic",
+        "trigonometry"
+      ]
+    },
+    {
+      "id": "040-spherical-forward-waypoint",
+      "title": "Spherical Forward Geodesic Waypoint & Bearing",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Spherical Geometry",
+      "difficulty": "Medium",
+      "depends_on": [
+        "039-spherical-haversine"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "sphere",
+        "geodesic",
+        "rodrigues",
+        "tangent-bundle",
+        "turtle-geometry"
+      ]
+    },
+    {
+      "id": "041-spherical-excess-girard",
+      "title": "Spherical Excess & Girard's Theorem Polygon Area",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Spherical Geometry",
+      "difficulty": "Medium",
+      "depends_on": [
+        "040-spherical-forward-waypoint"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "sphere",
+        "girard-theorem",
+        "spherical-excess",
+        "gauss-bonnet",
+        "solid-angle"
+      ]
+    },
+    {
+      "id": "042-quat-norm-conjugate",
+      "title": "Unit Quaternion Normalization, Conjugate & Inverse on S3",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Lie Groups & Quaternions",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "quaternions",
+        "s3-manifold",
+        "normalization",
+        "conjugate"
+      ]
+    },
+    {
+      "id": "043-quat-hamilton-rotor",
+      "title": "Non-Commutative Hamilton Product & Axis-Angle Rotor",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Lie Groups & Quaternions",
+      "difficulty": "Easy",
+      "depends_on": [
+        "042-quat-norm-conjugate"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "quaternions",
+        "hamilton-product",
+        "rotor",
+        "so3",
+        "non-commutative"
+      ]
+    },
+    {
+      "id": "044-quat-geodesic-dist",
+      "title": "Geodesic Distance on the Double-Cover S3",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Lie Groups & Quaternions",
+      "difficulty": "Easy",
+      "depends_on": [
+        "043-quat-hamilton-rotor"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "quaternions",
+        "s3-manifold",
+        "geodesic-distance",
+        "double-cover",
+        "bi-invariance"
+      ]
+    },
+    {
+      "id": "045-quat-slerp",
+      "title": "Spherical Linear Interpolation (SLERP) with Small-Angle Fallback",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Lie Groups & Quaternions",
+      "difficulty": "Medium",
+      "depends_on": [
+        "044-quat-geodesic-dist"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "quaternions",
+        "slerp",
+        "interpolation",
+        "geodesic"
+      ]
+    },
+    {
+      "id": "046-hopf-fibration-map",
+      "title": "Hopf Fibration Projection (S3 to S2) & Fibre Invariance",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Hopf Fibration & Fibre Bundles",
+      "difficulty": "Medium",
+      "depends_on": [
+        "043-quat-hamilton-rotor"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hopf-fibration",
+        "s3-to-s2",
+        "fibre-bundle",
+        "u1-gauge-invariance"
+      ]
+    },
+    {
+      "id": "047-hopf-fibre-and-sector",
+      "title": "Hopf Kept-Fibre Angle & 512-Sector Quantizer",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Hopf Fibration & Fibre Bundles",
+      "difficulty": "Medium",
+      "depends_on": [
+        "046-hopf-fibration-map"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hopf-fibration",
+        "fibre-phase",
+        "sector-quantization",
+        "holonomy"
+      ]
+    },
+    {
+      "id": "048-hamilton-rotation-gate",
+      "title": "Hamilton Rotation Gate Forward & Exact Adjoint Backward",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Geometric Neural Gates",
+      "difficulty": "Medium",
+      "depends_on": [
+        "043-quat-hamilton-rotor"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hamilton-gate",
+        "quaternions",
+        "autodiff",
+        "adjoint",
+        "norm-preserving"
+      ]
+    },
+    {
+      "id": "049-recurrence-gate-secant",
+      "title": "Dyadic Recurrence Gate LUT & Secant Surrogate Credit",
+      "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+      "category": "Geometric Neural Gates",
+      "difficulty": "Hard",
+      "depends_on": [
+        "048-hamilton-rotation-gate"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "recurrence-gate",
+        "dyadic-lut",
+        "secant-surrogate",
+        "quaternion-scan"
+      ]
+    },
+    {
+      "id": "050-octonion-fano-product",
+      "title": "Fano Plane Octonion Basis Multiplication",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "Octonions & Clifford Algebra",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "octonions",
+        "fano-plane",
+        "non-associative",
+        "cayley-dickson"
+      ]
+    },
+    {
+      "id": "051-cl06-bivector-generators",
+      "title": "Clifford Algebra Cl(0,6) Generators & 15 Bivectors",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "Octonions & Clifford Algebra",
+      "difficulty": "Medium",
+      "depends_on": [
+        "050-octonion-fano-product"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "clifford-algebra",
+        "bivectors",
+        "octonions",
+        "signed-matrices"
+      ]
+    },
+    {
+      "id": "052-spinor-group-64-closure",
+      "title": "Order-64 Spinor Group Closure & Cayley Table",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "Octonions & Clifford Algebra",
+      "difficulty": "Medium",
+      "depends_on": [
+        "051-cl06-bivector-generators"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "clifford-algebra",
+        "spinor-group",
+        "cayley-table",
+        "bfs-closure",
+        "signed-permutations"
+      ]
+    },
+    {
+      "id": "053-e8-16root-orbit-bfs",
+      "title": "16-Root E8 Orbit Generation & Transport BFS Table",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "E8 Lattice & Discrete Routing",
+      "difficulty": "Hard",
+      "depends_on": [
+        "052-spinor-group-64-closure"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "e8-lattice",
+        "orbit-graph",
+        "bfs",
+        "holonomy-transport"
+      ]
+    },
+    {
+      "id": "054-e8-root-lexicographic-snap",
+      "title": "16-Root E8 Lexicographic Snapper (L1 + Hamming)",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "E8 Lattice & Discrete Routing",
+      "difficulty": "Medium",
+      "depends_on": [
+        "053-e8-16root-orbit-bfs"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "e8-lattice",
+        "quantization",
+        "l1-distance",
+        "hamming-distance",
+        "lexicographic-snap"
+      ]
+    },
+    {
+      "id": "055-hypervec-e8-carrier-decoder",
+      "title": "Hypervector-to-E8 256-Cell Product-Address Decoder",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "E8 Lattice & Discrete Routing",
+      "difficulty": "Medium",
+      "depends_on": [
+        "054-e8-root-lexicographic-snap"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hypervector",
+        "e8-lattice",
+        "product-quantization",
+        "admission-cell"
+      ]
+    },
+    {
+      "id": "056-icosian-600cell-generator",
+      "title": "Binary Icosahedral Group 2I (120 Icosians Generator)",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "600-Cell, Icosians & H4",
+      "difficulty": "Hard",
+      "depends_on": [
+        "029-golden-integers-norm-inv",
+        "043-quat-hamilton-rotor"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "600-cell",
+        "icosians",
+        "binary-icosahedral-group",
+        "golden-integers",
+        "h4-root-system"
+      ]
+    },
+    {
+      "id": "057-icosian-snap-cayley",
+      "title": "600-Cell Voronoi Snapper & 120x120 Cayley Table",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "600-Cell, Icosians & H4",
+      "difficulty": "Hard",
+      "depends_on": [
+        "056-icosian-600cell-generator"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "600-cell",
+        "icosians",
+        "cayley-table",
+        "voronoi-snap",
+        "spin-weights"
+      ]
+    },
+    {
+      "id": "058-e8-h4-golden-construction",
+      "title": "E8 = H4 + phi*H4 Reduced-Metric Bilinear Form",
+      "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+      "category": "600-Cell, Icosians & H4",
+      "difficulty": "Hard",
+      "depends_on": [
+        "056-icosian-600cell-generator"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "e8-lattice",
+        "h4-root-system",
+        "600-cell",
+        "reduced-metric",
+        "weyl-reflection"
+      ]
+    },
+    {
+      "id": "059-e8-shortlist-admission",
+      "title": "E8 256-Cell Product-Address Shortlist Admission Gate",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Medium",
+      "depends_on": [
+        "055-hypervec-e8-carrier-decoder"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "e8-lattice",
+        "shortlist-admission",
+        "sublinear-routing",
+        "product-address"
+      ]
+    },
+    {
+      "id": "060-helix-admission-cascade",
+      "title": "Two-Stage Helix Signature + Admission Pre-Filter Cascade",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Medium",
+      "depends_on": [
+        "019-helix-signature-256",
+        "059-e8-shortlist-admission"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "helix-signature",
+        "shortlist-cascade",
+        "nth-element",
+        "l2-cache-routing"
+      ]
+    },
+    {
+      "id": "061-flock-read-consensus",
+      "title": "Flock Read (Vicsek/Kuramoto Neighbour Consensus)",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Hard",
+      "depends_on": [
+        "054-e8-root-lexicographic-snap"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "flock-read",
+        "vicsek-consensus",
+        "e8-roots",
+        "softmax-free-attention"
+      ]
+    },
+    {
+      "id": "062-mode-relation-graph",
+      "title": "5-Edge MODE_RELATION Structural Adjacency Coupler",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Medium",
+      "depends_on": [
+        "020-triad-majority-consensus"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "mode-relation",
+        "structural-graph",
+        "triad-folding",
+        "manifold-routing"
+      ]
+    },
+    {
+      "id": "063-rank-margin-hinge",
+      "title": "Integer Rank-Margin Hinge Loss (Objectives A & R)",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Easy",
+      "depends_on": [
+        "059-e8-shortlist-admission"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "rank-margin",
+        "hinge-loss",
+        "integer-learning",
+        "no-softmax"
+      ]
+    },
+    {
+      "id": "064-lucidity-delta-readout",
+      "title": "Manifold Lucidity Score & Surprise-Gated Delta Learning",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Easy",
+      "depends_on": [
+        "060-helix-admission-cascade"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "lucidity-score",
+        "surprise-gated-learning",
+        "bmu-error",
+        "delta-rule"
+      ]
+    },
+    {
+      "id": "065-bell15-hazard-repulsor",
+      "title": "Bell-15 Counterfactual Task-Split & +3sigma Hazard Repulsor",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Medium",
+      "depends_on": [
+        "064-lucidity-delta-readout"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "counterfactual-split",
+        "hazard-repulsor",
+        "bell-margin",
+        "task-placement"
+      ]
+    },
+    {
+      "id": "066-ternary-merkle-object-store",
+      "title": "Canonical Ternary Merkle Object Store (fold & range)",
+      "track": "Track 7: Sub-Linear Geometric Routing, Flock Reads & Durable Memory",
+      "category": "Geometric Systems & Compute",
+      "difficulty": "Hard",
+      "depends_on": [
+        "005-fnv1a-splitmix64"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "ternary-merkle-dag",
+        "content-addressable",
+        "deduplication",
+        "range-read"
+      ]
+    },
+    {
+      "id": "067-symbolic-ast-evaluator",
+      "title": "Recursive Descent Symbolic Expression Parser & Evaluator",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Easy",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "recursive-descent",
+        "symbolic-ast",
+        "expression-parser",
+        "evaluator"
+      ]
+    },
+    {
+      "id": "068-alpha-premise-canonicalizer",
+      "title": "Reversible Alpha & Premise IR Canonicalizer",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Medium",
+      "depends_on": [
+        "067-symbolic-ast-evaluator"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "alpha-renaming",
+        "lean4-ir",
+        "canonicalization",
+        "theorem-proving"
+      ]
+    },
+    {
+      "id": "069-hashcons-expr-unification",
+      "title": "Hash-Consed Lean.Expr DAG & First-Order Unification Gate",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Hard",
+      "depends_on": [
+        "068-alpha-premise-canonicalizer"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hash-consing",
+        "dag-unification",
+        "lean-expr",
+        "admissibility-gate"
+      ]
+    },
+    {
+      "id": "070-tree-rotor-dag-folder",
+      "title": "Non-Commutative Tree Rotor DAG Folder on S^3",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Hard",
+      "depends_on": [
+        "043-quat-hamilton-rotor",
+        "069-hashcons-expr-unification"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "tree-rotor",
+        "quaternion-s3",
+        "non-commutative",
+        "dag-folding"
+      ]
+    },
+    {
+      "id": "071-least-action-macro-decider",
+      "title": "Least-Action Macro-Action Decider",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Medium",
+      "depends_on": [
+        "044-quat-geodesic-dist",
+        "070-tree-rotor-dag-folder"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "macro-decider",
+        "least-action",
+        "geodesic-convergence",
+        "tactic-routing"
+      ]
+    },
+    {
+      "id": "072-speculative-geodesic-astar",
+      "title": "Speculative Geodesic A* Search over Proof States",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Hard",
+      "depends_on": [
+        "071-least-action-macro-decider"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "geodesic-astar",
+        "speculative-routing",
+        "proof-search",
+        "cosine-tangent"
+      ]
+    },
+    {
+      "id": "073-exact-simplex-pivot",
+      "title": "Exact Rational Simplex Basis Pivot & Certificate Verifier",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Hard",
+      "depends_on": [
+        "033-dyadic-round-to-even"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "simplex-tableau",
+        "blands-rule",
+        "exact-rational",
+        "duality-certificate"
+      ]
+    },
+    {
+      "id": "074-hoare-contract-skeletonizer",
+      "title": "Hoare Logic Contract Parser & Function Skeletonizer (lgcc)",
+      "track": "Track 8: Symbolic ASTs, Tree Rotors & Neurosymbolic Theorem Proving",
+      "category": "Neurosymbolic & Formal Verification",
+      "difficulty": "Medium",
+      "depends_on": [
+        "067-symbolic-ast-evaluator"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Cycles/Op",
+          "asc": true
+        },
+        {
+          "hdr": "Bytes",
+          "asc": true
+        }
+      ],
+      "languages": [
+        "cpp"
+      ],
+      "tags": [
+        "hoare-logic",
+        "contract-parser",
+        "ast-skeletonizer",
+        "lgcc"
+      ]
+    },
+    {
+      "id": "075-container-namespace-isolation",
+      "title": "Linux Containers from Scratch (Namespaces & Chroot)",
+      "track": "Track 9: Systems Engineering, Containers & Git Internals",
+      "category": "Systems & Containers",
+      "difficulty": "Medium",
+      "depends_on": [],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "PID Isolation",
+          "asc": false
+        },
+        {
+          "hdr": "Mount Jail",
+          "asc": false
+        }
+      ],
+      "languages": [
+        "sh"
+      ],
+      "tags": [
+        "containers",
+        "namespaces",
+        "chroot",
+        "linux-kernel",
+        "pid1",
+        "procfs"
+      ]
+    },
+    {
+      "id": "076-git-object-plumbing",
+      "title": "Git Internals: Object Database Plumbing",
+      "track": "Track 9: Systems Engineering, Containers & Git Internals",
+      "category": "Systems & Tooling",
+      "difficulty": "Medium",
+      "depends_on": [
+        "005-fnv1a-splitmix64"
+      ],
+      "colspec": [
+        {
+          "hdr": "Score",
+          "asc": false
+        },
+        {
+          "hdr": "Plumbing Pass",
+          "asc": false
+        },
+        {
+          "hdr": "Tree Integrity",
+          "asc": false
+        }
+      ],
+      "languages": [
+        "sh"
+      ],
+      "tags": [
+        "git",
+        "internals",
+        "hash-object",
+        "write-tree",
+        "commit-tree",
+        "dag"
+      ]
+    }
+  ]
+}

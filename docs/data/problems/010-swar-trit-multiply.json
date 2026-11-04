@@ -1,0 +1,37 @@
+{
+  "id": "010-swar-trit-multiply",
+  "title": "Branchless SWAR Balanced Ternary Multiplication",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Balanced Ternary & SWAR",
+  "difficulty": "Easy",
+  "depends_on": [
+    "009-packed-trit-encoding"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "balanced-ternary",
+    "swar",
+    "bit-manipulation",
+    "monoid"
+  ],
+  "spec": "# 010: Branchless SWAR Balanced Ternary Multiplication\n\n## Problem Statement\n\nGiven two 64-trit vectors `a` and `b` in dual bit-plane format (`PackedTrit64 { uint64_t pos, neg; }`), compute their element-wise product $c_i = a_i \\cdot b_i \\in \\{-1, 0, +1\\}$ across all 64 coordinates simultaneously without branches or integer multipliers:\n- `out.pos = (a.pos & b.pos) | (a.neg & b.neg)`\n- `out.neg = (a.pos & b.neg) | (a.neg & b.pos)`\n\n## Mathematical Law / Invariant\n\n- **Commutative Monoid with Zero Absorption:** $(\\{-1, 0, +1\\}^{64}, \\cdot)$ is a commutative monoid with identity $+1^{64}$ (`{ ~0ULL, 0ULL }`) and absorbing zero $0^{64}$ (`{ 0ULL, 0ULL }`).\n- **Sign-Rule Closure:** If `a.is_valid()` and `b.is_valid()`, then `out.is_valid()` holds automatically (`(out.pos & out.neg) == 0`), because $(P_a \\land N_a) = 0$ and $(P_b \\land N_b) = 0$ imply `out.pos & out.neg == 0`.\n- **Involution on Support:** Multiplying `a` by $-1^{64}$ (`{ 0ULL, ~0ULL }`) swaps `a.pos` and `a.neg`, and `trit_mul(a, a)` projects onto the support mask `{ a.pos | a.neg, 0ULL }`.\n\n## Function Signature\n\n```cpp\nPackedTrit64 trit_mul(PackedTrit64 a, PackedTrit64 b);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 6 bitwise instructions (`and`, `or`) for 64 parallel trit multiplications (16+ trits/cycle).\n- **Space:** $O(1)$ registers.\n",
+  "readme": "# 010: Branchless SWAR Balanced Ternary Multiplication\n\n## Problem Statement\n\nGiven two 64-trit vectors `a` and `b` in dual bit-plane format (`PackedTrit64 { uint64_t pos, neg; }`), compute their element-wise product $c_i = a_i \\cdot b_i \\in \\{-1, 0, +1\\}$ across all 64 coordinates simultaneously without branches or integer multipliers:\n- `out.pos = (a.pos & b.pos) | (a.neg & b.neg)`\n- `out.neg = (a.pos & b.neg) | (a.neg & b.pos)`\n\n## Mathematical Law / Invariant\n\n- **Commutative Monoid with Zero Absorption:** $(\\{-1, 0, +1\\}^{64}, \\cdot)$ is a commutative monoid with identity $+1^{64}$ (`{ ~0ULL, 0ULL }`) and absorbing zero $0^{64}$ (`{ 0ULL, 0ULL }`).\n- **Sign-Rule Closure:** If `a.is_valid()` and `b.is_valid()`, then `out.is_valid()` holds automatically (`(out.pos & out.neg) == 0`), because $(P_a \\land N_a) = 0$ and $(P_b \\land N_b) = 0$ imply `out.pos & out.neg == 0`.\n- **Involution on Support:** Multiplying `a` by $-1^{64}$ (`{ 0ULL, ~0ULL }`) swaps `a.pos` and `a.neg`, and `trit_mul(a, a)` projects onto the support mask `{ a.pos | a.neg, 0ULL }`.\n\n## Function Signature\n\n```cpp\nPackedTrit64 trit_mul(PackedTrit64 a, PackedTrit64 b);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ \u2014 6 bitwise instructions (`and`, `or`) for 64 parallel trit multiplications (16+ trits/cycle).\n- **Space:** $O(1)$ registers.\n",
+  "stub": "#pragma once\n\n#include <cstdint>\n\nstruct PackedTrit64 {\n    uint64_t pos = 0; // bit i == 1 iff trit[i] == +1\n    uint64_t neg = 0; // bit i == 1 iff trit[i] == -1\n\n    constexpr bool is_valid() const { return (pos & neg) == 0; }\n};\n\n// Multiply 64 balanced trits in parallel using 6 bitwise operations\nconstexpr PackedTrit64 trit_mul(PackedTrit64 a, PackedTrit64 b) {\n    // TODO: implement out.pos = (a.pos & b.pos) | (a.neg & b.neg)\n    //                 out.neg = (a.pos & b.neg) | (a.neg & b.pos)\n    (void)a;\n    (void)b;\n    return {0, 0};\n}\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <cstdint>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 010 SWAR Balanced Ternary Multiplication Test Suite ===\\n\";\n\n    PackedTrit64 zero{0ULL, 0ULL};\n    PackedTrit64 ones{~0ULL, 0ULL};\n    PackedTrit64 neg_ones{0ULL, ~0ULL};\n\n    PackedTrit64 a{0x5555555555555555ULL, 0x2222222222222222ULL};\n    PackedTrit64 b{0x3333333333333333ULL, 0xCCCCCCCCCCCCCCCCULL};\n    PackedTrit64 c{0x0F0F0F0F0F0F0F0FULL, 0xF000F000F000F000ULL};\n    assert(a.is_valid() && b.is_valid() && c.is_valid());\n\n    // Test 1: Identity, zero absorption, and -1 involution\n    PackedTrit64 a_id = trit_mul(a, ones);\n    assert(a_id.pos == a.pos && a_id.neg == a.neg);\n\n    PackedTrit64 a_zero = trit_mul(a, zero);\n    assert(a_zero.pos == 0ULL && a_zero.neg == 0ULL);\n\n    PackedTrit64 a_neg = trit_mul(a, neg_ones);\n    assert(a_neg.pos == a.neg && a_neg.neg == a.pos);\n    std::cout << \"  \u2022 Test 1: Identity (+1), absorption (0), and negation (-1) ... [PASS]\\n\";\n\n    // Test 2: Commutativity, associativity, and validity preservation\n    PackedTrit64 ab = trit_mul(a, b);\n    PackedTrit64 ba = trit_mul(b, a);\n    assert(ab.is_valid());\n    assert(ab.pos == ba.pos && ab.neg == ba.neg);\n\n    PackedTrit64 abc1 = trit_mul(ab, c);\n    PackedTrit64 abc2 = trit_mul(a, trit_mul(b, c));\n    assert(abc1.is_valid());\n    assert(abc1.pos == abc2.pos && abc1.neg == abc2.neg);\n    std::cout << \"  \u2022 Test 2: Commutativity, associativity & disjoint plane closure ... [PASS]\\n\";\n\n    // Test 3: Square idempotence on support: a * a == { a.pos | a.neg, 0 }\n    PackedTrit64 a_sq = trit_mul(a, a);\n    assert(a_sq.pos == (a.pos | a.neg) && a_sq.neg == 0ULL);\n    std::cout << \"  \u2022 Test 3: Square projection onto active support mask ... [PASS]\\n\";\n\n    // Timing benchmark\n    constexpr size_t ITERS = 2000000;\n    PackedTrit64 acc = a;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (size_t i = 0; i < ITERS; ++i) {\n        acc = trit_mul(acc, b);\n        acc.pos ^= (i & 1ULL);\n        acc.neg &= ~acc.pos;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    if (acc.pos == 0xdeadbeefULL) std::cout << acc.neg;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / static_cast<double>(ITERS);\n\n    std::cout << \"All 010 tests passed!\\n\";\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

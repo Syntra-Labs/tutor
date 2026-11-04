@@ -1,0 +1,36 @@
+{
+  "id": "028-golden-integers-ring",
+  "title": "Golden Integer Ring Z[phi] Addition & Multiplication",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "golden-ratio",
+    "ring",
+    "exact-arithmetic",
+    "algebra",
+    "icosians"
+  ],
+  "spec": "# 028: Golden Integer Ring $\\mathbb{Z}[\\phi]$ Addition & Multiplication\n\n## Problem Statement\n\nThe coordinates of the 120 unit icosians and $H_4$ root systems contain the golden ratio $\\phi = \\frac{1 + \\sqrt{5}}{2}$, an irrational algebraic integer satisfying $\\phi^2 = \\phi + 1$.\n\nTo compute with golden coordinates with **zero floating-point rounding**, represent every element of the ring of integers $\\mathbb{Z}[\\phi] = \\{a + b\\phi : a, b \\in \\mathbb{Z}\\}$ as an exact integer pair `ZPhi { int64_t a, b; }`.\n\n## Mathematical Law / Invariant\n\nUsing the defining minimal polynomial identity $\\phi^2 = \\phi + 1$:\n\n1. **Addition & Subtraction:**\n   $$(a + b\\phi) \\pm (c + d\\phi) = (a \\pm c) + (b \\pm d)\\phi$$\n2. **Exact Ring Multiplication:**\n   $$(a + b\\phi)(c + d\\phi) = ac + (ad + bc)\\phi + bd\\phi^2 = (ac + bd) + (ad + bc + bd)\\phi$$\n3. **Golden Ratio Identity:**\n   Let $\\Phi = (0, 1)$. Then $\\Phi \\cdot \\Phi = (1, 1) = 1 + \\phi$, and $\\Phi \\cdot (\\Phi - 1) = (0, 1) \\cdot (-1, 1) = (1, 0) = 1$.\n\n## Function Signature\n\n```cpp\nstruct ZPhi {\n    int64_t a = 0;\n    int64_t b = 0;\n\n    constexpr bool operator==(const ZPhi& o) const = default;\n    constexpr ZPhi operator+(const ZPhi& o) const;\n    constexpr ZPhi operator-(const ZPhi& o) const;\n    constexpr ZPhi operator-() const;\n    constexpr ZPhi operator*(const ZPhi& o) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (4 integer multiplications and 3 additions per product, or 3 multiplications via Karatsuba).\n- **Space:** $O(1)$ (16 bytes per `ZPhi`).\n",
+  "readme": "# 028: Golden Integer Ring $\\mathbb{Z}[\\phi]$ Addition & Multiplication\n\n## Problem Statement\n\nThe coordinates of the 120 unit icosians and $H_4$ root systems contain the golden ratio $\\phi = \\frac{1 + \\sqrt{5}}{2}$, an irrational algebraic integer satisfying $\\phi^2 = \\phi + 1$.\n\nTo compute with golden coordinates with **zero floating-point rounding**, represent every element of the ring of integers $\\mathbb{Z}[\\phi] = \\{a + b\\phi : a, b \\in \\mathbb{Z}\\}$ as an exact integer pair `ZPhi { int64_t a, b; }`.\n\n## Mathematical Law / Invariant\n\nUsing the defining minimal polynomial identity $\\phi^2 = \\phi + 1$:\n\n1. **Addition & Subtraction:**\n   $$(a + b\\phi) \\pm (c + d\\phi) = (a \\pm c) + (b \\pm d)\\phi$$\n2. **Exact Ring Multiplication:**\n   $$(a + b\\phi)(c + d\\phi) = ac + (ad + bc)\\phi + bd\\phi^2 = (ac + bd) + (ad + bc + bd)\\phi$$\n3. **Golden Ratio Identity:**\n   Let $\\Phi = (0, 1)$. Then $\\Phi \\cdot \\Phi = (1, 1) = 1 + \\phi$, and $\\Phi \\cdot (\\Phi - 1) = (0, 1) \\cdot (-1, 1) = (1, 0) = 1$.\n\n## Function Signature\n\n```cpp\nstruct ZPhi {\n    int64_t a = 0;\n    int64_t b = 0;\n\n    constexpr bool operator==(const ZPhi& o) const = default;\n    constexpr ZPhi operator+(const ZPhi& o) const;\n    constexpr ZPhi operator-(const ZPhi& o) const;\n    constexpr ZPhi operator-() const;\n    constexpr ZPhi operator*(const ZPhi& o) const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ (4 integer multiplications and 3 additions per product, or 3 multiplications via Karatsuba).\n- **Space:** $O(1)$ (16 bytes per `ZPhi`).\n",
+  "stub": "#pragma once\n\n#include <cstdint>\n\nstruct ZPhi {\n    int64_t a = 0;\n    int64_t b = 0;\n\n    constexpr bool operator==(const ZPhi& o) const = default;\n\n    constexpr ZPhi operator+(const ZPhi& o) const {\n        // TODO: (a + c, b + d)\n        (void)o;\n        return {};\n    }\n\n    constexpr ZPhi operator-(const ZPhi& o) const {\n        // TODO: (a - c, b - d)\n        (void)o;\n        return {};\n    }\n\n    constexpr ZPhi operator-() const {\n        // TODO: (-a, -b)\n        return {};\n    }\n\n    constexpr ZPhi operator*(const ZPhi& o) const {\n        // TODO: (a*c + b*d, a*d + b*c + b*d)\n        (void)o;\n        return {};\n    }\n};\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 028 Golden Integer Ring Z[phi] Suite ===\\n\";\n\n    constexpr ZPhi one{1, 0};\n    constexpr ZPhi phi{0, 1};\n\n    // Test 1: Fundamental golden identity phi^2 == phi + 1\n    assert((phi * phi) == (phi + one));\n    assert((phi * phi) == (ZPhi{1, 1}));\n    std::cout << \"  \u2022 Test 1: Minimal polynomial phi^2 == phi + 1 == (1, 1) ... [PASS]\\n\";\n\n    // Test 2: Reciprocal identity phi * (phi - 1) == 1\n    ZPhi phi_inv{-1, 1};\n    assert((phi * phi_inv) == one);\n    std::cout << \"  \u2022 Test 2: Reciprocal identity phi * (phi - 1) == (1, 0) ... [PASS]\\n\";\n\n    // Test 3: Ring axioms (associativity & distributivity) & doubled icosian norm\n    // Doubled icosian (phi, 1, phi^-1, 0) -> sum of squares = phi^2 + 1 + phi^-2 == 4\n    ZPhi x{3, -2}, y{-5, 4}, z{7, 1};\n    assert(((x * y) * z) == (x * (y * z)));\n    assert((x * (y + z)) == ((x * y) + (x * z)));\n    ZPhi sum_sq = (phi * phi) + (one * one) + (phi_inv * phi_inv);\n    assert(sum_sq == (ZPhi{4, 0}));\n    std::cout << \"  \u2022 Test 3: Ring associativity, distributivity & icosian length^2 == 4 ... [PASS]\\n\";\n\n    // Benchmark loop\n    constexpr size_t ITERS = 1000000;\n    ZPhi acc{1, 1};\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (size_t i = 0; i < ITERS; ++i) {\n        acc = (acc * phi) - one;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / static_cast<double>(ITERS);\n    volatile int64_t sink = acc.a ^ acc.b;\n    (void)sink;\n\n    std::cout << \"All 028 tests passed!\\n\";\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

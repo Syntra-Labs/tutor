@@ -1,0 +1,37 @@
+{
+  "id": "045-quat-slerp",
+  "title": "Spherical Linear Interpolation (SLERP) with Small-Angle Fallback",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Medium",
+  "depends_on": [
+    "044-quat-geodesic-dist"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "quaternions",
+    "slerp",
+    "interpolation",
+    "geodesic"
+  ],
+  "spec": "# 045: Spherical Linear Interpolation (SLERP) with Small-Angle Fallback\n\n## Problem Statement\n\nGiven two unit quaternions $q_1, q_2 \\in S^3$ and an interpolation parameter $t \\in [0, 1]$, **Spherical Linear Interpolation (SLERP)** traces the constant-angular-velocity shortest geodesic arc on $S^3 / \\{\\pm 1\\}$. When $q_1 \\cdot q_2 < 0$, $q_2$ must be negated to ensure the shortest path on $SO(3)$; when $|q_1 \\cdot q_2| > 0.9995$, $\\sin\\theta_0 \\to 0$ and the formula must fall back to normalized linear interpolation (NLERP) for numerical stability.\n\n## Mathematical Law / Invariant\n\nGiven unit quaternions $q_1, q_2 \\in S^3$ and $t \\in [0, 1]$:\n1. Compute $d = q_1 \\cdot q_2$. If $d < 0$, set $q_2 \\leftarrow -q_2$ and $d \\leftarrow -d$.\n2. If $d > 0.9995$, return $\\mathrm{normalize}((1 - t) q_1 + t q_2)$.\n3. Otherwise, let $\\theta_0 = \\arccos(\\min(1.0, d))$ and $\\theta = t \\theta_0$:\n   $$\\mathrm{slerp}(q_1, q_2, t) = \\frac{\\sin(\\theta_0 - \\theta)}{\\sin\\theta_0} q_1 + \\frac{\\sin\\theta}{\\sin\\theta_0} q_2$$\n4. **Constant Angular Speed Invariant:**\n   $$d_{S^3}(\\mathrm{slerp}(q_1, q_2, t), q_1) = t \\cdot d_{S^3}(q_1, q_2), \\qquad \\|\\mathrm{slerp}(q_1, q_2, t)\\|_2 = 1$$\n\n## Function Signature\n\n```cpp\nQuat slerp(Quat q1, Quat q2, double t);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per interpolation.\n- **Space:** $O(1)$.\n",
+  "readme": "# 045: Spherical Linear Interpolation (SLERP) with Small-Angle Fallback\n\n## Problem Statement\n\nGiven two unit quaternions $q_1, q_2 \\in S^3$ and an interpolation parameter $t \\in [0, 1]$, **Spherical Linear Interpolation (SLERP)** traces the constant-angular-velocity shortest geodesic arc on $S^3 / \\{\\pm 1\\}$. When $q_1 \\cdot q_2 < 0$, $q_2$ must be negated to ensure the shortest path on $SO(3)$; when $|q_1 \\cdot q_2| > 0.9995$, $\\sin\\theta_0 \\to 0$ and the formula must fall back to normalized linear interpolation (NLERP) for numerical stability.\n\n## Mathematical Law / Invariant\n\nGiven unit quaternions $q_1, q_2 \\in S^3$ and $t \\in [0, 1]$:\n1. Compute $d = q_1 \\cdot q_2$. If $d < 0$, set $q_2 \\leftarrow -q_2$ and $d \\leftarrow -d$.\n2. If $d > 0.9995$, return $\\mathrm{normalize}((1 - t) q_1 + t q_2)$.\n3. Otherwise, let $\\theta_0 = \\arccos(\\min(1.0, d))$ and $\\theta = t \\theta_0$:\n   $$\\mathrm{slerp}(q_1, q_2, t) = \\frac{\\sin(\\theta_0 - \\theta)}{\\sin\\theta_0} q_1 + \\frac{\\sin\\theta}{\\sin\\theta_0} q_2$$\n4. **Constant Angular Speed Invariant:**\n   $$d_{S^3}(\\mathrm{slerp}(q_1, q_2, t), q_1) = t \\cdot d_{S^3}(q_1, q_2), \\qquad \\|\\mathrm{slerp}(q_1, q_2, t)\\|_2 = 1$$\n\n## Function Signature\n\n```cpp\nQuat slerp(Quat q1, Quat q2, double t);\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per interpolation.\n- **Space:** $O(1)$.\n",
+  "stub": "#pragma once\n\n#include <algorithm>\n#include <cmath>\n\nstruct Quat {\n    double w{1.0};\n    double x{0.0};\n    double y{0.0};\n    double z{0.0};\n\n    Quat() = default;\n    Quat(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) {}\n\n    static Quat identity() { return Quat(1.0, 0.0, 0.0, 0.0); }\n\n    double norm_sq() const { return w * w + x * x + y * y + z * z; }\n    double norm() const { return std::sqrt(norm_sq()); }\n\n    Quat normalize() const {\n        double n = norm();\n        if (n < 1e-12) return identity();\n        return Quat(w / n, x / n, y / n, z / n);\n    }\n\n    double dot(const Quat& q) const {\n        return w * q.w + x * q.x + y * q.y + z * q.z;\n    }\n\n    double geodesic_dist(const Quat& q) const {\n        double d = std::min(1.0, std::abs(dot(q)));\n        return 2.0 * std::acos(d);\n    }\n};\n\n// Shortest-path SLERP on S^3 with small-angle NLERP fallback when |q1 . q2| > 0.9995\ninline Quat slerp(Quat q1, Quat q2, double t) {\n    // TODO: implement shortest-path SLERP with antipodal flip and >0.9995 NLERP fallback\n    (void)q1; (void)q2; (void)t;\n    return Quat::identity();\n}\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <cmath>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 045 Quaternion SLERP Test Suite ===\\n\";\n\n    Quat q1 = Quat(1.0, 0.0, 0.0, 0.0);\n    Quat q2 = Quat(0.0, 1.0, 0.0, 0.0);\n\n    // Test 1: Endpoints and midpoint on 90-degree S^3 arc\n    Quat s0 = slerp(q1, q2, 0.0);\n    Quat s1 = slerp(q1, q2, 1.0);\n    Quat sm = slerp(q1, q2, 0.5);\n    assert(s0.geodesic_dist(q1) < 1e-12);\n    assert(s1.geodesic_dist(q2) < 1e-12);\n    assert(std::abs(sm.w - std::sqrt(0.5)) < 1e-12 && std::abs(sm.x - std::sqrt(0.5)) < 1e-12);\n    std::cout << \"  \u2022 Test 1: Endpoints and midpoint on 90-degree arc ... [PASS]\\n\";\n\n    // Test 2: Constant angular speed along geodesic and shortest-path antipodal flip\n    Quat p1 = Quat(1.0, 2.0, -1.0, 0.5).normalize();\n    Quat p2 = Quat(-0.8, -1.5, 0.9, -0.4).normalize(); // negative dot with p1\n    double total_dist = p1.geodesic_dist(p2);\n    for (double t : {0.2, 0.4, 0.75}) {\n        Quat pt = slerp(p1, p2, t);\n        assert(std::abs(pt.norm() - 1.0) < 1e-12);\n        assert(std::abs(p1.geodesic_dist(pt) - t * total_dist) < 1e-11);\n    }\n    std::cout << \"  \u2022 Test 2: Constant angular velocity and antipodal flip ... [PASS]\\n\";\n\n    // Test 3: Small-angle fallback stability (|q1 . q2| > 0.9995)\n    Quat near_q1 = Quat(1.0, 1e-5, -1e-5, 0.0).normalize();\n    Quat mid_near = slerp(q1, near_q1, 0.5);\n    assert(std::isfinite(mid_near.w) && std::abs(mid_near.norm() - 1.0) < 1e-12);\n    std::cout << \"  \u2022 Test 3: Small-angle NLERP fallback stability ... [PASS]\\n\";\n\n    constexpr int ITERS = 100000;\n    volatile double sink = 0.0;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (int i = 0; i < ITERS; ++i) {\n        double t = (i % 100) * 0.01;\n        Quat r = slerp(p1, p2, t);\n        sink = sink + r.w;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    (void)sink;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / ITERS;\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

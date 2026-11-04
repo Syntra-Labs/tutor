@@ -1,0 +1,36 @@
+{
+  "id": "000b-simple-arithmetic",
+  "title": "Simple Integer Arithmetic & Polynomial Eval",
+  "track": "Track 0: Warmup & Sanity Checks",
+  "category": "Track 0: Warmup & Sanity Checks",
+  "difficulty": "Easy",
+  "depends_on": [
+    "000a-hello-world"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "warmup",
+    "arithmetic",
+    "integers"
+  ],
+  "spec": "# 000b: Simple Integer Arithmetic & Polynomial Eval\n\n## Problem Statement\n\nImplement three basic integer arithmetic functions in `solution.hpp`:\n\n1. `int64_t add_i64(int64_t a, int64_t b)`:\n   - Return $a + b$.\n2. `int64_t eval_quadratic(int64_t a, int64_t b, int64_t c, int64_t x)`:\n   - Evaluate the quadratic polynomial $f(x) = a x^2 + b x + c$.\n3. `int64_t sum_first_n(int64_t n)`:\n   - For $n \\ge 0$, return the sum $\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}$.\n   - If $n \\le 0$, return $0$.\n",
+  "readme": "# 000b: Simple Integer Arithmetic & Polynomial Eval\n\n## Problem Statement\n\nImplement three basic integer arithmetic functions in `solution.hpp`:\n\n1. `int64_t add_i64(int64_t a, int64_t b)`:\n   - Return $a + b$.\n2. `int64_t eval_quadratic(int64_t a, int64_t b, int64_t c, int64_t x)`:\n   - Evaluate the quadratic polynomial $f(x) = a x^2 + b x + c$.\n3. `int64_t sum_first_n(int64_t n)`:\n   - For $n \\ge 0$, return the sum $\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}$.\n   - If $n \\le 0$, return $0$.\n",
+  "stub": "#pragma once\n#include <cstdint>\n\ninline int64_t add_i64(int64_t a, int64_t b) {\n    // TODO: Return a + b\n    (void)a; (void)b;\n    return 0;\n}\n\ninline int64_t eval_quadratic(int64_t a, int64_t b, int64_t c, int64_t x) {\n    // TODO: Return a * x^2 + b * x + c\n    (void)a; (void)b; (void)c; (void)x;\n    return 0;\n}\n\ninline int64_t sum_first_n(int64_t n) {\n    // TODO: Return 1 + 2 + ... + n for n > 0 (or 0 if n <= 0)\n    (void)n;\n    return 0;\n}\n",
+  "harness": "#include \"solution.hpp\"\n#include <cassert>\n#include <chrono>\n#include <cstdint>\n#include <iostream>\n\nint main() {\n    std::cout << \"=== Running 000b Simple Arithmetic Test Suite ===\\n\";\n\n    std::cout << \"  - Test 1: add_i64 ... \";\n    assert(add_i64(2, 3) == 5);\n    assert(add_i64(-10, 10) == 0);\n    assert(add_i64(1000000000LL, 2000000000LL) == 3000000000LL);\n    std::cout << \"[PASS]\\n\";\n\n    std::cout << \"  - Test 2: eval_quadratic (a*x^2 + b*x + c) ... \";\n    assert(eval_quadratic(1, 0, 0, 5) == 25);\n    assert(eval_quadratic(2, 3, -5, 4) == 2 * 16 + 12 - 5);\n    assert(eval_quadratic(-1, 2, 1, -3) == -9 - 6 + 1);\n    std::cout << \"[PASS]\\n\";\n\n    std::cout << \"  - Test 3: sum_first_n (n*(n+1)/2) ... \";\n    assert(sum_first_n(-5) == 0);\n    assert(sum_first_n(0) == 0);\n    assert(sum_first_n(10) == 55);\n    assert(sum_first_n(100) == 5050);\n    assert(sum_first_n(100000) == 5000050000LL);\n    std::cout << \"[PASS]\\n\";\n\n    constexpr int ITERS = 1000000;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    volatile int64_t sink = 0;\n    for (int i = 0; i < ITERS; ++i) {\n        sink = sink + add_i64(i, 1) + eval_quadratic(1, 2, 3, i & 15) + sum_first_n(i & 63);\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    (void)sink;\n\n    double ns = std::chrono::duration<double, std::nano>(t1 - t0).count();\n    double cycles_per_op = (ns * 3.2) / (ITERS * 3.0);\n    std::cout << \"SCOREBOARD_JSON:{\\\"cycles_per_op\\\":\" << cycles_per_op << \"}\\n\";\n    std::cout << \"All 000b tests passed!\\n\";\n    return 0;\n}\n"
+}

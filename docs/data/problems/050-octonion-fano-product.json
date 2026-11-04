@@ -1,0 +1,35 @@
+{
+  "id": "050-octonion-fano-product",
+  "title": "Fano Plane Octonion Basis Multiplication",
+  "track": "Track 6: Octonions, Clifford Algebra Cl(0,6), E8 & the 600-Cell",
+  "category": "Octonions & Clifford Algebra",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "octonions",
+    "fano-plane",
+    "non-associative",
+    "cayley-dickson"
+  ],
+  "spec": "# 050: Fano Plane Octonion Basis Multiplication\n\n## Problem Statement\n\nThe **octonions** $\\mathbb{O}$ form the 8-dimensional normed division algebra spanned by $e_0 = 1$ and seven imaginary units $e_1, \\dots, e_7$ satisfying $e_i^2 = -1$. Multiplication of distinct imaginary units is governed by the 7 oriented lines of the **Fano plane** $\\mathrm{PG}(2, 2)$:\n$$\\{1,2,4\\},\\; \\{2,3,5\\},\\; \\{3,4,6\\},\\; \\{4,5,7\\},\\; \\{5,6,1\\},\\; \\{6,7,2\\},\\; \\{7,1,3\\}$$\nAlong any cycle $(a, b, c)$, $e_a e_b = +e_c$, $e_b e_c = +e_a$, $e_c e_a = +e_b$, and reversing the order negates the sign.\n\n## Mathematical Law / Invariant\n\n1. **Basis Product (`octonion_basis_product`):** Given `left`, `right` $\\in \\{0, \\dots, 7\\}$, returns `{sign, index}` such that $e_{\\text{left}} e_{\\text{right}} = \\text{sign} \\cdot e_{\\text{index}}$:\n   - $e_0 e_k = e_k e_0 = +e_k$\n   - $e_k e_k = -e_0$ for $k \\in \\{1, \\dots, 7\\}$\n   - For $i \\neq j \\in \\{1, \\dots, 7\\}$, the unique Fano line containing $\\{i, j\\}$ determines the third index $k$ and orientation sign $\\pm 1$.\n2. **Non-Associativity Invariant:** Out of all $7 \\times 6 \\times 5 = 210$ ordered triples $(i, j, k)$ of distinct imaginary units in $\\{1, \\dots, 7\\}$, the $7 \\times 6 = 42$ collinear triples lying on a Fano line are associative ($(e_i e_j)e_k = +e_i(e_j e_k)$), while the remaining **$168$ non-collinear triples are strictly anti-associative**:\n   $$(e_i e_j)e_k = -e_i(e_j e_k)$$\n\n## Function Signature\n\n```cpp\nstd::pair<int8_t, uint8_t> octonion_basis_product(uint8_t left, uint8_t right);\nuint32_t count_anti_associative_triples();\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per basis product.\n- **Space:** $O(1)$.\n",
+  "readme": "# 050: Fano Plane Octonion Basis Multiplication\n\n## Problem Statement\n\nThe **octonions** $\\mathbb{O}$ form the 8-dimensional normed division algebra spanned by $e_0 = 1$ and seven imaginary units $e_1, \\dots, e_7$ satisfying $e_i^2 = -1$. Multiplication of distinct imaginary units is governed by the 7 oriented lines of the **Fano plane** $\\mathrm{PG}(2, 2)$:\n$$\\{1,2,4\\},\\; \\{2,3,5\\},\\; \\{3,4,6\\},\\; \\{4,5,7\\},\\; \\{5,6,1\\},\\; \\{6,7,2\\},\\; \\{7,1,3\\}$$\nAlong any cycle $(a, b, c)$, $e_a e_b = +e_c$, $e_b e_c = +e_a$, $e_c e_a = +e_b$, and reversing the order negates the sign.\n\n## Mathematical Law / Invariant\n\n1. **Basis Product (`octonion_basis_product`):** Given `left`, `right` $\\in \\{0, \\dots, 7\\}$, returns `{sign, index}` such that $e_{\\text{left}} e_{\\text{right}} = \\text{sign} \\cdot e_{\\text{index}}$:\n   - $e_0 e_k = e_k e_0 = +e_k$\n   - $e_k e_k = -e_0$ for $k \\in \\{1, \\dots, 7\\}$\n   - For $i \\neq j \\in \\{1, \\dots, 7\\}$, the unique Fano line containing $\\{i, j\\}$ determines the third index $k$ and orientation sign $\\pm 1$.\n2. **Non-Associativity Invariant:** Out of all $7 \\times 6 \\times 5 = 210$ ordered triples $(i, j, k)$ of distinct imaginary units in $\\{1, \\dots, 7\\}$, the $7 \\times 6 = 42$ collinear triples lying on a Fano line are associative ($(e_i e_j)e_k = +e_i(e_j e_k)$), while the remaining **$168$ non-collinear triples are strictly anti-associative**:\n   $$(e_i e_j)e_k = -e_i(e_j e_k)$$\n\n## Function Signature\n\n```cpp\nstd::pair<int8_t, uint8_t> octonion_basis_product(uint8_t left, uint8_t right);\nuint32_t count_anti_associative_triples();\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per basis product.\n- **Space:** $O(1)$.\n",
+  "stub": "#pragma once\n\n#include <array>\n#include <cstdint>\n#include <utility>\n\ninline constexpr std::array<std::array<uint8_t, 3>, 7> FANO_CYCLES = {{\n    {1, 2, 4}, {2, 3, 5}, {3, 4, 6}, {4, 5, 7},\n    {5, 6, 1}, {6, 7, 2}, {7, 1, 3}\n}};\n\n// Multiply basis elements e_left * e_right = sign * e_index for left, right in [0, 7]\ninline std::pair<int8_t, uint8_t> octonion_basis_product(uint8_t left, uint8_t right) {\n    // TODO: implement octonion basis multiplication using FANO_CYCLES\n    (void)left; (void)right;\n    return {0, 0};\n}\n\n// Count how many of the 210 ordered triples (i, j, k) of distinct imaginary units in 1..7\n// satisfy (e_i * e_j) * e_k == - e_i * (e_j * e_k)\ninline uint32_t count_anti_associative_triples() {\n    // TODO: enumerate all 210 distinct imaginary triples and count anti-associative ones\n    return 0;\n}\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 050 Octonion Fano Plane Basis Product Test Suite ===\\n\";\n\n    // Test 1: Identity e_0 and squares e_i^2 = -e_0\n    for (uint8_t i = 0; i < 8; ++i) {\n        assert(octonion_basis_product(0, i) == std::make_pair(int8_t(1), i));\n        assert(octonion_basis_product(i, 0) == std::make_pair(int8_t(1), i));\n        if (i > 0) {\n            assert(octonion_basis_product(i, i) == std::make_pair(int8_t(-1), uint8_t(0)));\n        }\n    }\n    std::cout << \"  \u2022 Test 1: Identity e_0 and imaginary square relations e_i^2 = -e_0 ... [PASS]\\n\";\n\n    // Test 2: Cyclic Fano line orientation and anti-commutativity\n    for (const auto& cyc : FANO_CYCLES) {\n        uint8_t a = cyc[0], b = cyc[1], c = cyc[2];\n        assert(octonion_basis_product(a, b) == std::make_pair(int8_t(1), c));\n        assert(octonion_basis_product(b, a) == std::make_pair(int8_t(-1), c));\n        assert(octonion_basis_product(b, c) == std::make_pair(int8_t(1), a));\n        assert(octonion_basis_product(c, a) == std::make_pair(int8_t(1), b));\n    }\n    std::cout << \"  \u2022 Test 2: All 7 oriented Fano cycles and anti-commutativity ... [PASS]\\n\";\n\n    // Test 3: 168 of 210 ordered distinct imaginary triples are anti-associative\n    assert(count_anti_associative_triples() == 168);\n    std::cout << \"  \u2022 Test 3: 168/210 non-collinear triples are anti-associative ... [PASS]\\n\";\n\n    constexpr int ITERS = 200000;\n    volatile int sink = 0;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (int i = 0; i < ITERS; ++i) {\n        auto [sgn, idx] = octonion_basis_product(i & 7, (i >> 3) & 7);\n        sink = sink + sgn + idx;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    (void)sink;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / ITERS;\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

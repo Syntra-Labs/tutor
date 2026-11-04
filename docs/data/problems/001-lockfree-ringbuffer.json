@@ -1,0 +1,36 @@
+{
+  "id": "001-lockfree-ringbuffer",
+  "title": "SPSC Lock-Free Ring Buffer",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Concurrency & Systems",
+  "difficulty": "Medium",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "atomics",
+    "memory-ordering",
+    "spsc",
+    "lock-free",
+    "ring-buffer"
+  ],
+  "spec": "# 001: SPSC Lock-Free Ring Buffer\n\n## Specification & Contract\n\nImplement a Single-Producer Single-Consumer (SPSC) lock-free bounded FIFO queue in C++20.\n\n### Requirements:\n1. **Thread Safety**: Exactly one producer thread and one consumer thread may access the queue concurrently without locks or mutexes.\n2. **Fixed Capacity**: The capacity $N$ is fixed at construction and guaranteed to be a power of two.\n3. **Operations**:\n   - `bool push(const T& item)`: Inserts `item` at the tail. Returns `false` if the buffer is full.\n   - `bool pop(T& item)`: Extracts an item from the head. Returns `false` if the buffer is empty.\n   - `size_t size() const`: Returns the approximate number of items currently in the buffer.\n   - `bool empty() const` / `bool full() const`.\n4. **Memory Ordering**:\n   - Use atomic indices (`std::atomic<size_t>`) with non-seq-cst semantics (`memory_order_acquire`, `memory_order_release`, `memory_order_relaxed`) to ensure strict cache synchronization and minimal bus traffic.\n",
+  "readme": "# 001: SPSC Lock-Free Ring Buffer\n\n## Specification & Contract\n\nImplement a Single-Producer Single-Consumer (SPSC) lock-free bounded FIFO queue in C++20.\n\n### Requirements:\n1. **Thread Safety**: Exactly one producer thread and one consumer thread may access the queue concurrently without locks or mutexes.\n2. **Fixed Capacity**: The capacity $N$ is fixed at construction and guaranteed to be a power of two.\n3. **Operations**:\n   - `bool push(const T& item)`: Inserts `item` at the tail. Returns `false` if the buffer is full.\n   - `bool pop(T& item)`: Extracts an item from the head. Returns `false` if the buffer is empty.\n   - `size_t size() const`: Returns the approximate number of items currently in the buffer.\n   - `bool empty() const` / `bool full() const`.\n4. **Memory Ordering**:\n   - Use atomic indices (`std::atomic<size_t>`) with non-seq-cst semantics (`memory_order_acquire`, `memory_order_release`, `memory_order_relaxed`) to ensure strict cache synchronization and minimal bus traffic.\n",
+  "stub": "#pragma once\n\n#include <atomic>\n#include <vector>\n#include <cstddef>\n#include <optional>\n\ntemplate <typename T, size_t Capacity = 1024>\nclass SpscRingBuffer {\n    static_assert((Capacity & (Capacity - 1)) == 0, \"Capacity must be a power of two\");\n\npublic:\n    SpscRingBuffer() : head_(0), tail_(0) {\n        buffer_.resize(Capacity);\n    }\n\n    // Push item into buffer. Returns true if successful, false if full.\n    bool push(const T& item) {\n        // TODO: Implement lock-free push using appropriate memory orderings\n        (void)item;\n        return false;\n    }\n\n    // Pop item from buffer. Returns true if successful, false if empty.\n    bool pop(T& item) {\n        // TODO: Implement lock-free pop using appropriate memory orderings\n        (void)item;\n        return false;\n    }\n\n    [[nodiscard]] bool empty() const noexcept {\n        return head_.load(std::memory_order_relaxed) == tail_.load(std::memory_order_relaxed);\n    }\n\n    [[nodiscard]] size_t size() const noexcept {\n        size_t t = tail_.load(std::memory_order_relaxed);\n        size_t h = head_.load(std::memory_order_relaxed);\n        return (t >= h) ? (t - h) : (Capacity - (h - t));\n    }\n\nprivate:\n    std::vector<T> buffer_;\n    alignas(64) std::atomic<size_t> tail_; // Written by producer\n    alignas(64) std::atomic<size_t> head_; // Written by consumer\n};\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <iostream>\n#include <thread>\n#include <vector>\n\n#include \"solution.hpp\"\n\nvoid test_basic_fifo() {\n    SpscRingBuffer<int, 4> q;\n    assert(q.empty());\n    assert(q.push(10));\n    assert(q.push(20));\n    assert(q.push(30));\n    assert(!q.push(40)); // Capacity is 4, standard FIFO keeps 1 slot open to distinguish full vs empty\n\n    int val = 0;\n    assert(q.pop(val) && val == 10);\n    assert(q.pop(val) && val == 20);\n    assert(q.push(50));\n    assert(q.pop(val) && val == 30);\n    assert(q.pop(val) && val == 50);\n    assert(!q.pop(val)); // Empty\n    assert(q.empty());\n    std::cout << \"  \u2022 Test 1: Basic single-threaded FIFO semantics ... [PASS]\\n\";\n}\n\nvoid test_concurrent_stress() {\n    constexpr size_t TOTAL = 100000;\n    SpscRingBuffer<size_t, 1024> q;\n\n    std::vector<size_t> received;\n    received.reserve(TOTAL);\n\n    std::thread producer([&]() {\n        for (size_t i = 0; i < TOTAL; ++i) {\n            while (!q.push(i)) {\n                std::this_thread::yield();\n            }\n        }\n    });\n\n    std::thread consumer([&]() {\n        size_t val = 0;\n        for (size_t i = 0; i < TOTAL; ++i) {\n            while (!q.pop(val)) {\n                std::this_thread::yield();\n            }\n            received.push_back(val);\n        }\n    });\n\n    producer.join();\n    consumer.join();\n\n    assert(received.size() == TOTAL);\n    for (size_t i = 0; i < TOTAL; ++i) {\n        assert(received[i] == i);\n    }\n    std::cout << \"  \u2022 Test 2: Concurrent multi-threaded stress (100k items) ... [PASS]\\n\";\n}\n\nint main() {\n    std::cout << \"=== Running SpscRingBuffer Test Suite ===\\n\";\n    try {\n        test_basic_fifo();\n        test_concurrent_stress();\n        std::cout << \"All SpscRingBuffer test suites passed!\\n\";\n        return 0;\n    } catch (const std::exception& e) {\n        std::cerr << \"Test failure: \" << e.what() << \"\\n\";\n        return 1;\n    }\n}\n"
+}

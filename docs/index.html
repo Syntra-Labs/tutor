@@ -1250,14 +1250,15 @@ function syncUserSubmissionsToLeaderboard() {
 
 async function initStudio() {
   try {
-    const [catRes, boardRes] = await Promise.all([
-      fetch("data/catalog.json"),
+    let catRes = await fetch("data/manifest.json");
+    if (!catRes.ok) {
+      catRes = await fetch("data/catalog.json");
+    }
+    const [catData, boardRes] = await Promise.all([
+      catRes.json(),
       fetch("data/leaderboard.json")
     ]);
-    if (catRes.ok) {
-      const data = await catRes.json();
-      catalog = data.problems || [];
-    }
+    catalog = catData.problems || [];
     if (boardRes.ok) {
       leaderboard = await boardRes.json();
     }
@@ -1425,10 +1426,21 @@ function difficultyBadgeHtml(diff) {
   return `<span class="diff-badge ${cls}">${diff || "Medium"}</span>`;
 }
 
-function loadProblem(idx) {
+async function loadProblem(idx) {
   if (!catalog.length) return;
   currentIdx = Math.max(0, Math.min(idx, catalog.length - 1));
   const prob = catalog[currentIdx];
+
+  // Lazy-load problem spec/stub chunk if not already present in memory
+  if (!prob.spec && !prob.stub) {
+    try {
+      const chunkRes = await fetch(`data/problems/${prob.id}.json`);
+      if (chunkRes.ok) {
+        const chunk = await chunkRes.json();
+        Object.assign(prob, chunk);
+      }
+    } catch (_) {}
+  }
 
   const isSh = (prob.languages || []).includes("sh") || (prob.track || "").includes("Track 9");
   const solFilename = isSh ? `${prob.id}/solution.sh` : `${prob.id}/solution.hpp`;

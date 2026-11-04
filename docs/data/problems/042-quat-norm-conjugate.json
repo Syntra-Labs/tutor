@@ -1,0 +1,35 @@
+{
+  "id": "042-quat-norm-conjugate",
+  "title": "Unit Quaternion Normalization, Conjugate & Inverse on S3",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "quaternions",
+    "s3-manifold",
+    "normalization",
+    "conjugate"
+  ],
+  "spec": "# 042: Unit Quaternion Normalization, Conjugate & Inverse on $S^3$\n\n## Problem Statement\n\nA quaternion $q = w + xi + yj + zk \\in \\mathbb{H} \\cong \\mathbb{R}^4$ represents a rotor on the 3-sphere $S^3 = \\{q \\in \\mathbb{H} : \\|q\\|_2 = 1\\}$ when normalized. For unit quaternions on $S^3$, the multiplicative inverse $q^{-1}$ coincides with the quaternion conjugate $\\bar{q} = w - xi - yj - zk$. Near-zero quaternions ($\\|q\\|_2 < 10^{-12}$) must safely fall back to the identity rotor $(1, 0, 0, 0)$ without dividing by zero.\n\n## Mathematical Law / Invariant\n\nFor $q = (w, x, y, z) \\in \\mathbb{H}$:\n1. **Squared Norm & Norm:** $\\|q\\|_2^2 = w^2 + x^2 + y^2 + z^2$, $\\|q\\|_2 = \\sqrt{\\|q\\|_2^2}$.\n2. **Projection onto $S^3$:**\n   $$\\mathrm{normalize}(q) = \\begin{cases} (1, 0, 0, 0) & \\text{if } \\|q\\|_2 < 10^{-12}, \\\\ \\frac{1}{\\|q\\|_2}(w, x, y, z) & \\text{otherwise.} \\end{cases}$$\n3. **Conjugate & Inverse:**\n   $$\\bar{q} = (w, -x, -y, -z), \\qquad q^{-1} = \\begin{cases} (1, 0, 0, 0) & \\text{if } \\|q\\|_2^2 < 10^{-24}, \\\\ \\frac{\\bar{q}}{\\|q\\|_2^2} & \\text{otherwise.} \\end{cases}$$\n   On $S^3$ ($\\|q\\|_2 = 1$), $q^{-1} = \\bar{q}$ and $\\|\\bar{q}\\|_2 = 1$.\n\n## Function Signature\n\n```cpp\nstruct Quat {\n    double w{1.0}, x{0.0}, y{0.0}, z{0.0};\n    static Quat identity();\n    double norm_sq() const;\n    double norm() const;\n    Quat normalize() const;\n    Quat conj() const;\n    Quat inverse() const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per operation.\n- **Space:** $O(1)$ (32 bytes per `Quat`).\n",
+  "readme": "# 042: Unit Quaternion Normalization, Conjugate & Inverse on $S^3$\n\n## Problem Statement\n\nA quaternion $q = w + xi + yj + zk \\in \\mathbb{H} \\cong \\mathbb{R}^4$ represents a rotor on the 3-sphere $S^3 = \\{q \\in \\mathbb{H} : \\|q\\|_2 = 1\\}$ when normalized. For unit quaternions on $S^3$, the multiplicative inverse $q^{-1}$ coincides with the quaternion conjugate $\\bar{q} = w - xi - yj - zk$. Near-zero quaternions ($\\|q\\|_2 < 10^{-12}$) must safely fall back to the identity rotor $(1, 0, 0, 0)$ without dividing by zero.\n\n## Mathematical Law / Invariant\n\nFor $q = (w, x, y, z) \\in \\mathbb{H}$:\n1. **Squared Norm & Norm:** $\\|q\\|_2^2 = w^2 + x^2 + y^2 + z^2$, $\\|q\\|_2 = \\sqrt{\\|q\\|_2^2}$.\n2. **Projection onto $S^3$:**\n   $$\\mathrm{normalize}(q) = \\begin{cases} (1, 0, 0, 0) & \\text{if } \\|q\\|_2 < 10^{-12}, \\\\ \\frac{1}{\\|q\\|_2}(w, x, y, z) & \\text{otherwise.} \\end{cases}$$\n3. **Conjugate & Inverse:**\n   $$\\bar{q} = (w, -x, -y, -z), \\qquad q^{-1} = \\begin{cases} (1, 0, 0, 0) & \\text{if } \\|q\\|_2^2 < 10^{-24}, \\\\ \\frac{\\bar{q}}{\\|q\\|_2^2} & \\text{otherwise.} \\end{cases}$$\n   On $S^3$ ($\\|q\\|_2 = 1$), $q^{-1} = \\bar{q}$ and $\\|\\bar{q}\\|_2 = 1$.\n\n## Function Signature\n\n```cpp\nstruct Quat {\n    double w{1.0}, x{0.0}, y{0.0}, z{0.0};\n    static Quat identity();\n    double norm_sq() const;\n    double norm() const;\n    Quat normalize() const;\n    Quat conj() const;\n    Quat inverse() const;\n};\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per operation.\n- **Space:** $O(1)$ (32 bytes per `Quat`).\n",
+  "stub": "#pragma once\n\n#include <cmath>\n\nstruct Quat {\n    double w{1.0};\n    double x{0.0};\n    double y{0.0};\n    double z{0.0};\n\n    Quat() = default;\n    Quat(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) {}\n\n    static Quat identity() {\n        return Quat(1.0, 0.0, 0.0, 0.0);\n    }\n\n    double norm_sq() const {\n        // TODO: return w^2 + x^2 + y^2 + z^2\n        return 0.0;\n    }\n\n    double norm() const {\n        // TODO: return Euclidean norm\n        return 0.0;\n    }\n\n    Quat normalize() const {\n        // TODO: project onto S^3; return identity() if norm() < 1e-12\n        return identity();\n    }\n\n    Quat conj() const {\n        // TODO: return quaternion conjugate (w, -x, -y, -z)\n        return identity();\n    }\n\n    Quat inverse() const {\n        // TODO: return multiplicative inverse conj() / norm_sq(); return identity() if norm_sq() < 1e-24\n        return identity();\n    }\n};\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <cmath>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 042 Quaternion Norm, Conjugate & Inverse Test Suite ===\\n\";\n\n    // Test 1: Norm and normalization onto S^3\n    Quat q(1.0, 2.0, -2.0, 4.0);\n    assert(std::abs(q.norm_sq() - 25.0) < 1e-12);\n    assert(std::abs(q.norm() - 5.0) < 1e-12);\n    Quat u = q.normalize();\n    assert(std::abs(u.norm() - 1.0) < 1e-12);\n    assert(std::abs(u.w - 0.2) < 1e-12 && std::abs(u.x - 0.4) < 1e-12 &&\n           std::abs(u.y + 0.4) < 1e-12 && std::abs(u.z - 0.8) < 1e-12);\n    std::cout << \"  \u2022 Test 1: S3 projection and norm ... [PASS]\\n\";\n\n    // Test 2: Zero / near-zero degenerate fallback to identity (1,0,0,0)\n    Quat tiny(1e-15, -1e-15, 0.0, 0.0);\n    Quat id = tiny.normalize();\n    assert(id.w == 1.0 && id.x == 0.0 && id.y == 0.0 && id.z == 0.0);\n    std::cout << \"  \u2022 Test 2: Degenerate norm (< 1e-12) fallback to identity ... [PASS]\\n\";\n\n    // Test 3: Conjugate and inverse coincidence on S^3, and scaling for general quaternions\n    Quat uc = u.conj();\n    Quat ui = u.inverse();\n    assert(std::abs(uc.w - ui.w) < 1e-12 && std::abs(uc.x - ui.x) < 1e-12 &&\n           std::abs(uc.y - ui.y) < 1e-12 && std::abs(uc.z - ui.z) < 1e-12);\n    Quat qi = q.inverse();\n    assert(std::abs(qi.w - (1.0 / 25.0)) < 1e-12);\n    assert(std::abs(qi.z - (-4.0 / 25.0)) < 1e-12);\n    std::cout << \"  \u2022 Test 3: Conjugate and inverse invariants ... [PASS]\\n\";\n\n    constexpr int ITERS = 200000;\n    volatile double sink = 0.0;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (int i = 0; i < ITERS; ++i) {\n        Quat v(1.0 + i * 1e-6, 2.0, -3.0, 4.0);\n        Quat vn = v.normalize().conj();\n        sink = sink + vn.w + vn.x;\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    (void)sink;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / ITERS;\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

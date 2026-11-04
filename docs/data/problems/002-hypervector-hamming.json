@@ -1,0 +1,35 @@
+{
+  "id": "002-hypervector-hamming",
+  "title": "8192-bit Hypervector Hamming Distance",
+  "track": "Track 1: Bit-Parallelism, Cellular Automata & Ternary Logic",
+  "category": "Geometric Systems & Compute",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "bit-manipulation",
+    "popcount",
+    "hypervector",
+    "simd"
+  ],
+  "spec": "# 002: 8192-bit Hypervector Hamming Distance\n\n## Specification & Contract\n\nIn dense binary hyperdimensional computing (HDC) and geometric substrates, representations are vectors of 8192 bits packed into $128 \\times \\text{uint64\\_t}$ words.\n\nImplement:\n1. `size_t hamming_distance(const Hypervec8192& a, const Hypervec8192& b)`:\n   - Count the number of differing bits across the two 8192-bit vectors (XOR + popcount).\n2. `double cosine_similarity(const Hypervec8192& a, const Hypervec8192& b)`:\n   - Normalized geometric similarity: $1.0 - \\frac{2 \\cdot \\text{hamming\\_distance}}{8192}$.\n   - Identical vectors return $1.0$. Orthogonal vectors return $0.0$. Inverse vectors return $-1.0$.\n",
+  "readme": "# 002: 8192-bit Hypervector Hamming Distance\n\n## Specification & Contract\n\nIn dense binary hyperdimensional computing (HDC) and geometric substrates, representations are vectors of 8192 bits packed into $128 \\times \\text{uint64\\_t}$ words.\n\nImplement:\n1. `size_t hamming_distance(const Hypervec8192& a, const Hypervec8192& b)`:\n   - Count the number of differing bits across the two 8192-bit vectors (XOR + popcount).\n2. `double cosine_similarity(const Hypervec8192& a, const Hypervec8192& b)`:\n   - Normalized geometric similarity: $1.0 - \\frac{2 \\cdot \\text{hamming\\_distance}}{8192}$.\n   - Identical vectors return $1.0$. Orthogonal vectors return $0.0$. Inverse vectors return $-1.0$.\n",
+  "stub": "#pragma once\n\n#include <array>\n#include <bit>\n#include <cstddef>\n#include <cstdint>\n\nstruct Hypervec8192 {\n    static constexpr size_t BITS = 8192;\n    static constexpr size_t WORDS = BITS / 64; // 128 uint64_t words\n    std::array<uint64_t, WORDS> words{};\n};\n\n// Calculate the bitwise Hamming distance between two 8192-bit hypervectors\ninline size_t hamming_distance(const Hypervec8192& a, const Hypervec8192& b) {\n    // TODO: Iterate over words, compute XOR and accumulate std::popcount\n    (void)a; (void)b;\n    return 0;\n}\n\n// Calculate the normalized bipolar cosine similarity in range [-1.0, 1.0]\ninline double cosine_similarity(const Hypervec8192& a, const Hypervec8192& b) {\n    // TODO: Map Hamming distance to [-1.0, 1.0]\n    (void)a; (void)b;\n    return 0.0;\n}\n",
+  "harness": "#include <cassert>\n#include <cmath>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running Hypervector Hamming Test Suite ===\\n\";\n\n    Hypervec8192 v1{};\n    Hypervec8192 v2{};\n\n    // Identical\n    assert(hamming_distance(v1, v2) == 0);\n    assert(std::abs(cosine_similarity(v1, v2) - 1.0) < 1e-6);\n    std::cout << \"  \u2022 Test 1: Zero vectors identical ... [PASS]\\n\";\n\n    // Inverse\n    for (auto& w : v2.words) w = ~0ULL;\n    assert(hamming_distance(v1, v2) == 8192);\n    assert(std::abs(cosine_similarity(v1, v2) - (-1.0)) < 1e-6);\n    std::cout << \"  \u2022 Test 2: Inverted vector antipodal distance ... [PASS]\\n\";\n\n    // Orthogonal (half bits set)\n    for (size_t i = 0; i < 64; ++i) v2.words[i] = ~0ULL;\n    for (size_t i = 64; i < 128; ++i) v2.words[i] = 0ULL;\n    assert(hamming_distance(v1, v2) == 4096);\n    assert(std::abs(cosine_similarity(v1, v2) - 0.0) < 1e-6);\n    std::cout << \"  \u2022 Test 3: Orthogonal vector cosine similarity == 0.0 ... [PASS]\\n\";\n\n    std::cout << \"All Hypervector Hamming tests passed successfully!\\n\";\n    return 0;\n}\n"
+}

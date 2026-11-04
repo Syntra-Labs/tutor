@@ -1,0 +1,36 @@
+{
+  "id": "034-isqrt-and-nibble-mul",
+  "title": "Exact Integer Square Root (isqrt) & Base-16 LUT Multiply",
+  "track": "Track 4: Exact Algebraic Rings, Dyadics, LUT Serving & Primes",
+  "category": "Exact Algebraic Rings & Number Theory",
+  "difficulty": "Easy",
+  "depends_on": [],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "isqrt",
+    "lut",
+    "multiplier-free",
+    "bit-manipulation",
+    "integer-serving"
+  ],
+  "spec": "# 034: Exact Integer Square Root (`isqrt`) & Base-16 LUT Multiply\n\n## Problem Statement\n\nIn multiplier-free integer table serving (`UORLUT01` / D11), floating-point instructions (`sqrtsd`, `fmul`) are forbidden:\n\n1. **Exact 64-Bit Integer Square Root (`isqrt`):**\n   Given `uint64_t n`, compute $r = \\lfloor\\sqrt{n}\\rfloor$ using the digit-by-digit (abacus) bitwise algorithm with **zero floating-point instructions** and **zero hardware multiplications** (safe for all $n \\in [0, 2^{64}-1]$, whereas `(double)n` loses precision above $2^{53}$).\n2. **Base-16 Multiples-Table Product (`lut_mul_u64`):**\n   Given `uint32_t a, uint32_t b`, build a 16-entry table `T[0..15]` of multiples of `a` by repeated addition (`T[0] = 0`, `T[q] = T[q - 1] + a`), then read `T` at each of the 8 base-16 nibbles of `b` and accumulate with shifts:\n   $$a \\cdot b = \\sum_{k=0}^{7} T\\!\\left[(b \\gg 4k) \\mathbin{\\&} 15\\right] \\ll 4k$$\n\n## Mathematical Law / Invariant\n\n- **Exact Floor Square Root Inequality:** For every $n \\in [0, 2^{64}-1]$, $r = \\text{isqrt}(n) \\in [0, 2^{32}-1]$ satisfies:\n  $$r^2 \\le n < (r + 1)^2$$\n- **Radix-16 Decomposition Identity:** Since $b = \\sum_{k=0}^{7} d_k 16^k$ with $d_k = (b \\gg 4k) \\mathbin{\\&} 15 \\in [0, 15]$ and $T[d_k] = d_k \\cdot a$:\n  $$\\sum_{k=0}^{7} (T[d_k] \\ll 4k) = \\sum_{k=0}^{7} (d_k \\cdot a) 2^{4k} = a \\cdot b$$\n\n## Function Signature\n\n```cpp\nconstexpr uint64_t isqrt_u64(uint64_t n);\nconstexpr uint64_t lut_mul_u64(uint32_t a, uint32_t b);\n```\n\n## Complexity Target\n\n- **Time:** $O(32)$ bitwise shift/sub iterations for `isqrt_u64`; 15 additions + 8 table lookups for `lut_mul_u64`.\n- **Space:** $O(1)$ (16-entry `uint64_t` stack table).\n",
+  "readme": "# 034: Exact Integer Square Root (`isqrt`) & Base-16 LUT Multiply\n\n## Problem Statement\n\nIn multiplier-free integer table serving (`UORLUT01` / D11), floating-point instructions (`sqrtsd`, `fmul`) are forbidden:\n\n1. **Exact 64-Bit Integer Square Root (`isqrt`):**\n   Given `uint64_t n`, compute $r = \\lfloor\\sqrt{n}\\rfloor$ using the digit-by-digit (abacus) bitwise algorithm with **zero floating-point instructions** and **zero hardware multiplications** (safe for all $n \\in [0, 2^{64}-1]$, whereas `(double)n` loses precision above $2^{53}$).\n2. **Base-16 Multiples-Table Product (`lut_mul_u64`):**\n   Given `uint32_t a, uint32_t b`, build a 16-entry table `T[0..15]` of multiples of `a` by repeated addition (`T[0] = 0`, `T[q] = T[q - 1] + a`), then read `T` at each of the 8 base-16 nibbles of `b` and accumulate with shifts:\n   $$a \\cdot b = \\sum_{k=0}^{7} T\\!\\left[(b \\gg 4k) \\mathbin{\\&} 15\\right] \\ll 4k$$\n\n## Mathematical Law / Invariant\n\n- **Exact Floor Square Root Inequality:** For every $n \\in [0, 2^{64}-1]$, $r = \\text{isqrt}(n) \\in [0, 2^{32}-1]$ satisfies:\n  $$r^2 \\le n < (r + 1)^2$$\n- **Radix-16 Decomposition Identity:** Since $b = \\sum_{k=0}^{7} d_k 16^k$ with $d_k = (b \\gg 4k) \\mathbin{\\&} 15 \\in [0, 15]$ and $T[d_k] = d_k \\cdot a$:\n  $$\\sum_{k=0}^{7} (T[d_k] \\ll 4k) = \\sum_{k=0}^{7} (d_k \\cdot a) 2^{4k} = a \\cdot b$$\n\n## Function Signature\n\n```cpp\nconstexpr uint64_t isqrt_u64(uint64_t n);\nconstexpr uint64_t lut_mul_u64(uint32_t a, uint32_t b);\n```\n\n## Complexity Target\n\n- **Time:** $O(32)$ bitwise shift/sub iterations for `isqrt_u64`; 15 additions + 8 table lookups for `lut_mul_u64`.\n- **Space:** $O(1)$ (16-entry `uint64_t` stack table).\n",
+  "stub": "#pragma once\n\n#include <array>\n#include <cstdint>\n\nconstexpr inline uint64_t isqrt_u64(uint64_t n) {\n    // TODO: Compute exact floor(sqrt(n)) for any uint64_t using bitwise digit-by-digit method\n    // with zero floating-point operations\n    (void)n;\n    return 0;\n}\n\nconstexpr inline uint64_t lut_mul_u64(uint32_t a, uint32_t b) {\n    // TODO: Build T[16] where T[q] = q * a using only additions, then accumulate\n    // sum_{k=0..7} (T[(b >> (4*k)) & 15] << (4*k)) with zero '*' instructions\n    (void)a;\n    (void)b;\n    return 0;\n}\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <cstdint>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 034 Exact Integer Square Root & Base-16 LUT Multiply Suite ===\\n\";\n\n    // Test 1: isqrt_u64 on small squares, non-squares, and 64-bit boundary cases (> 2^53 where double fails)\n    assert(isqrt_u64(0) == 0);\n    assert(isqrt_u64(1) == 1);\n    assert(isqrt_u64(2) == 1);\n    assert(isqrt_u64(3) == 1);\n    assert(isqrt_u64(4) == 2);\n    assert(isqrt_u64(15) == 3);\n    assert(isqrt_u64(16) == 4);\n    // Max uint64_t = 2^64 - 1 -> floor(sqrt(2^64 - 1)) == 2^32 - 1 == 4294967295\n    // Note: std::sqrt(static_cast<double>(~0ULL)) rounds up to 4294967296.0!\n    assert(isqrt_u64(~0ULL) == 0xFFFFFFFFULL);\n    uint64_t big_sq = 0xFFFFFFFE00000001ULL; // (2^32 - 1)^2\n    assert(isqrt_u64(big_sq - 1) == 0xFFFFFFFEULL);\n    assert(isqrt_u64(big_sq) == 0xFFFFFFFFULL);\n    std::cout << \"  \u2022 Test 1: Exact 64-bit isqrt_u64 (including > 2^53 boundary) ... [PASS]\\n\";\n\n    // Test 2: lut_mul_u64 exact parity with 64-bit hardware multiplication\n    assert(lut_mul_u64(0, 123456789u) == 0ULL);\n    assert(lut_mul_u64(123456789u, 0) == 0ULL);\n    assert(lut_mul_u64(0xFFFFFFFFu, 0xFFFFFFFFu) == static_cast<uint64_t>(0xFFFFFFFFu) * 0xFFFFFFFFu);\n    assert(lut_mul_u64(314159265u, 271828183u) == 314159265ULL * 271828183ULL);\n    std::cout << \"  \u2022 Test 2: Base-16 multiples-table product lut_mul_u64 parity ... [PASS]\\n\";\n\n    // Test 3: Commutativity & distributivity of lut_mul_u64\n    uint32_t x = 0x13579BDFu, y = 0x2468ACE0u, z = 0x0F0F0F0Fu;\n    assert(lut_mul_u64(x, y) == lut_mul_u64(y, x));\n    assert(lut_mul_u64(x, y + z) == lut_mul_u64(x, y) + lut_mul_u64(x, z));\n    std::cout << \"  \u2022 Test 3: lut_mul_u64 commutativity & distributivity ... [PASS]\\n\";\n\n    // Benchmark loop\n    constexpr size_t ITERS = 1000000;\n    volatile uint64_t sink = 0;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (uint32_t i = 1; i <= ITERS; ++i) {\n        sink ^= isqrt_u64(lut_mul_u64(i * 2654435761u, i));\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / static_cast<double>(ITERS);\n    (void)sink;\n\n    std::cout << \"All 034 tests passed!\\n\";\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}

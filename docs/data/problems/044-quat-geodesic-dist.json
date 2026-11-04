@@ -1,0 +1,38 @@
+{
+  "id": "044-quat-geodesic-dist",
+  "title": "Geodesic Distance on the Double-Cover S3",
+  "track": "Track 5: Spherical Manifolds (S2, S3), Quaternions & Hopf Fibration",
+  "category": "Lie Groups & Quaternions",
+  "difficulty": "Easy",
+  "depends_on": [
+    "043-quat-hamilton-rotor"
+  ],
+  "colspec": [
+    {
+      "hdr": "Score",
+      "asc": false
+    },
+    {
+      "hdr": "Cycles/Op",
+      "asc": true
+    },
+    {
+      "hdr": "Bytes",
+      "asc": true
+    }
+  ],
+  "languages": [
+    "cpp"
+  ],
+  "tags": [
+    "quaternions",
+    "s3-manifold",
+    "geodesic-distance",
+    "double-cover",
+    "bi-invariance"
+  ],
+  "spec": "# 044: Geodesic Distance on the Double-Cover $S^3$\n\n## Problem Statement\n\nBecause $S^3 \\cong SU(2)$ is the universal double cover of $SO(3)$, antipodal unit quaternions $q$ and $-q$ represent the exact same 3D rotation. The Riemannian rotation distance on $SO(3) \\cong S^3 / \\{\\pm 1\\}$ between two unit quaternions $p, q \\in S^3$ is given by twice the acute spherical angle between the lines $\\pm p$ and $\\pm q$.\n\n## Mathematical Law / Invariant\n\nFor unit quaternions $p, q \\in S^3$:\n$$p \\cdot q = p_w q_w + p_x q_x + p_y q_y + p_z q_z$$\n$$d_{S^3}(p, q) = 2 \\arccos\\!\\left(\\min(1.0,\\; |p \\cdot q|)\\right) \\in [0, \\pi]$$\n\nInvariants:\n1. **Antipodal Identification:** $d_{S^3}(q, -q) = 0$.\n2. **Orthogonal Rotors:** If $p \\cdot q = 0$ (e.g., $1$ and $i$), then $d_{S^3}(p, q) = \\pi$ (a $180^\\circ$ physical rotation).\n3. **Bi-Invariance on $S^3$:** For any unit rotor $r \\in S^3$:\n   $$d_{S^3}(r \\otimes p,\\; r \\otimes q) = d_{S^3}(p \\otimes r,\\; q \\otimes r) = d_{S^3}(p, q)$$\n\n## Function Signature\n\n```cpp\ndouble Quat::dot(const Quat& q) const;\ndouble Quat::geodesic_dist(const Quat& q) const;\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per query.\n- **Space:** $O(1)$.\n",
+  "readme": "# 044: Geodesic Distance on the Double-Cover $S^3$\n\n## Problem Statement\n\nBecause $S^3 \\cong SU(2)$ is the universal double cover of $SO(3)$, antipodal unit quaternions $q$ and $-q$ represent the exact same 3D rotation. The Riemannian rotation distance on $SO(3) \\cong S^3 / \\{\\pm 1\\}$ between two unit quaternions $p, q \\in S^3$ is given by twice the acute spherical angle between the lines $\\pm p$ and $\\pm q$.\n\n## Mathematical Law / Invariant\n\nFor unit quaternions $p, q \\in S^3$:\n$$p \\cdot q = p_w q_w + p_x q_x + p_y q_y + p_z q_z$$\n$$d_{S^3}(p, q) = 2 \\arccos\\!\\left(\\min(1.0,\\; |p \\cdot q|)\\right) \\in [0, \\pi]$$\n\nInvariants:\n1. **Antipodal Identification:** $d_{S^3}(q, -q) = 0$.\n2. **Orthogonal Rotors:** If $p \\cdot q = 0$ (e.g., $1$ and $i$), then $d_{S^3}(p, q) = \\pi$ (a $180^\\circ$ physical rotation).\n3. **Bi-Invariance on $S^3$:** For any unit rotor $r \\in S^3$:\n   $$d_{S^3}(r \\otimes p,\\; r \\otimes q) = d_{S^3}(p \\otimes r,\\; q \\otimes r) = d_{S^3}(p, q)$$\n\n## Function Signature\n\n```cpp\ndouble Quat::dot(const Quat& q) const;\ndouble Quat::geodesic_dist(const Quat& q) const;\n```\n\n## Complexity Target\n\n- **Time:** $O(1)$ per query.\n- **Space:** $O(1)$.\n",
+  "stub": "#pragma once\n\n#include <algorithm>\n#include <cmath>\n\nstruct Quat {\n    double w{1.0};\n    double x{0.0};\n    double y{0.0};\n    double z{0.0};\n\n    Quat() = default;\n    Quat(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) {}\n\n    static Quat identity() { return Quat(1.0, 0.0, 0.0, 0.0); }\n\n    double norm_sq() const { return w * w + x * x + y * y + z * z; }\n    double norm() const { return std::sqrt(norm_sq()); }\n\n    Quat normalize() const {\n        double n = norm();\n        if (n < 1e-12) return identity();\n        return Quat(w / n, x / n, y / n, z / n);\n    }\n\n    Quat conj() const { return Quat(w, -x, -y, -z); }\n\n    Quat mul(const Quat& q) const {\n        return Quat(\n            w * q.w - x * q.x - y * q.y - z * q.z,\n            w * q.x + x * q.w + y * q.z - z * q.y,\n            w * q.y - x * q.z + y * q.w + z * q.x,\n            w * q.z + x * q.y - y * q.x + z * q.w\n        );\n    }\n\n    // 4D Euclidean inner product\n    double dot(const Quat& q) const {\n        // TODO: return w*q.w + x*q.x + y*q.y + z*q.z\n        (void)q;\n        return 0.0;\n    }\n\n    // Geodesic distance on S^3 / {+1, -1} in [0, pi]\n    double geodesic_dist(const Quat& q) const {\n        // TODO: return 2 * acos(min(1.0, |dot(q)|))\n        (void)q;\n        return 0.0;\n    }\n};\n",
+  "harness": "#include <cassert>\n#include <chrono>\n#include <cmath>\n#include <iostream>\n\n#include \"solution.hpp\"\n\nint main() {\n    std::cout << \"=== Running 044 Quaternion Geodesic Distance Test Suite ===\\n\";\n\n    constexpr double PI = 3.14159265358979323846;\n\n    // Test 1: Antipodal identification d(q, -q) == 0\n    Quat p = Quat(1.0, 2.0, -1.0, 3.0).normalize();\n    Quat neg_p(-p.w, -p.x, -p.y, -p.z);\n    assert(std::abs(p.geodesic_dist(p)) < 1e-12);\n    assert(std::abs(p.geodesic_dist(neg_p)) < 1e-12);\n    std::cout << \"  \u2022 Test 1: Antipodal identification d(q, -q) == 0 ... [PASS]\\n\";\n\n    // Test 2: Orthogonal quaternions have geodesic distance pi\n    Quat id = Quat::identity();\n    Quat qi(0.0, 1.0, 0.0, 0.0);\n    assert(std::abs(id.geodesic_dist(qi) - PI) < 1e-12);\n    std::cout << \"  \u2022 Test 2: Orthogonal rotors distance == pi ... [PASS]\\n\";\n\n    // Test 3: Left and right multiplication bi-invariance on S^3\n    Quat q = Quat(-2.0, 0.5, 4.0, 1.0).normalize();\n    Quat r = Quat(0.7, -1.3, 2.1, -0.9).normalize();\n    double d_base = p.geodesic_dist(q);\n    double d_left = r.mul(p).geodesic_dist(r.mul(q));\n    double d_right = p.mul(r).geodesic_dist(q.mul(r));\n    assert(std::abs(d_base - d_left) < 1e-12);\n    assert(std::abs(d_base - d_right) < 1e-12);\n    std::cout << \"  \u2022 Test 3: Left and right bi-invariance on S^3 ... [PASS]\\n\";\n\n    constexpr int ITERS = 200000;\n    volatile double sink = 0.0;\n    auto t0 = std::chrono::high_resolution_clock::now();\n    for (int i = 0; i < ITERS; ++i) {\n        sink = sink + p.geodesic_dist(q);\n    }\n    auto t1 = std::chrono::high_resolution_clock::now();\n    (void)sink;\n    double ns_per_op = std::chrono::duration<double, std::nano>(t1 - t0).count() / ITERS;\n    std::cout << \"SCOREBOARD_JSON: {\\\"cycles_per_op\\\": \" << ns_per_op << \"}\\n\";\n    return 0;\n}\n"
+}
