@@ -130,14 +130,14 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
 .problem-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   padding-bottom: 12px;
   margin-bottom: 12px;
   border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
 }
-.problem-nav-group, .problem-actions-group {
+.problem-actions-group {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -945,10 +945,6 @@ body.is-resizing-v, body.is-resizing-v * {
       <!-- TAB 1: PROBLEM SPEC & LIVE C++20 JUDGE OUTPUT -->
       <div id="tab-spec">
         <div class="problem-bar">
-          <div class="problem-nav-group">
-            <button class="small-btn" onclick="stepProblem(-1)" title="Previous Problem (:Prev / <Space>p)">◀ Prev</button>
-            <button class="small-btn" onclick="stepProblem(1)" title="Next Problem (:Next / <Space>n)">Next ▶</button>
-          </div>
           <div class="problem-actions-group">
             <button class="small-btn" id="run-btn" onclick="triggerRun()" title="Run test cases (:Run / <F5>)">:Run (&lt;F5&gt;)</button>
             <button class="small-btn primary" id="submit-btn" onclick="triggerSubmit()" title="Official Submit &amp; persist score (:Submit / <Ctrl+Enter>)">:Submit (&lt;Ctrl+Enter&gt;)</button>
